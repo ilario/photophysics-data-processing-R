@@ -1,0 +1,26 @@
+# Copyright (C) 2015-2016 Ilario Gelmetti <iochesonome@gmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+files <- list.files(path=".", pattern="^TP.*\\.txt$");
+mydata <- lapply(files, read.table, header=FALSE, skip=8, col.names=c("voltage"));
+names(mydata) <- files;
+
+trashfornullmessages <- lapply(files, function(x) {
+	if(!file.exists(paste(x, ".table", sep=""))){
+		message(x);
+		header = as.numeric(system(paste("head -6 '", x, "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
+		mydata[[x]]$time = seq(0,header[3]-1)*header[1]+header[2];
+		write.table(mydata[[x]][,c("time","voltage")], paste(x,".table", sep=""), col.names=F, row.names=F, quote=F)
+	}})
