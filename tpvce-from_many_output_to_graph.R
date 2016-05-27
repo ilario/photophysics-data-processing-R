@@ -28,7 +28,7 @@ colors=brewer.pal(max(length(dirs),3),"Set1")
 dirs <- sub("./","",dirs)
 
 lapply(dirs, function(x) {print(x);
- a <- read.table(paste(x,"-outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
+ a <- read.table(paste(x,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  b<-strsplit(a$file, "_")
  c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
  d<-as.numeric(gsub("mV", "", c))
@@ -63,7 +63,7 @@ i <- 0
 png(paste(name,"-TPVCEs.png",sep=""), width=800, height=800)
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="Extracted Charge Density (C/cm2)", ylab="Life-time (s)", main=paste(name,"TPV decay vs Charge from CE"),cex.lab=1.5,cex.axis=1.5,log="y");
 lapply(dirs, function(x) {print(x);
- a <- read.table(paste(x,"-outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
+ a <- read.table(paste(x,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  b<-strsplit(a$file, "_")
  c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
  d<-as.numeric(gsub("mV", "", c))
