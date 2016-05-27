@@ -19,7 +19,7 @@ library(robustbase)
 library(RColorBrewer)
 library(minpack.lm)
 
- a <- read.table("outputChargeDensityCE.txt",header=T,stringsAsFactors=F)
+ a <- read.table("ce/outputChargeDensityCE.txt",header=T,stringsAsFactors=F)
  b<-strsplit(a$file, "_")
  c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
  d<-as.numeric(gsub("mV", "", c))
@@ -43,9 +43,9 @@ library(minpack.lm)
 # exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
 # expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
 
-fulloutput <- read.table("output-monoexp.txt", header=TRUE);
+fulloutput <- read.table("tpv/output-monoexp.txt", header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table("output-monoexp.txt", header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- read.table("tpv/output-monoexp.txt", header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(d = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
