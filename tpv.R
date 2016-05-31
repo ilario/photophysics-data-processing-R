@@ -19,7 +19,7 @@ powerlaw=0
 robust=0
 logy=0
 logx=1
-residuals=0
+residuals=1
 thresholdBiexp=70
 thresholdRobustBiexp=100
 
@@ -90,6 +90,9 @@ trashfornullmessages <- lapply(files, function(x) {
 			if(coef(fit2)["C"] > coef(fit2)["F"]) {slowampl <- coef(fit2)[".lin2"]; slowdecay <- coef(fit2)["C"]; fastampl <- coef(fit2)[".lin3"]; fastdecay <- coef(fit2)["F"]; slowampl.err <- summary(fit2)$coefficients[".lin2",2]; slowdecay.err <- summary(fit2)$coefficients["C",2]; fastampl.err <- summary(fit2)$coefficients[".lin3",2]; fastdecay.err <- summary(fit2)$coefficients["F",2]} else {fastampl <- coef(fit2)[".lin2"]; fastdecay <- coef(fit2)["C"]; slowampl <- coef(fit2)[".lin3"]; slowdecay <- coef(fit2)["F"]; fastampl.err <- summary(fit2)$coefficients[".lin2",2]; fastdecay.err <- summary(fit2)$coefficients["C",2]; slowampl.err <- summary(fit2)$coefficients[".lin3",2]; slowdecay.err <- summary(fit2)$coefficients["F",2]};
 			capture.output(summary(fit2), file=paste(x, "-fit", sep=""),  append=TRUE);
 			
+		outputDeltaVbiexp <- t(c(x, startingvoltage, predict(fit2,newdata=data.frame(time=0))-startingvoltage));
+		write.table(outputDeltaVbiexp, file="outputDeltaVbiexp.txt", append=TRUE, col.names=F, row.names=F, quote=F);
+
 			print("Biexp/Plot/Linear: Performing");
 		tryCatch({
 			png(paste(x, "-biexp.png", sep=""), width = 1280, height = 800);
@@ -138,7 +141,8 @@ if(residuals){
 		tryCatch({
 			print("Biexp/Plot/Residuals: Performing");
 			png(paste(x, "-biexp-residuals.png", sep=""), width = 1280, height = 800);
-			plot(temp$time, temp$voltage-predict(fit2), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+			yresidualfit2 <- temp$voltage-predict(fit2,newdata=data.frame(time=temp$time))
+			plot(temp$time, yresidualfit2, ylim=c(quantile(yresidualfit2,0.001),quantile(yresidualfit2,0.999)), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("Tau2 =", signif(fastdecay,digits=4), "\u00b1", signif(fastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
@@ -175,6 +179,10 @@ if(residuals){
 		C.err <- summary(fit)$coefficients["C",2];
 		quitelowerpointmonoexp <- max((predict(fit, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A)/5,min(subset(tempsubset, voltage > A, select=voltage)-A));
 		higherpointmonoexp <- max(predict(fit, newdata = data.frame(time=0))-A,head(tempsubset$voltage,n=1)-A);
+
+		outputDeltaVmonoexp <- t(c(x, startingvoltage, predict(fit,newdata=data.frame(time=0))-startingvoltage));
+		write.table(outputDeltaVmonoexp, file="outputDeltaVmonoexp.txt", append=TRUE, col.names=F, row.names=F, quote=F);
+		
 		print("Monoexp/Plot/Linear: Performing");
 		png(paste(x, "-monoexp.png", sep=""), width = 1280, height = 800);
 		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, col="yellow");
@@ -205,7 +213,8 @@ if(logx){
 if(residuals){
 		print("Monoexp/Plot/Residuals: Performing");
 		png(paste(x, "-monoexp-residuals.png", sep=""), width = 1280, height = 800);
-		plot(temp$time, temp$voltage-predict(fit), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, 0.5));
+		yresidualfit <- temp$voltage-predict(fit,newdata=data.frame(time=temp$time))
+                plot(temp$time, yresidualfit, ylim=c(quantile(yresidualfit,0.001),quantile(yresidualfit,0.999)), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, 0.5));
 		abline(h=0, col="red");
 		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
@@ -269,7 +278,8 @@ if(residuals){
 		tryCatch({
 			print("PowerMonoexp/Plot/Residuals: Performing");
 			png(paste(x, "-powermonoexp-residuals.png", sep=""), width = 1280, height = 800);
-			plot(temp$time, temp$voltage-predict(fit3), main=paste(x,"power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+			yresidualfit3 <- temp$voltage-predict(fit3,newdata=data.frame(time=temp$time))
+                        plot(temp$time, yresidualfit3, ylim=c(quantile(yresidualfit3,0.001),quantile(yresidualfit3,0.999)), main=paste(x,"power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau =", signif(G,digits=4), "\u00b1", signif(G.err,digits=2), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("K =", signif(K,digits=4), "\u00b1", signif(K.err,digits=2), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
@@ -326,7 +336,8 @@ if(logx){
 if(residuals){
 		print("RobustMonoexp/Plot/Residuals: Performing");
 		png(paste(x, "-robustmonoexp-residuals.png", sep=""), width = 1280, height = 800);
-		plot(temp$time, temp$voltage-predict(fitR), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, 0.5));
+		yresidualfitR <- temp$voltage-predict(fitR,newdata=data.frame(time=temp$time))
+                plot(temp$time, yresidualfitR, ylim=c(quantile(yresidualfitR,0.001),quantile(yresidualfitR,0.999)), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, 0.5));
 		abline(h=0, col="red");
 		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
@@ -398,7 +409,8 @@ if(residuals){
 		tryCatch({
 			print("RobustPowerMonoexp/Plot/Residuals: Performing");
 			png(paste(x, "-robustpowermonoexp-residuals.png", sep=""), width = 1280, height = 800);
-			plot(temp$time, temp$voltage-predict(fit3r), main=paste(x,"robust power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+			yresidualfit3r <- temp$voltage-predict(fit3r,newdata=data.frame(time=temp$time))
+                        plot(temp$time, yresidualfit3r, ylim=c(quantile(yresidualfit3r,0.001),quantile(yresidualfit3r,0.999)), main=paste(x,"robust power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau =", signif(I,digits=4), "\u00b1", signif(I.err,digits=2), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("K =", signif(Kr,digits=4), "\u00b1", signif(Kr.err,digits=2), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
@@ -480,7 +492,8 @@ if(residuals){
 		tryCatch({
 			print("RobustBiexp/Plot/Residuals: Performing");
 			png(paste(x, "-robustbiexp-residuals.png", sep=""), width = 1280, height = 800);
-			plot(temp$time, temp$voltage-predict(fit2R), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+			yresidualfit2R <- temp$voltage-predict(fit2R,newdata=data.frame(time=temp$time))
+                        plot(temp$time, yresidualfit2R, ylim=c(quantile(yresidualfit2R,0.001),quantile(yresidualfit2R,0.999)), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
