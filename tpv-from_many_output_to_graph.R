@@ -42,8 +42,8 @@ n<-tail(grep("file",fulloutput[,1]),n=1)
 output <- read.table(paste(x,"/output-biexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
 #errbar(output$Voc, output$T1, output$T1+output$T1.error, output$T1-output$T1.error,log="y",add=TRUE)
 #errbar(output$Voc, output$T2, output$T2+output$T2.error, output$T2-output$T2.error,log="y",add=TRUE)
-points(output$Voc, output$T1, pch=21, col=colors[i+1], bg=colors[i+1]);
-points(output$Voc, output$T2, col=colors[i+1]);
+points(output$Voc, output$T1, lwd=2, pch=i+15, col=colors[i+1], bg=colors[i+1]);
+points(output$Voc, output$T2, lwd=2, pch=i, col=colors[i+1]);
 i <<- i+1
 })
 legend(x="bottomleft",inset=0.05,dirs,pt.cex=2,cex=1.5,pch=seq(0,10,1), col=colors)
