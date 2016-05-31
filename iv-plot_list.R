@@ -24,8 +24,8 @@ colors=brewer.pal(max(length(fileslist),3),"Set1")
 source("~/software/r/PvCurvesR/extractdata-curves-vi-separated_files.R")
 source("~/software/r/PvCurvesR/iv-generate_mydata.R")
 i = 1
-png(paste(name,"-IVs.png",sep=""), width=640, height=640);
-plot(NULL,xlim=c(-0.1,1),ylim=c(-1.8,0.5),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5, main=name);
+png(paste(gsub(" ", "_", name),"-IVs.png",sep=""), width=640, height=640);
+plot(NULL,xlim=c(-0.1,1.1),ylim=c(-2.1,0.5),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5, main=name);
 lapply(fileslist, function(x){print(x); fwd=paste(x, "-forward.txt", sep=""); rev=paste( x, "-reverse.txt", sep="");
 lines(mydata[[fwd]]$Voltage_V, mydata[[fwd]]$Current_mA, lwd=3, col=colors[i])#brewer.pal(9,"Reds")[i])
 lines(mydata[[rev]]$Voltage_V, mydata[[rev]]$Current_mA, lwd=3, lty=2, col=colors[i])#brewer.pal(9,"Reds")[i], )
