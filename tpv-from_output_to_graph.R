@@ -25,10 +25,10 @@ n<-tail(grep("file",fulloutput[,1]),n=1)
 output <- read.table("output-biexp.txt", header=TRUE, skip=ifelse(length(n),n,0)); 
 png(paste(name, "-tpv-biexp.png",sep=""), width=1280, height=800);
 plot(1, ylim=c(min(output$T1,output$T2),max(output$T2,output$T1)), xlim=c(min(output$Voc),max(output$Voc)), log="y", xlab="Voc (V)", ylab="Life-time (s)", main=paste(name, "TPV biexp"));
-errbar(output$Voc, output$T1, output$T1+output$T1.error, output$T1-output$T1.error,log="y",add=TRUE)
-errbar(output$Voc, output$T2, output$T2+output$T2.error, output$T2-output$T2.error,log="y",add=TRUE)
-points(output$Voc, output$T1, pch=21, col="red", bg="red");
-points(output$Voc, output$T2, col="red");
+errbar(output$Voc, output$T1, output$T1+output$T1.error, output$T1-output$T1.error,log="y",add=TRUE, pch="")
+errbar(output$Voc, output$T2, output$T2+output$T2.error, output$T2-output$T2.error,log="y",add=TRUE, pch="")
+points(output$Voc, output$T1, pch=20, col="red", cex=4*output$A1/(output$A1+output$A2));
+points(output$Voc, output$T2, pch=20, col="black", cex=4*output$A2/(output$A1+output$A2));
 graphics.off()
 
 
@@ -50,9 +50,13 @@ print("monoexp")
 fulloutput <- read.table("output-monoexp.txt", header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 output <- read.table("output-monoexp.txt", header=TRUE, skip=ifelse(length(n),n,0)); 
-png(paste(name, "-tpv-monoexp.png",sep=""), width=1280, height=800);
-plot(output$Voc, output$T, col="red", log="y", xlab="Voc (V)", ylab="Life-time (s)", main=paste(name, "TPV monoexp"));
-errbar(output$Voc, output$T, output$T+output$T.error, output$T-output$T.error,log="y",add=TRUE)
+lo<-loess(output$T~output$Voc,span=0.5)
+
+png(paste(name, "-tpv-monoexp.png",sep=""), width=400, height=400);
+par(mar=c(5.1,5,4.1,2.1))
+plot(output$Voc, output$T, col="black", log="y", xlab=bquote("V"["oc"]~"(V)"), ylab="Life-time (s)", cex.axis=1.4, cex.lab=1.4)#, main=paste(name, "TPV monoexp"));
+#errbar(output$Voc, output$T, output$T+output$T.error, output$T-output$T.error,log="y",add=TRUE)
+lines(output$Voc, predict(lo), lwd=1,col="red")
 graphics.off()
 #
 #print("robust monoexp")

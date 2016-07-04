@@ -25,8 +25,25 @@ library(minpack.lm)
  d<-as.numeric(gsub("mV", "", c))
  lo <- loess(a$ChargeDensityCE~d,span=0.9)
  a$d <- d
-       	exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
- expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
+
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ C*exp(D*d), start=list(C=2e-8,D=5), data=a)
+	   }, error=function(e) {print("FAILED ZEROTH FIT")});
+ 
+ tryCatch({
+ exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-8,D=0.1), data=a)
+ }, error=function(e) {print("FAILED FIRST FIT")});
+
+tryCatch({
+	exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-10,D=1), data=a)
+	 }, error=function(e) {print("FAILED SECOND FIT")});
+
+tryCatch({
+	 exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
+         }, error=function(e) {print("FAILED THIRD FIT")});
+
+
+ expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
  png(paste(name,"-CE-fit.png",sep=""), width=800, height=640)
  plot(d, a$ChargeDensityCE, cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), lwd=2)
  lines(d,predict(exp))

@@ -29,7 +29,7 @@ colors=brewer.pal(max(length(dirs),3),"Set1")
 # e<-1.6021766208e-19
 png(paste(name,"-CEs.png",sep=""), width=800, height=640)
 par(mar=c(5.1,5,4.1,2.1))
-plot(NULL,xlim=c(0,1),ylim=c(0,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), cex.lab=1.5, cex.axis=1.5);
+plot(NULL,xlim=c(0,0.9),ylim=c(0,1.3e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), cex.lab=1.5, cex.axis=1.5);
 
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)

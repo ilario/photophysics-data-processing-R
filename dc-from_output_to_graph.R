@@ -20,8 +20,9 @@ b <- read.table("tpv/outputDeltaV.txt",header=T)
 capacitance <- charge/b$deltaV
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
-png(paste("DC-capacitance-", directory, ".png", sep=""), width=1000, heigh=600)
-plot(b$Voc, capacitance, ylab="Specific Capacitance (F/cm2)", xlab="Voltage (V)", main=paste(directory,"DC capacitance"))
+png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
+par(mar=c(5,6,1,1))
+plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)#, main=paste(directory,"DC capacitance"))
 graphics.off()
 
 c<- data.frame(b$Voc,capacitance)
@@ -46,8 +47,14 @@ g$capacitance[g$capacitance < 0] <- 0
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 #integrate(z, range(f$Voc)[1], range(f$Voc)[2])
 
-png(paste("DC-charge-", directory, ".png", sep=""), width=1000, heigh=600)
-plot(Vectorize(function(X)integrate(z,0,X)$value),range(f$Voc)[1], range(f$Voc)[2], ylab="Charge Density (C/cm2)", xlab="Voltage (V)", main=paste(directory,"DC charge"))
+png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
+par(mar=c(5,6,1,1))
+plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)#, main=paste(directory,"DC capacitance"))
+
+
+png(paste("DC-charge-", directory, ".png", sep=""), width=400, heigh=400)
+par(mar=c(5,6,1,1))
+plot(Vectorize(function(X)integrate(z,0,X)$value),range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)#, main=paste(directory,"DC charge"))
 graphics.off()
 
 
