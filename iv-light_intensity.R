@@ -15,15 +15,14 @@
 
 #name=""
 
-source("~/software/r/PvCurvesR/extractdata-curves-vi-separated_files.R")
-source("~/software/r/PvCurvesR/iv-generate_mydata.R")
-
 files <- list.files(path=".", pattern="\\.txt$");
-files <- grep(name,files,value=T)
+#files <- grep(name,files,value=T)
 #files <- grep("sun",files,value=T)
+splittedfilename <- strsplit(files, "-")
+suns <- gsub("sun","",unique(unlist(splittedfilename)[grepl("sun",unlist(splittedfilename))]))
 
 png(paste(name,"-suns.png",sep=""), width=640, height=640);
-plot(NULL,xlim=c(-0.1,1),ylim=c(-1.7,0.5),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5, main=paste(name, "at various Light Intensities"));
+plot(NULL,xlim=c(-0.1,1.2),ylim=c(-2,0.8),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5, main=paste(name, "at various Light Intensities"));
 lapply(files[grepl("forward",files)], function(x){print(x); 
 lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=2)
 })
@@ -31,5 +30,6 @@ lapply(files[grepl("reverse",files)], function(x){print(x);
 lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=2, lty=2);
 })
 abline(h=0);abline(v=0)
+legend(x="topleft",inset=0.05,suns, cex=1.5)
 graphics.off()
 
