@@ -16,6 +16,6 @@
 mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="^ig.*.txt$", list.excl="output.txt")
 #mydata <- import.iv.separated(pattern.excl="\\.pdf$")
 results <- lapply(names(mydata), function(x){
-	write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, cell.surface=0.09, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x))), file="output.txt", append=TRUE);
+	write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, cell.surface=0.09, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x))), file="output.txt", append=FALSE);
 	extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, comment="", cell.surface=0.09)})
 names(results) <- names(mydata)

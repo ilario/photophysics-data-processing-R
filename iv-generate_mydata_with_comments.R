@@ -12,7 +12,7 @@ levels(z) <- list(`` = v1g1, `` = v1g2, `` = v1g3);
 y <- ""
 
 
-write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x)), comment=paste(toString(y), toString(z))), file="output.txt", append=TRUE);
+write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x)), comment=paste(toString(y), toString(z))), file="output.txt", append=FALSE);
 extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, comment=paste(toString(y), toString(z)))});
 names(results) <- names(mydata)
 

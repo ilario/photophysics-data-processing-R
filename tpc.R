@@ -19,9 +19,7 @@ files <- list.files(path=".", pattern="^TPC.*\\.txt.table$");
 mydata <- lapply(files, read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
-write.table(t(c("file","ChargeDensityTPC")), file="outputChargeDensityTPC.txt", append=TRUE, col.names=F, row.names=F);
-
-
+write.table(t(c("file","ChargeDensityTPC")), file="outputChargeDensityTPC.txt", append=FALSE, col.names=F, row.names=F);
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);

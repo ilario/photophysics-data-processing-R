@@ -28,18 +28,18 @@ mydata <- lapply(files, read.table, header=FALSE, col.names=c("time","voltage"))
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
 ## output for importing
-write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file="output-biexp.txt", append=TRUE, col.names=F, row.names=F);
-write.table(t(c("file","Voc","A","T","T.error")), file="output-monoexp.txt", append=TRUE, col.names=F, row.names=F);
-write.table(t(c("file","Voc","deltaV")), file="outputDeltaV.txt", append=TRUE, col.names=F, row.names=F);
-write.table(t(c("file","Voc","A","T","T.error")), file="output-robustmonoexp.txt", append=TRUE, col.names=F, row.names=F);
-write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file="output-robustbiexp.txt", append=TRUE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file="output-biexp.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","A","T","T.error")), file="output-monoexp.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","deltaV")), file="outputDeltaV.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","A","T","T.error")), file="output-robustmonoexp.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file="output-robustbiexp.txt", append=FALSE, col.names=F, row.names=F);
 
 
 
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
-	if(!file.exists(paste(x, "-biexp-log.png", sep="")) | !file.exists(paste(x, "-monoexp-log.png", sep=""))){
+#	if(!file.exists(paste(x, "-biexp-log.png", sep="")) | !file.exists(paste(x, "-monoexp-log.png", sep=""))){
 		#names(mydata[[x]]) <- c("time","voltage")
 	
 		#workaround
@@ -519,5 +519,5 @@ if(residuals){
 
 
 
-		}
+#		}
 	}})
