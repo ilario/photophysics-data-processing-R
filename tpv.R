@@ -15,7 +15,7 @@
 
 library(robustbase)
 
-powerlaw=0
+powerlaw=1
 robust=0
 logy=0
 logx=1
