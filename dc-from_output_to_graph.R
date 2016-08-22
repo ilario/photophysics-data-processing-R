@@ -13,46 +13,33 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-a <- read.table("tpc/outputChargeDensityTPC.txt",header=T)
+dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
+{
+a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
 charge <- mean(a$ChargeDensityTPC)
-b <- read.table("tpv/outputDeltaV.txt",header=T)
+b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
 capacitance <- charge/b$deltaV
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
 png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
-plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4, ylim=c(0,max(capacitance)))#, main=paste(directory,"DC capacitance"))
+plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4, ylim=c(0,max(capacitance)))
 graphics.off()
 
 c<- data.frame(b$Voc,capacitance)
 d <- c[with(c, order(b.Voc)), ]
 e <- d[1:(nrow(d)/2),]
 
-
-#fit <- nls(capacitance ~ cbind(1, exp(C*(b.Voc))), trace=F, alg="plinear", start=list(C=1), data=e)
-#A = coef(fit)[".lin1"]
-#B = coef(fit)[".lin2"]
-#C = coef(fit)["C"]
-
-#f <- data.frame(d$b.Voc, d$capacitance - A)
 f <- data.frame(d$b.Voc, d$capacitance)
 
 names(f) <- c("Voc","capacitance")
-#g <- subset(f,capacitance>0)
 g <- f
 g$capacitance[g$capacitance < 0] <- 0
 
-
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
-#integrate(z, range(f$Voc)[1], range(f$Voc)[2])
 
 png(paste("DC-charge-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
-plot(Vectorize(function(X)integrate(z,0,X)$value),range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)#, main=paste(directory,"DC charge"))
+plot(Vectorize(function(X)integrate(z,0,X)$value),range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)
 graphics.off()
-
-
-#plot(f$Voc[-nrow(f)]?????,cumsum(f$capacitance[-nrow(f)]*diff(f$Voc)))
-
-
+}

@@ -13,41 +13,36 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cea <- read.table("ce/outputChargeDensityCE.txt",header=T,stringsAsFactors=F)
+ceDc <- function(cedir="ce", tpvdir="tpv", tpcdir="tpc")
+{
+cea <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
 ceb<-strsplit(cea$file, "_")
 cec<-unlist(ceb)[length(ceb[[1]])*(1:length(cea$file))]
 ced<-as.numeric(gsub("mV", "", cec))
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
-a <- read.table("tpc/outputChargeDensityTPC.txt",header=T)
+a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
 charge <- mean(a$ChargeDensityTPC)
-b <- read.table("tpv/outputDeltaV.txt",header=T)
+b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
 capacitance <- charge/b$deltaV
 
 c<- data.frame(b$Voc,capacitance)
 d <- c[with(c, order(b.Voc)), ]
 e <- d[1:(nrow(d)/2),]
 
-#fit <- nls(capacitance ~ cbind(1, exp(C*(b.Voc))), trace=F, alg="plinear", start=list(C=1), data=e)
-#A = coef(fit)[".lin1"]
-#B = coef(fit)[".lin2"]
-#C = coef(fit)["C"]
-
-#f <- data.frame(d$b.Voc, d$capacitance - A)
 f <- data.frame(d$b.Voc, d$capacitance)
 names(f) <- c("Voc","capacitance")
-#g <- subset(f,capacitance>0)
 g <- f
 g$capacitance[g$capacitance < 0] <- 0
 
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 
-
 ChargeDensityCE <- cea$ChargeDensityCE*1e9
 png(paste("DC-CE-", directory, ".png", sep=""), heigh=600, width=600)
 par(mar=c(5.1,5,4.1,2.1))
-plot(Vectorize(function(X)integrate(z,0,X)$value*1e9),xlim=c(min(ced,range(f$Voc)[1]),max(ced,range(f$Voc)[2]))#, ylim=c(min(0,ChargeDensityCE),max(ChargeDensityCE))
+plot(Vectorize(function(X)integrate(z,0,X)$value*1e9),xlim=c(min(ced,range(f$Voc)[1]),max(ced,range(f$Voc)[2])), ylim=c(min(0,ChargeDensityCE),max(ChargeDensityCE, integrate(z,0,range(g$Voc)[2])$value*1e9))
      , ylab=bquote("Charge Density (nC/cm"^"2"*")"), xlab="Voltage (V)", main=paste(directory,"DC and CE"), cex.main=1.5, cex.lab=1.5, cex.axis=1.5)
 points(ced, ChargeDensityCE)
 legend(x="topleft",inset=0.1,c("Differential Charging", "Charge Extraction"), lty=c(1,NA), pch=c(NA,1), lwd=2, cex=1.5)
 graphics.off()
+}

@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+ceFromOutputToGraph <- function(cedir="ce")
+{
 library(robustbase)
-a <- read.table("outputChargeDensityCE.txt",header=T,stringsAsFactors=F)
+a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
 
-#b<-list.files(path=".", pattern="^CE.*\\.txt.table$");
 b<-strsplit(a$file, "_")
 c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
 d<-as.numeric(gsub("mV", "", c))
@@ -26,7 +27,8 @@ exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
 f <- data.frame(d = sort(d))
 
 directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
-png(paste("charge_extraction-", directory[1], ".png", sep=""), width=800, heigh=800)
-plot(d, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4)#, main=paste(directory,collapse=" "))
+png(file.path(cedir, paste("charge_extraction-", directory[1], ".png", sep="")), width=800, heigh=800)
+plot(d, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4)
 lines(f$d,predict(exp,f), lwd=1, col="red")
 graphics.off()
+}

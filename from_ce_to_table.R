@@ -13,14 +13,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-files <- list.files(path=".", pattern="^CE.*\\.txt$");
-mydata <- lapply(files, read.table, header=FALSE, skip=9, col.names=c("voltage"));
+fromCeToTable <- function(cedir="ce")
+{
+files <- list.files(path=cedir, pattern="^CE.*\\.txt$");
+mydata <- lapply(file.path(cedir, files), read.table, header=FALSE, skip=9, col.names=c("voltage"));
 names(mydata) <- files;
 
 trashfornullmessages <- lapply(files, function(x) {
-	if(!file.exists(paste(x, ".table", sep=""))){
+#	if(!file.exists(paste(x, ".table", sep=""))){
 		message(x);
-		header = as.numeric(system(paste("head -7 '", x, "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
+		header = as.numeric(system(paste("head -7 '", file.path(cedir, x), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
 		mydata[[x]]$time = seq(0,header[3]-1)*header[1]+header[2];
-		write.table(mydata[[x]][,c("time","voltage")], paste(x,".table", sep=""), col.names=F, row.names=F, quote=F)
-	}})
+		write.table(mydata[[x]][,c("time","voltage")], file.path(cedir, paste(x,".table", sep="")), col.names=F, row.names=F, quote=F)
+#	}
+})
+}

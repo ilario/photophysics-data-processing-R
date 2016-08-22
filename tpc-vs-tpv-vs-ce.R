@@ -1,17 +1,39 @@
-ce.files <- list.files(path="ce", pattern="^CE.*\\.txt.table$");
-tpv.files  <- list.files(path="tpv", pattern="^TPV.*\\.txt.table$");
-tpc.sun.files <- list.files(path="tpc", pattern="^TPC.*sun.*\\.txt.table$");
-tpc.dark.files <- list.files(path="tpc", pattern="^TPC.*dark.*\\.txt.table$");
+# Copyright (C) 2015-2016 Ilario Gelmetti <iochesonome@gmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+tpcVsTpvVsCe <- function(cedir="ce", tpvdir="tpv", tpcdir="tpc")
+{
+ce.files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
+tpv.files  <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
+tpc.sun.files <- list.files(path=tpcdir, pattern="^TPC.*sun.*\\.txt.table$");
+tpc.dark.files <- list.files(path=tpcdir, pattern="^TPC.*dark.*\\.txt.table$");
 
 ce.file <- tail(ce.files, n=1)
 tpv.file <- tail(tpv.files, n=1)
 tpc.sun.file <- tail(tpc.sun.files, n=1)
 tpc.dark.file <- tail(tpc.dark.files, n=1)
 
-ce <- read.table(paste("ce/",ce.file,sep=""),header=F)
-tpc.sun <- read.table(paste("tpc/",tpc.sun.file,sep=""),header=F)
-tpc.dark <- read.table(paste("tpc/",tpc.dark.file,sep=""),header=F)
-tpv <- read.table(paste("tpv/",tpv.file,sep=""),header=F)
+print(paste("CE file:", file.path(cedir, ce.file)))
+print(paste("TPV file:", file.path(tpvdir, tpv.file)))
+print(paste("TPC sun file:", file.path(tpcdir, tpc.sun.file)))
+print(paste("TPC dark file:", file.path(tpcdir, tpc.dark.file)))
+
+ce <- read.table(file.path(cedir, ce.file),header=F)
+tpv <- read.table(file.path(tpvdir, tpv.file),header=F)
+tpc.sun <- read.table(file.path(tpcdir, tpc.sun.file),header=F)
+tpc.dark <- read.table(file.path(tpcdir, tpc.dark.file),header=F)
 tpc.sun$V2 <- -tpc.sun$V2
 tpc.dark$V2 <- -tpc.dark$V2
 
@@ -32,5 +54,4 @@ lines(tpc.sun$V1, (tpc.sun$V2-tpc.sun.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dar
 lines(tpc.dark$V1, (tpc.dark$V2-tpc.dark.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dark.max-tpc.dark.min)), lwd=1, col="black", lty=1)
 legend(x="topright",inset=0.05, c("TPC 1sun","TPC dark", "TPV 1sun", "CE 1sun"), lwd=4, col=c("red","black","blue","green"), cex=2)
 graphics.off()
-
-
+}

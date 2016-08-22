@@ -1,12 +1,11 @@
 #library(robustbase)
-
-files <- list.files(path=".", pattern="^CE.*\\.txt.table$");
-mydata <- lapply(files, read.table, header=FALSE, col.names=c("time","voltage"));
+ce <- function(cedir="ce")
+{
+files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
+mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
-write.table(t(c("file","ChargeDensityCE")), file="outputChargeDensityCE.txt", append=FALSE, col.names=F, row.names=F);
-
-
+write.table(t(c("file","ChargeDensityCE")), file=file.path(cedir,"outputChargeDensityCE.txt"), append=FALSE, col.names=F, row.names=F);
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
@@ -22,9 +21,9 @@ trashfornullmessages <- lapply(files, function(x) {
 	totalcharge=quantile(charge[charge>0],0.75)
 	totalchargedensity=totalcharge/0.09
         outputChargeDensityCE <- t(c(x, abs(totalchargedensity)));
-	write.table(outputChargeDensityCE, file="outputChargeDensityCE.txt", append=TRUE, col.names=F, row.names=F, quote=F);
+	write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
-	png(paste(x, ".png", sep=""), width=1280, heigh=800)
+	png(file.path(cedir,paste(x, ".png", sep="")), width=1280, heigh=800)
 	par(mar=c(5,4,4,5)+.1)
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x,"CE"))
 	abline(h=endingvoltage, col="green")
@@ -38,4 +37,4 @@ trashfornullmessages <- lapply(files, function(x) {
 	graphics.off()
 #}
 })
-
+}

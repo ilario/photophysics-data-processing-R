@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+tpvCeFromOutputToGraph <- function(cedir="ce", tpvdir="tpv", printcefit=FALSE)
+{
 #name=""
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 name<- directory
@@ -21,7 +23,7 @@ library(robustbase)
 library(RColorBrewer)
 library(minpack.lm)
 
- a <- read.table("ce/outputChargeDensityCE.txt",header=T,stringsAsFactors=F)
+ a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
  b<-strsplit(a$file, "_")
  c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
  d<-as.numeric(gsub("mV", "", c))
@@ -46,40 +48,35 @@ tryCatch({
 
 
  expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
+
+if(printcefit)
+{
  png(paste(name,"-CE-fit.png",sep=""), width=800, height=640)
  plot(d, a$ChargeDensityCE, cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), lwd=2)
  lines(d,predict(exp))
  lines(d,predict(lo),col="green")
  lines(d[round(length(a$file)/2):length(a$file)],predict(expend),col="red")
  graphics.off()
+}
 
-# a <- read.table("outputChargeDensityCE.txt",header=T,stringsAsFactors=F)
-# b<-strsplit(a$file, "_")
-# c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
-# d<-as.numeric(gsub("mV", "", c))
-# lo <- loess(a$ChargeDensityCE~d,span=0.9)
-# a$d <- d
-# exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
-# expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
-
-fulloutput <- read.table("tpv/output-monoexp.txt", header=TRUE);
+fulloutput <- read.table(file.path(tpvdir, "output-monoexp.txt"), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table("tpv/output-monoexp.txt", header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- read.table(file.path(tpvdir, "output-monoexp.txt"), header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(d = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(d = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
-png(paste(name,"-tpvce.png",sep=""), width=600, height=600)
+png(paste(name,"-tpvce-monoexp.png",sep=""), width=600, height=600)
 plot(charge, tpv$T,cex.main=1.5,xlab="Extracted Charge Density (C/cm2)", ylab="Life-time (s)", main=paste(name,"TPV decay vs Charge from CE"),cex.lab=1.5,cex.axis=1.5,log="y", lwd=2);
 #legend(x="topright",inset=0.05,dirs,pch=seq(0,10,1), col=colors,cex=1.5)
 graphics.off()
 
 
-fulloutput <- read.table("tpv/output-biexp.txt", header=TRUE)#, fill = TRUE);#,stringsAsFactors=F);
+fulloutput <- read.table(file.path(tpvdir, "output-biexp.txt"), header=TRUE)#, fill = TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 #output <- fulloutput[(ifelse(length(n),n,0)+1):nrow(fulloutput),]
-tpv <- read.table("tpv/output-biexp.txt", header=TRUE, skip=ifelse(length(n),n,0))#, fill=TRUE);
+tpv <- read.table(file.path(tpvdir, "output-biexp.txt"), header=TRUE, skip=ifelse(length(n),n,0))#, fill=TRUE);
 new <- data.frame(d = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(d = tpv$Voc[is.na(charge)])
@@ -97,11 +94,12 @@ points(charge2, T1, pch=20, col="red")#, cex=4*tpv$A1/(tpv$A1+tpv$A2));
 points(charge2, T2, pch=20, col="black")#, cex=4*tpv$A2/(tpv$A1+tpv$A2));
 graphics.off()
 
-
-fulloutput <- read.table("tpv/output-mixedbimono.txt", header=TRUE, fill = TRUE);#,stringsAsFactors=F);
+if(file.exists(file.path(tpvdir, "output-mixedbimono.txt")))
+{
+fulloutput <- read.table(file.path(tpvdir, "output-mixedbimono.txt"), header=TRUE, fill = TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 #output <- fulloutput[(ifelse(length(n),n,0)+1):nrow(fulloutput),]
-tpv <- read.table("tpv/output-mixedbimono.txt", header=TRUE, skip=ifelse(length(n),n,0), fill=TRUE);
+tpv <- read.table(file.path(tpvdir, "output-mixedbimono.txt"), header=TRUE, skip=ifelse(length(n),n,0), fill=TRUE);
 new <- data.frame(d = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(d = tpv$Voc[is.na(charge)])
@@ -118,4 +116,5 @@ plot(0, ylim=c(min(T1,T2[!is.na(tpv$T2)]),max(T2[!is.na(tpv$T2)],T1)), xlim=c(mi
 points(charge2, T1, pch=20, col="red")#, cex=4*tpv$A1/(tpv$A1+tpv$A2));
 points(charge2[!is.na(tpv$T2)], T2[!is.na(tpv$T2)], pch=20, col="black")#, cex=4*tpv$A2/(tpv$A1+tpv$A2));
 graphics.off()
-
+}
+}
