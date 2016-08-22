@@ -15,11 +15,18 @@
 
 dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
 {
+
+write.table(t(c("Voc","capacitance")), file="outputDCcapacitance.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("Voc","chargeDC")), file="outputDCcharge.txt", append=FALSE, col.names=F, row.names=F);
+
 a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
 charge <- mean(a$ChargeDensityTPC)
 b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
 capacitance <- charge/b$deltaV
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
+
+outputDCcapacitance <- data.frame(b$Voc, capacitance);
+write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
 png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
@@ -37,9 +44,13 @@ g <- f
 g$capacitance[g$capacitance < 0] <- 0
 
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
+integral=Vectorize(function(X)integrate(z,0,X)$value)
+
+outputDCcharge <- data.frame(f$Voc, integral(f$Voc));
+write.table(outputDCcharge, file="outputDCcharge.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
 png(paste("DC-charge-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
-plot(Vectorize(function(X)integrate(z,0,X)$value),range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)
+plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)
 graphics.off()
 }

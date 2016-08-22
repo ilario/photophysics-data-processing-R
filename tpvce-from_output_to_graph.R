@@ -22,6 +22,12 @@ name<- directory
 library(robustbase)
 library(RColorBrewer)
 library(minpack.lm)
+write.table(t(c("ChargeDensityCE", "T")), file="outputTPVCE-monoexp.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("ChargeDensityCE", "T1", "T2")), file="outputTPVCE-biexp.txt", append=FALSE, col.names=F, row.names=F);
+if(file.exists(file.path(tpvdir, "output-mixedbimono.txt")))
+{
+	write.table(t(c("ChargeDensityCE", "T1", "T2")), file="outputTPVCE-mixedbimono.txt", append=FALSE, col.names=F, row.names=F);
+}
 
  a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
  b<-strsplit(a$file, "_")
@@ -67,6 +73,10 @@ new <- data.frame(d = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(d = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+
+outputTPVCEmonoexp <- data.frame(charge, tpv$T)
+write.table(outputTPVCEmonoexp, file="outputTPVCE-monoexp.txt", append=TRUE, col.names=F, row.names=F, quote=F);
+
 png(paste(name,"-tpvce-monoexp.png",sep=""), width=600, height=600)
 plot(charge, tpv$T,cex.main=1.5,xlab="Extracted Charge Density (C/cm2)", ylab="Life-time (s)", main=paste(name,"TPV decay vs Charge from CE"),cex.lab=1.5,cex.axis=1.5,log="y", lwd=2);
 #legend(x="topright",inset=0.05,dirs,pch=seq(0,10,1), col=colors,cex=1.5)
@@ -82,9 +92,13 @@ charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(d = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 
+outputTPVCEbiexp <- data.frame(charge, tpv$T1, tpv$T2)
+write.table(outputTPVCEbiexp, file="outputTPVCE-biexp.txt", append=TRUE, col.names=F, row.names=F, quote=F);
+
 charge2 <- charge*1e9
 T1 <- tpv$T1*1e6
 T2 <- tpv$T2*1e6
+
 png(paste(name, "-tpvce-biexp.png",sep=""), width=600, height=600);
 par(mar=c(5.1,4.5,4.1,2.1))
 plot(0, ylim=c(min(T1,T2),max(T2,T1)), xlim=c(min(charge2),max(charge2)), log="y", xlab=bquote("Extracted Charge Density (nC/cm"^"2"*")"), ylab=bquote("Life-time ("*mu*"s)"), main=paste(name, "TPV biexp and monoexp decay vs Charge from CE"), cex.axis=1.5, cex.lab=1.5);
@@ -104,6 +118,9 @@ new <- data.frame(d = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(d = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+
+outputTPVCEmixedbimono <- data.frame(charge, tpv$T1, tpv$T2)
+write.table(outputTPVCEmixedbimono, file="outputTPVCE-mixedbimono.txt", append=TRUE, col.names=F, row.names=F, quote=F, na="");
 
 charge2 <- charge*1e9
 T1 <- tpv$T1*1e6
