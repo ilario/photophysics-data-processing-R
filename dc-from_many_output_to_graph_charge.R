@@ -19,16 +19,17 @@
 library(RColorBrewer)
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
-colors=brewer.pal(length(dirs),"Set1")
+dirs <- sub("./","",dirs)
+colors=brewer.pal(max(length(dirs),3),"Spectral")
 
-png(paste(name,"-DCs-charge.png",sep=""), width=800, height=640)
-
-plot(NULL,xlim=c(0,1),ylim=c(0,1.2e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Charge Density (C/cm2)", main=paste(name,"DCs charge"))
+png(paste(name,"-DCs-charge.png",sep=""), width=640, height=640)
+par(mar=c(5.1,5,4.1,2.1))
+plot(NULL,xlim=c(0,1),ylim=c(1e-10,1.2e-7),cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"), main=paste(name,"DCs charge"), log="y")
 
 lapply(dirs, function(x) {print(x);
-a <- read.table(paste(x,"/outputChargeDensityTPC.txt",sep=""),header=T)
+a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
 charge <- mean(a$ChargeDensityTPC)
-b <- read.table(paste(x,"/outputDeltaV.txt",sep=""),header=T)
+b <- read.table(paste(x,"/tpv/outputDeltaV.txt",sep=""),header=T)
 capacitance <- charge/b$deltaV
 
 #points(b$Voc, capacitance, lwd=2, pch=i, col=colors[i+1])
@@ -49,7 +50,12 @@ w <- Vectorize(function(X)integrate(z,0,X)$value)
 
 curve(w,range(f$Voc)[1], range(f$Voc)[2], lwd=2, col=colors[i+1], add=T)
 
- i <<- i+1
+ww <- function(X)integrate(z,0,X)$value
+x <- c(seq(range(f$Voc)[1], range(f$Voc)[2], 0.1), range(f$Voc)[2])
+www <- unlist(lapply(x, ww))
+points(x, www, lwd=2, col=colors[i+1], cex=2)
+
+i <<- i+1
 })
-legend(x="topleft",inset=0.05,dirs,pch=seq(0,10,1), col=colors)
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",dirs),pch=1, lwd=4, pt.cex=2, pt.lwd=2, cex=1.5, col=colors)
 graphics.off()

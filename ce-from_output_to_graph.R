@@ -28,7 +28,7 @@ f <- data.frame(d = sort(d))
 
 directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
 png(file.path(cedir, paste("charge_extraction-", directory[1], ".png", sep="")), width=800, heigh=800)
-plot(d, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4)
+plot(d, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4, log="y")
 lines(f$d,predict(exp,f), lwd=1, col="red")
 graphics.off()
 }

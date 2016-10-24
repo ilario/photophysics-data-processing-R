@@ -19,24 +19,26 @@
 library(RColorBrewer)
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
+dirs <- sub("./","",dirs)
 #files.tpc <- list.files(path=".", pattern="*-outputDeltaV.txt$")
 #files.tpv <- list.files(path=".", pattern="*-outputChargeDensityTPC.txt$")
-colors=brewer.pal(length(dirs),"Set1")
+colors=brewer.pal(max(length(dirs),3),"Spectral")
 
-png(paste(name,"-DCs-capacitance.png",sep=""), width=800, height=640)
-
-plot(NULL,xlim=c(0,1),ylim=c(0,7e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Specific Capacitance (F/cm2)", main=paste(name,"DCs capacitance"))
+png(paste(name,"-DCs-capacitance.png",sep=""), width=640, height=640)
+par(mar=c(5.1,5,4.1,2.1))
+plot(NULL,xlim=c(0,1),ylim=c(1e-8,7e-7),cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), main=paste(name,"DCs capacitance"), log="y")
 
 lapply(dirs, function(x) {print(x);
-a <- read.table(paste(x,"/outputChargeDensityTPC.txt",sep=""),header=T)
+a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
 charge <- mean(a$ChargeDensityTPC)
-b <- read.table(paste(x,"/outputDeltaV.txt",sep=""),header=T)
+b <- read.table(paste(x,"/tpv/outputDeltaV.txt",sep=""),header=T)
 capacitance <- charge/b$deltaV
 
-points(b$Voc, capacitance, lwd=2, pch=i, col=colors[i+1])
+points(b$Voc, capacitance, lwd=2, col=colors[i+1], cex=1.5)# pch=i,)
  i <<- i+1
 })
-legend(x="topleft",inset=0.05,dirs,pch=seq(0,10,1), col=colors)
+#abline(h=0)
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",dirs),pch=1, col=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4)#pch=seq(0,10,1), )
 graphics.off()
 
 

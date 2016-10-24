@@ -23,16 +23,16 @@ i <- 0
 #files <- list.files(path=".", pattern="*-outputChargeDensityCE.txt$")
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-colors=brewer.pal(max(length(dirs),3),"Set1")
+colors=brewer.pal(max(length(dirs),3),"Spectral")
 #colors=brewer.pal(length(files),"Set1")
 
 # e<-1.6021766208e-19
-png(paste(name,"-CEs.png",sep=""), width=800, height=640)
+png(paste(name,"-CEs.png",sep=""), width=640, height=640)
 par(mar=c(5.1,5,4.1,2.1))
-plot(NULL,xlim=c(0,0.9),ylim=c(0,1.3e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), cex.lab=1.5, cex.axis=1.5);
+plot(NULL,xlim=c(0,1),ylim=c(1e-9,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"), main=paste(name,"CEs"), cex.lab=1.5, cex.axis=1.2, log="y");
 
 lapply(dirs, function(x) {print(x);
- a <- read.table(paste(x,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
+ a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  b<-strsplit(a$file, "_")
  c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
  d<-as.numeric(gsub("mV", "", c))
@@ -46,16 +46,17 @@ exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,#A=coef(lin)[1],
 #B=coef(lin)[2],
 C=2e-9,D=9), data=a)
  
- points(d, a$ChargeDensityCE, lwd=2, pch=i, col=colors[i+1])
 f <- data.frame(d = sort(d))
- lines(f$d,predict(exp,f),col=colors[i+1])
+ lines(f$d,predict(exp,f),col=colors[i+1],lwd=2)
+ points(d, a$ChargeDensityCE, lwd=2, col=colors[i+1])#, pch=i)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
- mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
-	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
+
+# mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
+#	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
 
-legend(x="topleft",inset=0.05,dirs,pch=seq(0,10,1), col=colors, pt.cex=2, cex=1.5)
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",dirs), col=colors,pch=1, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4)#,pch=seq(0,10,1))
 
 graphics.off()

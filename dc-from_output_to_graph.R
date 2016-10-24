@@ -30,7 +30,7 @@ write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, co
 
 png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
-plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4, ylim=c(0,max(capacitance)))
+plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4, log="y")
 graphics.off()
 
 c<- data.frame(b$Voc,capacitance)
@@ -51,6 +51,6 @@ write.table(outputDCcharge, file="outputDCcharge.txt", append=TRUE, col.names=F,
 
 png(paste("DC-charge-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
-plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1.4, cex.lab=1.4)
+plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4, log="y")
 graphics.off()
 }
