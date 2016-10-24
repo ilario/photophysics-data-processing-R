@@ -19,12 +19,13 @@ ylim=c(3e-7,1e-3)
 xlim=c(0,2.5e-7)
 
 library(robustbase)
-library(RColorBrewer)
+#library(RColorBrewer)
 library(minpack.lm)
 
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
-colors=brewer.pal(max(length(dirs),3),"Spectral")
+colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
+#brewer.pal(max(length(dirs),3),"Spectral")
 dirs <- sub("./","",dirs)
 
 #lapply(dirs, function(x) {print(x);

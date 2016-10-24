@@ -23,7 +23,8 @@ i <- 0
 #files <- list.files(path=".", pattern="*-outputChargeDensityCE.txt$")
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-colors=brewer.pal(max(length(dirs),3),"Spectral")
+colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
+#brewer.pal(max(length(dirs),3),"Spectral")
 #colors=brewer.pal(length(files),"Set1")
 
 # e<-1.6021766208e-19

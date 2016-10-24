@@ -25,7 +25,8 @@ library(RColorBrewer)
 
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-colors=brewer.pal(max(length(dirs),3),"Spectral")
+colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
+#brewer.pal(max(length(dirs),3),"Spectral")
 
 print("errori derivano da avere molti header in output, bisogna pulirlo")
 #directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
@@ -35,6 +36,7 @@ print("biexp")
 
 i <- 0
 png(paste(name, "-TPVs-biexp.png",sep=""), width=640, height=640);
+par(mar=c(5.1,5,4.1,2.1))
 plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voc (V)", ylab="Life-time (s)", main=paste(name, "TPV biexp"));
 lapply(dirs, function(x) {print(x);
 fulloutput <- read.table(paste(x,"/tpv/output-biexp.txt",sep=""), header=TRUE);#,stringsAsFactors=F);
@@ -70,6 +72,7 @@ graphics.off()
 print("monoexp")
 i <- 0
 png(paste(name, "-TPVs-monoexp.png",sep=""), width=640, height=640);
+par(mar=c(5.1,5,4.1,2.1))
 plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voc (V)", ylab="Life-time (s)", main=paste(name, "TPV monoexp"));
 lapply(dirs, function(x) {print(x);
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);

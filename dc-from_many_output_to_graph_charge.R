@@ -20,7 +20,8 @@ library(RColorBrewer)
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-colors=brewer.pal(max(length(dirs),3),"Spectral")
+colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
+#brewer.pal(max(length(dirs),3),"Spectral")
 
 png(paste(name,"-DCs-charge.png",sep=""), width=640, height=640)
 par(mar=c(5.1,5,4.1,2.1))
