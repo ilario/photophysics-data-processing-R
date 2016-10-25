@@ -15,55 +15,61 @@
 
 #name=""
 
-
 library(RColorBrewer)
 library(robustbase)
-#library(minpack.lm)
 library(sfsmisc)
 library(Hmisc)
 
-
 i <- 0
-#files <- list.files(path=".", pattern="*-outputChargeDensityCE.txt$")
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
-#brewer.pal(max(length(dirs),3),"Spectral")
-#colors=brewer.pal(length(files),"Set1")
-
-# e<-1.6021766208e-19
-png(paste(name,"-CEs.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,2,2.1))
-plot(NULL,xlim=c(0,1),ylim=c(1e-9,1.5e-7),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"),  cex.lab=1.5, cex.axis=1.2, log="y", yaxt="n");#main=paste(name,"CEs"),
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
-minor.tick(nx=10)
-
-lapply(dirs, function(x) {print(x);
+data <- lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  b<-strsplit(a$file, "_")
  c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
  d<-as.numeric(gsub("mV", "", c))
+ a$d <- d
+ a <- a[with(a, order(a$d)),]
+ exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
+ g <- predict(exp,a$d)
+ a$g <- g
+ a})
+names(data) <- dirs
 
-
-a$d <- d
-#print(a)
-#lin <- lmrob(ChargeDensityCE~ d, data=a)
-#print(list(A=0,C=(2e-9/e),D=3))
-exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,#A=coef(lin)[1],
-#B=coef(lin)[2],
-C=2e-9,D=9), data=a)
- 
-f <- data.frame(d = sort(d))
- lines(f$d,predict(exp,f),col=colors[i+1],lwd=2)
- points(d, a$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+i, cex=2)
+png(paste(name,"-CEs-linlog.png",sep=""), width=640, height=640)
+par(mar=c(5.1,5,2,2.1))
+plot(NULL,xlim=c(0,1),ylim=c(1e-9,1.1e-7),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"),  cex.lab=1.5, cex.axis=1.2, log="y", yaxt="n");#main=paste(name,"CEs"),
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+minor.tick(nx=10)
+lapply(dirs, function(x) {print(x);
+ lines(data[[x]]$d, data[[x]]$g, col=colors[i+1],lwd=2)
+ points(data[[x]]$d, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+i, cex=2)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
-
 # mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
-
 legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",dirs), pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=paste("Charge Extraction\n",sub("-"," - ",sub("_"," ",name))), bty="n")
-
 graphics.off()
+
+i<-0
+png(paste(name,"-CEs.png",sep=""), width=640, height=640)
+par(mar=c(5.1,7,2,2.1))
+plot(NULL,xlim=c(0,1),ylim=c(1e-9,1.1e-7),cex.main=1.5,xlab="Voltage (V)", ylab="", cex.lab=1.5, cex.axis=1.2, yaxt="n");#main=paste(name,"CEs"),
+eaxis(side=2, cex.axis=1.2)
+minor.tick(nx=10, ny=10)
+title(ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
+lapply(dirs, function(x) {print(x);
+ lines(data[[x]]$d, data[[x]]$g, col=colors[i+1],lwd=2)
+ points(data[[x]]$d, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+i, cex=2)
+# mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
+#	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
+# mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
+#	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
+ i <<- i+1
+})
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",dirs), pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=paste("Charge Extraction\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+graphics.off()
+
