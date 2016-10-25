@@ -17,6 +17,11 @@
 
 
 library(RColorBrewer)
+#library(magicaxis)
+library(sfsmisc)
+library(Hmisc)
+
+
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
@@ -24,9 +29,11 @@ colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(
 #brewer.pal(max(length(dirs),3),"Spectral")
 
 png(paste(name,"-DCs-charge.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,4.1,2.1))
-plot(NULL,xlim=c(0,1),ylim=c(1e-10,1.2e-7),cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"), main=paste(name,"DCs charge"), log="y")
-
+par(mar=c(5.1,5,2,2.1))
+plot(NULL,xlim=c(0,1),ylim=c(3e-10,8e-8),cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
+#magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+minor.tick(nx=10)#, tick.ratio=n)
 lapply(dirs, function(x) {print(x);
 a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
 charge <- mean(a$ChargeDensityTPC)
@@ -54,9 +61,9 @@ curve(w,range(f$Voc)[1], range(f$Voc)[2], lwd=2, col=colors[i+1], add=T)
 ww <- function(X)integrate(z,0,X)$value
 x <- c(seq(range(f$Voc)[1], range(f$Voc)[2], 0.1), range(f$Voc)[2])
 www <- unlist(lapply(x, ww))
-points(x, www, lwd=2, col=colors[i+1], cex=2)
+points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 
 i <<- i+1
 })
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",dirs),pch=1, lwd=4, pt.cex=2, pt.lwd=2, cex=1.5, col=colors)
+legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",dirs),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()

@@ -18,7 +18,11 @@
 
 library(RColorBrewer)
 library(robustbase)
-library(minpack.lm)
+#library(minpack.lm)
+library(sfsmisc)
+library(Hmisc)
+
+
 i <- 0
 #files <- list.files(path=".", pattern="*-outputChargeDensityCE.txt$")
 dirs <- list.dirs(recursive=FALSE)
@@ -29,8 +33,10 @@ colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(
 
 # e<-1.6021766208e-19
 png(paste(name,"-CEs.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,4.1,2.1))
-plot(NULL,xlim=c(0,1),ylim=c(1e-9,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"), main=paste(name,"CEs"), cex.lab=1.5, cex.axis=1.2, log="y");
+par(mar=c(5.1,5,2,2.1))
+plot(NULL,xlim=c(0,1),ylim=c(1e-9,1.5e-7),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"),  cex.lab=1.5, cex.axis=1.2, log="y", yaxt="n");#main=paste(name,"CEs"),
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
@@ -49,7 +55,7 @@ C=2e-9,D=9), data=a)
  
 f <- data.frame(d = sort(d))
  lines(f$d,predict(exp,f),col=colors[i+1],lwd=2)
- points(d, a$ChargeDensityCE, lwd=2, col=colors[i+1])#, pch=i)
+ points(d, a$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+i, cex=2)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
 
@@ -58,6 +64,6 @@ f <- data.frame(d = sort(d))
  i <<- i+1
 })
 
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",dirs), col=colors,pch=1, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4)#,pch=seq(0,10,1))
+legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",dirs), pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=paste("Charge Extraction\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 
 graphics.off()

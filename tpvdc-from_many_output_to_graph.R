@@ -16,11 +16,14 @@
 #name=""
 
 ylim=c(3e-7,1e-3)
-xlim=c(0,2.5e-7)
+xlim=c(0,8e-8)
 
 library(robustbase)
 #library(RColorBrewer)
 library(minpack.lm)
+library(sfsmisc)
+library(Hmisc)
+
 
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
@@ -45,8 +48,12 @@ dirs <- sub("./","",dirs)
 
 i <- 0
 png(paste(name,"-TPVDCs.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,4.1,2.1))
-plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)", main=paste(name,"TPV decay vs Charge from DC"),cex.lab=1.5,cex.axis=1.2,log="y");
+par(mar=c(5.1,5,2,2.1))
+plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+eaxis(side=1, cex.axis=1.2)
+minor.tick(nx=10)
+
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$chargeDC~a$Voc,span=0.9)
@@ -63,8 +70,8 @@ new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 lo<-loess(tpv$T~charge,span=0.5)
 lines(charge, predict(lo), lwd=2, col=colors[i+1])
-points(charge, tpv$T, lwd=2, col=colors[i+1]);
+points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
-legend(x="topright",inset=0.05,sub("-ig..-...-.","",dirs),pch=1, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5)
+legend(x="topright",inset=0.05,sub("-ig..-...-.","",dirs),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs DC\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()
