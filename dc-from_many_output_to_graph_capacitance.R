@@ -20,6 +20,9 @@ library(RColorBrewer)
 library(sfsmisc)
 library(Hmisc)
 
+ylim=c(2e-8,4e-7)
+xlim=c(0,1)
+
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
@@ -30,7 +33,7 @@ colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(
 
 png(paste(name,"-DCs-capacitance.png",sep=""), width=640, height=640)
 par(mar=c(5.1,5,2,2.1))
-plot(NULL,xlim=c(0,1),ylim=c(2e-8,4e-7),cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 minor.tick(nx=10)
 
@@ -44,7 +47,7 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",dirs),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()
 
 

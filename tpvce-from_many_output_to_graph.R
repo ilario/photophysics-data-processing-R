@@ -80,5 +80,5 @@ lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
-legend(x="topright",inset=0.05,sub("-ig..-...-.","",dirs),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs CE\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs CE\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()
