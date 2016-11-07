@@ -19,10 +19,6 @@ legendlist = c("", "", "", "")
 library(RColorBrewer)
 colors=brewer.pal(max(length(fileslist),3),"Set1")
 
-
-
-source("~/software/r/PvCurvesR/extractdata-curves-vi-separated_files.R")
-source("~/software/r/PvCurvesR/iv-generate_mydata.R")
 i = 1
 png(paste(gsub(" ", "_", name),"-IVs.png",sep=""), width=640, height=640);
 plot(NULL,xlim=c(-0.1,1.1),ylim=c(-2.1,0.5),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5, main=name);

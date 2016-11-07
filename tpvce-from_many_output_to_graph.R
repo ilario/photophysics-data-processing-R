@@ -16,7 +16,7 @@
 #name=""
 
 ylim=c(3e-7,1e-3)
-xlim=c(0,1.5e-7)
+xlim=c(1e-9,1.1e-7)
 
 library(robustbase)
 library(RColorBrewer)

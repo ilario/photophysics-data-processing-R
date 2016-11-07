@@ -54,4 +54,19 @@ lines(tpc.sun$V1, (tpc.sun$V2-tpc.sun.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dar
 lines(tpc.dark$V1, (tpc.dark$V2-tpc.dark.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dark.max-tpc.dark.min)), lwd=1, col="black", lty=1)
 legend(x="topright",inset=0.05, c("TPC 1sun","TPC dark", "TPV 1sun", "CE 1sun"), lwd=4, col=c("red","black","blue","green"), cex=2)
 graphics.off()
+
+png(paste("tpc_vs_tpc-", main, ".png", sep=""), width=600, heigh=600)
+plot(NULL, xlim=c(-5e-7,0.5e-5), ylim=c(-0.1,1), type="l", ylab="Normalized Voltage", xlab="Time (s)", main=paste(main, "TPC dark vs TPC 1sun"), yaxt='n', cex.axis=1.4, cex.lab=1.4)
+lines(tpc.sun$V1, (tpc.sun$V2-tpc.sun.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dark.max-tpc.dark.min)), lwd=1, col="red")
+lines(tpc.dark$V1, (tpc.dark$V2-tpc.dark.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dark.max-tpc.dark.min)), lwd=1, col="black", lty=1)
+legend(x="topright",inset=0.05, c("TPC 1sun","TPC dark"), lwd=4, col=c("red","black"), cex=2)
+graphics.off()
+
+png(paste("tpv_vs_ce-", main, ".png", sep=""), width=600, heigh=600)
+plot(tpv$V1, (tpv$V2-tpv.min)/(tpv.max-tpv.min), xlim=c(-5e-7,0.5e-5), ylim=c(-0.1,1), type="l", ylab="Normalized Voltage", xlab="Time (s)", main=paste(main, "TPV vs CE"), col="blue", yaxt='n', cex.axis=1.4, cex.lab=1.4)
+lines(ce$V1, (ce$V2-ce.min)/(ce.max-ce.min), lwd=2, col="green")
+legend(x="topright",inset=0.05, c("TPV 1sun", "CE 1sun"), lwd=4, col=c("blue","green"), cex=2)
+graphics.off()
+
 }
+
