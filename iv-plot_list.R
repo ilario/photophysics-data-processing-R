@@ -16,8 +16,9 @@
 name=""
 fileslist = c("", "", "", "")
 legendlist = c("", "", "", "")
-library(RColorBrewer)
-colors=brewer.pal(max(length(fileslist),3),"Set1")
+#library(RColorBrewer)
+#colors=brewer.pal(max(length(fileslist),3),"Set1")
+colors = c("red","green", "blue")
 
 i = 1
 png(paste(gsub(" ", "_", name),"-IVs.png",sep=""), width=640, height=640);
@@ -28,6 +29,6 @@ lines(mydata[[rev]]$Voltage_V, mydata[[rev]]$Current_mA, lwd=3, lty=2, col=color
 i <<- i+1
 })
 abline(h=0);abline(v=0)
-legend(x="topleft",inset=0.05,legendlist,lty=c(1,1,1,1), lwd=4,col=colors)
+legend(x="topleft",inset=0.05,legendlist,lty=c(1,1,1,1), lwd=4,col=colors, cex=2)
 graphics.off()
 

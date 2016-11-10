@@ -16,7 +16,7 @@
 #name=""
 
 ylim=c(3e-7,1e-3)
-xlim=c(3e-10,7e-8)
+xlim=c(2e-8,7e-8)#c(3e-10,7e-8)
 
 library(robustbase)
 #library(RColorBrewer)
@@ -72,7 +72,7 @@ lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
-legend(x="topright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs DC\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topright",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs DC\n","with geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()
 
 
@@ -103,5 +103,5 @@ lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
-legend(x="topright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs DC\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topright",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs DC\n","no geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()

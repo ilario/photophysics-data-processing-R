@@ -21,7 +21,7 @@ library(sfsmisc)
 library(Hmisc)
 
 ylim=c(1e-9,1.1e-7)
-xlim=c(0,1)
+xlim=c(0,0.95)
 
 i <- 0
 dirs <- list.dirs(recursive=FALSE)

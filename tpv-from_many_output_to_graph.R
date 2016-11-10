@@ -18,7 +18,7 @@
 #name=""
 
 ylim=c(3e-7,1e-3)
-xlim=c(0,1)
+xlim=c(0.3,0.95)
 
 #library(Hmisc)
 #library(RColorBrewer)
