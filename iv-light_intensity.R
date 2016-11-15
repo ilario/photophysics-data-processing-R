@@ -13,7 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#name=""
+directory=tail(strsplit(getwd(), "/")[[1]], n=1)
+name=directory
 
 files <- list.files(path=".", pattern="\\.txt$");
 #files <- grep(name,files,value=T)
