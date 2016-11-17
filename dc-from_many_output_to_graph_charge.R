@@ -33,7 +33,11 @@ colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(
 data <- lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
  charge <- mean(a$ChargeDensityTPC)
- b <- read.table(paste(x,"/tpv/outputDeltaV.txt",sep=""),header=T)
+if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
+               b <- read.table(file.path(x, "tpv", "outputDeltaVmixed.txt"), header=T)
+}else{
+	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
+}
  capacitance <- charge/b$deltaV
  c<- data.frame(b$Voc,capacitance)
  d <- c[with(c, order(b.Voc)), ]
@@ -83,6 +87,51 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n","with geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()
 
+i<-0
+png(paste(name,"-DCs-nogeom-charge-linlog.png",sep=""), width=640, height=640)
+par(mar=c(5.1,5,2,2.1))
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
+#magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+minor.tick(nx=10)#, tick.ratio=n)
+lapply(dirs, function(x) {print(x);
+g <- data[[x]]
+g$capacitance[g$capacitance < 0] <- 0
+g$capacitance <- g$capacitance - min(g$capacitance)
+z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
+w <- Vectorize(function(X)integrate(z,0,X)$value)
+curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
+ww <- function(X)integrate(z,0,X)$value
+x <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
+www <- unlist(lapply(x, ww))
+points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+i <<- i+1
+})
+legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n","no geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+graphics.off()
+
+i<-0
+png(paste(name,"-DCs-nogeom-charge.png",sep=""), width=640, height=640)
+par(mar=c(5.1,7,2,2.1))
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n")
+eaxis(side=2, cex.axis=1.2)
+minor.tick(nx=10, ny=10)
+title(ylab=bquote("Charge Density (C/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
+lapply(dirs, function(x) {print(x);
+g <- data[[x]]
+g$capacitance[g$capacitance < 0] <- 0
+g$capacitance <- g$capacitance - min(g$capacitance)
+z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
+w <- Vectorize(function(X)integrate(z,0,X)$value)
+curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
+ww <- function(X)integrate(z,0,X)$value
+x <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
+www <- unlist(lapply(x, ww))
+points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+i <<- i+1
+})
+legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n","no geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+graphics.off()
