@@ -65,7 +65,9 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n",
+       gsub("-","\n",gsub("_"," ",name))#)
+	, bty="n")
 graphics.off()
 
 i<-0
@@ -87,7 +89,9 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n","with geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","with geom. cap.\n",
+       gsub("-","\n",gsub("_"," ",name))#)
+       , bty="n")
 graphics.off()
 
 i<-0
