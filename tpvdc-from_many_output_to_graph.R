@@ -77,8 +77,8 @@ points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
 legend(x="topright",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs DC\n","with geom. cap.\n",
-       gsub("-","\n",gsub("_"," ",name))#)
-       , bty="n")
+       gsub("-","\n\n",gsub("_"," ",name)),bg="gray90"#), bty="n"
+       )
 graphics.off()
 
 
