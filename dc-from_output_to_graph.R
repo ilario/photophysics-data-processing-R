@@ -65,7 +65,7 @@ z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 integral=Vectorize(function(X)integrate(z,0,X)$value)
 
 outputDCcharge <- data.frame(f$Voc, integral(f$Voc));
-write.table(outputDCcharge, file="outputDCTPVmonoexpcharge-nogeom.txt", append=TRUE, col.names=F, row.names=F, quote=F);
+write.table(outputDCcharge, file="outputDCcharge-nogeom.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
 png(paste("DC-nogeom-charge-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
