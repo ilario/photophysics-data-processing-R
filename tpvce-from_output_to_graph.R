@@ -52,6 +52,9 @@ tryCatch({
 	 exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
          }, error=function(e) {print("FAILED THIRD FIT")});
 
+tryCatch({
+	 exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
+         }, error=function(e) {print("FAILED FOURTH FIT")});
 
  expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
 

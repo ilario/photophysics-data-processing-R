@@ -33,6 +33,8 @@ names(mydata) <- files;
 write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-biexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-monoexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaV.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-robustmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-robustbiexp.txt"), append=FALSE, col.names=F, row.names=F);
 
@@ -46,7 +48,6 @@ trashfornullmessages <- lapply(files, function(x) {
 	
 		#workaround
 		header = as.numeric(system(paste("head -6 '", file.path(tpvdir,paste(x,".txt",sep="")), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
-
 
 		indexpeaktime <- which.max(mydata[[x]]$voltage);
 		peaktime <- mydata[[x]]$time[indexpeaktime];
@@ -82,18 +83,25 @@ trashfornullmessages <- lapply(files, function(x) {
 		for(rand in (step*seq(1, 10, by=step))){
 		while(mean(temp[1:10,2]) < mean(temp[10:20,2])) {print("Biexp/Fit: Removing a point for clearing the curve - rough"); temp <- temp[-1,]}
 		while(temp[1,2] < mean(temp[2:4,2]) | temp[1,2] < mean(temp[10:15,2])) {print("Biexp/Fit: Removing a point for clearing the curve - fine"); temp <- temp[-1,]}
+		while(temp[1,2] < mean(temp[5:10,2]) + 0.01*deltavoltage) {print("Biexp/Fit: Removing a point for clearing the curve - flat part"); temp <- temp[-1,]}
 tryCatch({
-		Crand <- C*(2^runif(1,-rand,rand))*10;
-		Frand <- C*(2^runif(1,-rand,rand))/10;
+		if(exists("CFromPreviousDecay") && rand == step){
+		print("Biexp/Fit: Trying with previous parameters")
+		Crand <- CFromPreviousDecay*(2^runif(1,-step,step))
+		Frand <- FFromPreviousDecay*(2^runif(1,-step,step))
+		} else {
+		Crand <- C*(3^runif(1,-rand,rand))*10;
+		Frand <- C*(3^runif(1,-rand,rand))/10;
+		}
 		fit2 <- nls(voltage ~ cbind(1, exp(-time/C), exp(-time/F)), start=list(C=Crand, F=Frand),trace=F,data=temp,alg="plinear");
+		CFromPreviousDecay <<- coef(fit2)["C"] 
+		FFromPreviousDecay <<- coef(fit2)["F"]
 			A2 <- coef(fit2)[".lin1"]; A2.err <- summary(fit2)$coefficients[".lin1",2];
 			if(coef(fit2)[".lin2"] < 0 | coef(fit2)[".lin3"] < 0 | coef(fit2)["C"] < 0 | coef(fit2)["F"] < 0){print("Biexp/Fit: Bad result"); next};
 			#print(paste(startingvoltage, "=>", coef(fit2)[".lin1"], "/// ... =>", coef(fit2)[".lin2"], "///", Crand, "=>", coef(fit2)["C"], "/// ... =>", coef(fit2)[".lin3"], "--", Frand, "=>", coef(fit2)["F"]));
 			if(coef(fit2)["C"] > coef(fit2)["F"]) {slowampl <- coef(fit2)[".lin2"]; slowdecay <- coef(fit2)["C"]; fastampl <- coef(fit2)[".lin3"]; fastdecay <- coef(fit2)["F"]; slowampl.err <- summary(fit2)$coefficients[".lin2",2]; slowdecay.err <- summary(fit2)$coefficients["C",2]; fastampl.err <- summary(fit2)$coefficients[".lin3",2]; fastdecay.err <- summary(fit2)$coefficients["F",2]} else {fastampl <- coef(fit2)[".lin2"]; fastdecay <- coef(fit2)["C"]; slowampl <- coef(fit2)[".lin3"]; slowdecay <- coef(fit2)["F"]; fastampl.err <- summary(fit2)$coefficients[".lin2",2]; fastdecay.err <- summary(fit2)$coefficients["C",2]; slowampl.err <- summary(fit2)$coefficients[".lin3",2]; slowdecay.err <- summary(fit2)$coefficients["F",2]};
 			capture.output(summary(fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 			
-		outputDeltaVbiexp <- t(c(x, startingvoltage, predict(fit2,newdata=data.frame(time=0))-startingvoltage));
-		write.table(outputDeltaVbiexp, file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
 			print("Biexp/Plot/Linear: Performing");
 		tryCatch({
@@ -151,6 +159,10 @@ if(residuals){
 		output <- t(c(x, A2, slowampl, slowdecay, slowdecay.err, fastampl, fastdecay, fastdecay.err));
 		write.table(output, file=file.path(tpvdir,"output-biexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 		
+#		outputDeltaVbiexp <- t(c(x, startingvoltage, predict(fit2,newdata=data.frame(time=0))-startingvoltage));
+		outputDeltaVbiexp <- t(c(x, A2, slowampl+fastampl));
+		write.table(outputDeltaVbiexp, file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
+		
 		biexpsuccess = 1;
 		break
 }, error=function(e) print("Biexp/Fit: Error"));
@@ -177,8 +189,6 @@ tryCatch({
 		quitelowerpointmonoexp <- max((predict(fit, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A)/5,min(subset(tempsubset, voltage > A, select=voltage)-A));
 		higherpointmonoexp <- max(predict(fit, newdata = data.frame(time=0))-A,head(tempsubset$voltage,n=1)-A);
 
-		outputDeltaVmonoexp <- t(c(x, startingvoltage, predict(fit,newdata=data.frame(time=0))-startingvoltage));
-		write.table(outputDeltaVmonoexp, file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 		
 		print("Monoexp/Plot/Linear: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp.png", sep="")), width = 1280, height = 800);
@@ -218,6 +228,10 @@ if(residuals){
 }	
                 outputmonoexp <- t(c(x, A, B, C, C.err));
                 write.table(outputmonoexp, file=file.path(tpvdir,"output-monoexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
+
+#		outputDeltaVmonoexp <- t(c(x, startingvoltage, predict(fit,newdata=data.frame(time=0))-startingvoltage));
+		outputDeltaVmonoexp <- t(c(x, A, B));
+		write.table(outputDeltaVmonoexp, file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
 tryCatch({
 			capture.output(anova(fit,fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);

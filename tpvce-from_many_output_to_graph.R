@@ -64,7 +64,7 @@ lapply(dirs, function(x) {print(x);
  d<-as.numeric(gsub("mV", "", c))
  lo <- loess(a$ChargeDensityCE~d,span=0.9)
  a$d <- d
- exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
+ exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
  expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
 
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);

@@ -23,7 +23,7 @@ c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
 d<-as.numeric(gsub("mV", "", c))
 
 a$d <- d
-exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
+exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
 f <- data.frame(d = sort(d))
 
 directory <- tail(strsplit(getwd(), "/")[[1]], n=2)

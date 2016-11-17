@@ -51,7 +51,7 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","with geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","with geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()
 
 i <- 0
@@ -75,5 +75,5 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","no geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","no geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
 graphics.off()

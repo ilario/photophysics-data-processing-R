@@ -61,15 +61,11 @@ lapply(dirs, function(x) {print(x);
  exp <- nlrob(chargeDC~ A+C*exp(D*Voc), start=list(A=0,C=2e-9,D=9), data=a)
  expend <- nlsLM(chargeDC~ A+C*exp(D*Voc), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
 
-if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
-	               fileDeltaV <- file.path(x, "tpv", "outputDeltaVmixed.txt")
-}else{
-	               fileDeltaV <- file.path(x, "tpv", "outputDeltaV.txt")
-}
+filex <- file.path(x, "tpv", "output-monoexp.txt")
 
-fulloutput <- read.table(fileDeltaV), header=TRUE);
+fulloutput <- read.table(filex, header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table(fileDeltaV, header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- read.table(filex, header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
@@ -98,15 +94,10 @@ lapply(dirs, function(x) {print(x);
  exp <- nlrob(chargeDC~ C*exp(D*Voc), start=list(C=2e-11,D=8), data=a)
  expend <- nlsLM(chargeDC~ A+C*exp(D*Voc), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
 
-if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
-	               fileDeltaV <- file.path(x, "tpv", "outputDeltaVmixed.txt")
-}else{
-	               fileDeltaV <- file.path(x, "tpv", "outputDeltaV.txt")
-}
-
-fulloutput <- read.table(fileDeltaV, header=TRUE);
+filex <- file.path(x, "tpv", "output-monoexp.txt")
+fulloutput <- read.table(filex, header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table(fileDeltaV, header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- read.table(filex, header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2

@@ -14,6 +14,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #name=""
+directory=tail(strsplit(getwd(), "/")[[1]], n=1)
+name=directory
+
 
 library(robustbase)
 a <- read.table("output.txt",header=F,stringsAsFactors=F)

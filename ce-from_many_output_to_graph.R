@@ -34,7 +34,7 @@ data <- lapply(dirs, function(x) {print(x);
  d<-as.numeric(gsub("mV", "", c))
  a$d <- d
  a <- a[with(a, order(a$d)),]
- exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
+ exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
  g <- predict(exp,a$d)
  a$g <- g
  a})
