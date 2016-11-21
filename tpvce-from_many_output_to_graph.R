@@ -67,8 +67,18 @@ lapply(dirs, function(x) {print(x);
  d<-as.numeric(gsub("mV", "", c))
  lo <- loess(a$ChargeDensityCE~d,span=0.9)
  a$d <- d
- exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
- expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
+#exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
+#expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
+ expend <- nlsLM(ChargeDensityCE~ C*(exp(D*d)-A), start=list(A=1,C=1e-10,D=9), data=a[round(length(a$file)/2):length(a$file),])
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ C*(exp(D*d)-A), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ }, error=function(e) {print("FAILED ZEROTH FIT")});
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ }, error=function(e) {print("FAILED FIRST FIT")});
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ }, error=function(e) {print("FAILED SECOND FIT")});
 
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)

@@ -62,7 +62,15 @@ lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$chargeDC~a$Voc,span=0.9)
  expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+tryCatch({
+ exp <- nlrob(chargeDC~ C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED ZEROTH FIT")});
+tryCatch({
+ exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED FIRST FIT")});
+tryCatch({
  exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED SECOND FIT")});
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
 
@@ -96,8 +104,13 @@ minor.tick(nx=10)
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge-nogeom.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$chargeDC~a$Voc,span=0.9)
- exp <- nlrob(chargeDC~ C*exp(D*Voc), start=list(C=2e-11,D=8), data=a)
- expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+tryCatch({
+ exp <- nlrob(chargeDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED ZEROTH nogeom FIT")});
+tryCatch({
+ exp <- nlrob(chargeDC~ C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED FIRST nogeom FIT")});
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
 fulloutput <- read.table(filex, header=TRUE);
