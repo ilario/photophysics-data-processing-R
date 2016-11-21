@@ -15,7 +15,9 @@
 
 #name=""
 
-title=gsub("-","\n\n",gsub("_"," ",name))
+
+#title=gsub("-","\n\n",gsub("_"," ",name))
+title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
 ylim=limlifetime
@@ -72,8 +74,14 @@ tryCatch({
  exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED SECOND FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
 }, error=function(e) {print("FAILED THIRD FIT")});
+tryCatch({
+ exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-8,C=1e-9,D=1), data=a)
+}, error=function(e) {print("FAILED THIRD FIT")});
+tryCatch({
+ exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED FOURTH FIT")});
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
 
@@ -112,8 +120,11 @@ tryCatch({
  exp <- nlrob(chargeDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED ZEROTH nogeom FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED FIRST nogeom FIT")});
+tryCatch({
+ exp <- nlrob(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=1e-10,D=8), data=a)
+}, error=function(e) {print("FAILED SECOND nogeom FIT")});
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
 fulloutput <- read.table(filex, header=TRUE);

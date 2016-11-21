@@ -77,8 +77,17 @@ lapply(dirs, function(x) {print(x);
 	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
  }, error=function(e) {print("FAILED FIRST FIT")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-1), start=list(B=2e-8,C=1e-8,D=0.1), data=a)
  }, error=function(e) {print("FAILED SECOND FIT")});
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
+ }, error=function(e) {print("FAILED THIRD FIT")});
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ }, error=function(e) {print("FAILED FOURTH FIT")});
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-A), start=list(A=1,B=1e-9,C=1e-10,D=8), data=a)
+ }, error=function(e) {print("FAILED FIFTH FIT")});
 
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)

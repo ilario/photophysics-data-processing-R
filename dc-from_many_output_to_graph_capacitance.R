@@ -15,7 +15,8 @@
 
 #name=""
 
-title=gsub("-","\n\n",gsub("_"," ",name))
+#title=gsub("-","\n\n",gsub("_"," ",name))
+title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
 library(RColorBrewer)
