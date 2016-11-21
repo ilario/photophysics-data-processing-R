@@ -14,6 +14,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 name=""
+title=gsub("-","\n\n",gsub("_"," ",name))
+filename=gsub(",","",gsub(":","",name))
+
 fileslist = c("", "", "", "")
 legendlist = c("", "", "", "")
 #library(RColorBrewer)
@@ -21,14 +24,29 @@ legendlist = c("", "", "", "")
 colors = c("red","green", "blue")
 
 i = 1
-png(paste(gsub(" ", "_", name),"-IVs.png",sep=""), width=640, height=640);
-plot(NULL,xlim=c(-0.1,1.1),ylim=c(-2.1,0.5),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5, main=name);
+png(paste(filename,"-IVs.png",sep=""), width=640, height=640);
+par(mar=c(5.1,7,2,2.1))
+plot(NULL,xlim=c(-0.1,1.1),ylim=c(-23,5),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5,cex.axis=1.2, yaxt="n", xaxt="n")#, main=name);
+eaxis(side=2, cex.axis=1.2)
+eaxis(side=1, cex.axis=1.2)
+minor.tick(nx=10, ny=10)
+
 lapply(fileslist, function(x){print(x); fwd=paste(x, "-forward.txt", sep=""); rev=paste( x, "-reverse.txt", sep="");
-lines(mydata[[fwd]]$Voltage_V, mydata[[fwd]]$Current_mA, lwd=3, col=colors[i])#brewer.pal(9,"Reds")[i])
-lines(mydata[[rev]]$Voltage_V, mydata[[rev]]$Current_mA, lwd=3, lty=2, col=colors[i])#brewer.pal(9,"Reds")[i], )
+fwdV=mydata[[fwd]]$Voltage_V
+fwdJ=mydata[[fwd]]$Current_mA
+revV=mydata[[rev]]$Voltage_V
+revJ=mydata[[rev]]$Current_mA
+lines(fwdV, fwdJ, lwd=3, col=colors[i])#brewer.pal(9,"Reds")[i])
+lines(revV, revJ, lwd=3, lty=2, col=colors[i])#brewer.pal(9,"Reds")[i], )
+fwdV=fwdV[c(T,F,F,F,F)]
+fwdJ=fwdJ[c(T,F,F,F,F)]
+revV=revV[c(T,F,F,F,F)]
+revJ=revJ[c(T,F,F,F,F)]
+points(fwdV, fwdJ, lwd=3, col=colors[i])
+points(revV, revJ, lwd=3, col=colors[i])
 i <<- i+1
 })
 abline(h=0);abline(v=0)
-legend(x="topleft",inset=0.05,legendlist,lty=c(1,1,1,1), lwd=4,col=colors, cex=2)
+legend(x="topleft",inset=0.1,legendlist, lty=c(1,1,1,1), lwd=4,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=title,bg="gray90")
 graphics.off()
 

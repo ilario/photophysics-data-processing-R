@@ -19,7 +19,7 @@ title=gsub("-","\n\n",gsub("_"," ",name))
 filename=gsub(",","",gsub(":","",name))
 
 ylim=limlifetime
-xlim=limdccharge
+xlim=limtpvdccharge
 
 library(robustbase)
 #library(RColorBrewer)
@@ -52,7 +52,7 @@ library(Hmisc)
 
 i <- 0
 png(paste(filename,"-TPVDCs.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,2,2.1))
+par(mar=c(5.1,7,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=1, cex.axis=1.2)
@@ -63,14 +63,17 @@ lapply(dirs, function(x) {print(x);
  lo <- loess(a$chargeDC~a$Voc,span=0.9)
  expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
 tryCatch({
- exp <- nlrob(chargeDC~ C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(chargeDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED ZEROTH FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(chargeDC~ C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED FIRST FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED SECOND FIT")});
+tryCatch({
+ exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED THIRD FIT")});
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
 
@@ -82,7 +85,7 @@ new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
-lo<-loess(tpv$T~charge,span=0.5)
+lo<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
@@ -95,7 +98,7 @@ graphics.off()
 
 i <- 0
 png(paste(filename,"-TPVDCs-nogeom.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,2,2.1))
+par(mar=c(5.1,7,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=1, cex.axis=1.2)
@@ -121,7 +124,7 @@ new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
-lo<-loess(tpv$T~charge,span=0.5)
+lo<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1

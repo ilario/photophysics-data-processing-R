@@ -34,10 +34,14 @@ colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(
 #brewer.pal(max(length(dirs),3),"Spectral")
 
 png(paste(filename,"-DCs-capacitance.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"))#, log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
+par(mar=c(5.1,7,2,2.1))
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab="",# log="y", 
+yaxt="n",xaxt="n")#main=paste(name,"DCs capacitance"), )
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
-minor.tick(nx=10)
+eaxis(side=2, cex.axis=1.2)
+eaxis(side=1, cex.axis=1.2)
+minor.tick(nx=10, ny=10)
+title(ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
 
 lapply(dirs, function(x) {print(x);
 a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
@@ -59,10 +63,13 @@ graphics.off()
 
 i <- 0
 png(paste(filename,"-DCs-nogeom-capacitance.png",sep=""), width=640, height=640)
-par(mar=c(5.1,5,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"))#, log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
+par(mar=c(5.1,7,2,2.1))
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
+yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
-minor.tick(nx=10)
+eaxis(side=2, cex.axis=1.2)
+eaxis(side=1, cex.axis=1.2)
+minor.tick(nx=10, ny=10)
 
 lapply(dirs, function(x) {print(x);
 a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
@@ -73,7 +80,7 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
 }
 capacitance <- charge/b$deltaV
-capacitance <- capacitance - mean(sort(capacitance)[1:3])
+capacitance <- capacitance - min(capacitance)#mean(sort(capacitance)[1:3])
 points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })

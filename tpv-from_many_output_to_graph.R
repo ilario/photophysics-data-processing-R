@@ -21,7 +21,7 @@ title=gsub("-","\n\n",gsub("_"," ",name))
 filename=gsub(",","",gsub(":","",name))
 
 ylim=limlifetime
-xlim=limvoltage
+xlim=limtpvvoltage
 
 #library(Hmisc)
 #library(RColorBrewer)
