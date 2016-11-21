@@ -17,8 +17,11 @@
 
 #name=""
 
-ylim=c(3e-7,1e-3)
-xlim=c(0.3,0.95)
+title=gsub("-","\n\n",gsub("_"," ",name))
+filename=gsub(",","",gsub(":","",name))
+
+ylim=limlifetime
+xlim=limvoltage
 
 #library(Hmisc)
 #library(RColorBrewer)
@@ -38,7 +41,7 @@ print("errori derivano da avere molti header in output, bisogna pulirlo")
 print("biexp")
 
 i <- 0
-png(paste(name, "-TPVs-biexp.png",sep=""), width=640, height=640);
+png(paste(filename, "-TPVs-biexp.png",sep=""), width=640, height=640);
 par(mar=c(5.1,5,2,2.1))
 plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Life-time (s)", yaxt="n")#, main=paste(name, "TPV biexp"));
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -54,7 +57,8 @@ points(output$Voc, output$T1, lwd=1, pch=21+i, bg=colors[i+1], cex=2);
 points(output$Voc, output$T2, lwd=1, pch=21+i, col=colors[i+1], cex=2);
 i <<- i+1
 })
-legend(x="bottomleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=paste("TPV biexp\n",sub("-"," - ",sub("_"," ",name))), bty="n", col=colors)
+legend(x="bottomleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=paste("TPV biexp\n",title), bg="gray90",#bty="n"
+col=colors)
 graphics.off()
 
 
@@ -77,7 +81,7 @@ graphics.off()
 
 print("monoexp")
 i <- 0
-png(paste(name, "-TPVs-monoexp.png",sep=""), width=640, height=640);
+png(paste(filename, "-TPVs-monoexp.png",sep=""), width=640, height=640);
 par(mar=c(5.1,5,2,2.1))
 plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Life-time (s)", yaxt="n")#, main=paste(name, "TPV monoexp"));
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -91,9 +95,9 @@ output <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, ski
 points(output$Voc, output$T, lwd=1, pch=21+i, bg=colors[i+1], cex=2);
 i <<- i+1
 })
-legend(x="bottomleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pt.cex=2, pt.lwd=2,cex=1.5, pch=seq(21,25), pt.bg=colors, col=colors, title=#paste("TPV exp\n",
-       gsub("-","\n",gsub("_"," ",name))#)
-       , bty="n")
+legend(x="bottomleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pt.cex=2, pt.lwd=2,cex=1.5, pch=seq(21,25), pt.bg=colors, col=colors, title=#paste("TPV exp\n",
+title, bg="gray90"#), bty="n"
+)
 
 graphics.off()
 

@@ -15,8 +15,11 @@
 
 #name=""
 
-ylim=c(3e-7,1e-3)
-xlim=c(3e-10,7e-8)
+title=gsub("-","\n\n",gsub("_"," ",name))
+filename=gsub(",","",gsub(":","",name))
+
+ylim=limlifetime
+xlim=limdccharge
 
 library(robustbase)
 #library(RColorBrewer)
@@ -26,18 +29,18 @@ library(Hmisc)
 
 
 
-i <- 0
-dirs <- list.dirs(recursive=FALSE)
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
-#brewer.pal(max(length(dirs),3),"Spectral")
-dirs <- sub("./","",dirs)
-
+#i <- 0
+#dirs <- list.dirs(recursive=FALSE)
+#colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
+##brewer.pal(max(length(dirs),3),"Spectral")
+#dirs <- sub("./","",dirs)
+#
 #lapply(dirs, function(x) {print(x);
 # a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
 #  lo <- loess(a$chargeDC~a$Voc, span=0.9)
-#       	exp <- nlrob(chargeDC~ A+C*exp(D*Voc), start=list(A=0,C=2e-9,D=9), data=a)
-# expend <- nlsLM(chargeDC~ A+C*exp(D*Voc), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
-# png(paste(x,"-CEs.png",sep=""), width=640, height=640)
+#       	exp <- nlrob(chargeDC~ B*Voc + C*(exp(D*Voc)-1), start=list(B=1e-8,C=2e-9,D=9), data=a)
+# expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
+# png(paste(x,"-DCfitting.png",sep=""), width=640, height=640)
 # plot(NULL,xlim=c(0,1),ylim=c(0,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Charge Density (C/cm2)", main=paste(x,"DC fitted"));
 # points(a, lwd=2, pch=1, col=colors[i+1])
 # lines(a$Voc,predict(exp))
@@ -48,7 +51,7 @@ dirs <- sub("./","",dirs)
 #})
 
 i <- 0
-png(paste(name,"-TPVDCs.png",sep=""), width=640, height=640)
+png(paste(filename,"-TPVDCs.png",sep=""), width=640, height=640)
 par(mar=c(5.1,5,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -58,8 +61,8 @@ minor.tick(nx=10)
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$chargeDC~a$Voc,span=0.9)
- exp <- nlrob(chargeDC~ A+C*exp(D*Voc), start=list(A=0,C=2e-9,D=9), data=a)
- expend <- nlsLM(chargeDC~ A+C*exp(D*Voc), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-A), start=list(A=coef(expend)["A"],B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
 
@@ -77,13 +80,13 @@ points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
 legend(x="topright",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs DC\n","with geom. cap.\n",
-       gsub("-","\n\n",gsub("_"," ",name)),bg="gray90"#), bty="n"
-       )
+title,bg="gray90"#), bty="n"
+)
 graphics.off()
 
 
 i <- 0
-png(paste(name,"-TPVDCs-nogeom.png",sep=""), width=640, height=640)
+png(paste(filename,"-TPVDCs-nogeom.png",sep=""), width=640, height=640)
 par(mar=c(5.1,5,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -94,7 +97,7 @@ lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge-nogeom.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$chargeDC~a$Voc,span=0.9)
  exp <- nlrob(chargeDC~ C*exp(D*Voc), start=list(C=2e-11,D=8), data=a)
- expend <- nlsLM(chargeDC~ A+C*exp(D*Voc), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
 fulloutput <- read.table(filex, header=TRUE);
@@ -110,5 +113,7 @@ lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
-legend(x="topright",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=paste("TPV vs DC\n","no geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topright",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs DC\n","no geom. cap.\n",
+title, bg="gray90"#, bty="n"
+)
 graphics.off()

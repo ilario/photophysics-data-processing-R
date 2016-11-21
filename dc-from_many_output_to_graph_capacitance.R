@@ -15,13 +15,15 @@
 
 #name=""
 
+title=gsub("-","\n\n",gsub("_"," ",name))
+filename=gsub(",","",gsub(":","",name))
 
 library(RColorBrewer)
 library(sfsmisc)
 library(Hmisc)
 
-ylim=c(2e-8,4e-7)
-xlim=c(0,1)
+ylim=limdccapacitance
+xlim=limvoltage
 
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
@@ -31,10 +33,10 @@ dirs <- sub("./","",dirs)
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
 
-png(paste(name,"-DCs-capacitance.png",sep=""), width=640, height=640)
+png(paste(filename,"-DCs-capacitance.png",sep=""), width=640, height=640)
 par(mar=c(5.1,5,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"))#, log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
+#eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
@@ -51,14 +53,15 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","with geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=title, bg="gray90"# bty="n"
+)
 graphics.off()
 
 i <- 0
-png(paste(name,"-DCs-nogeom-capacitance.png",sep=""), width=640, height=640)
+png(paste(filename,"-DCs-nogeom-capacitance.png",sep=""), width=640, height=640)
 par(mar=c(5.1,5,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"))#, log="y", yaxt="n")#main=paste(name,"DCs capacitance"), )
+#eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
@@ -70,10 +73,11 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
 }
 capacitance <- charge/b$deltaV
-capacitance <- capacitance - min(capacitance)
+capacitance <- capacitance - mean(sort(capacitance)[1:3])
 points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","no geom. cap.\n",sub("-"," - ",sub("_"," ",name))), bty="n")
+legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","no geom. cap.\n",title), bg="gray90"#bty="n"
+)
 graphics.off()

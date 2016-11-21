@@ -59,7 +59,7 @@ par(mar=c(5,6,1,1))
 plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4, log="y")
 graphics.off()
 
-g$capacitance <- g$capacitance - min(g$capacitance)
+g$capacitance <- g$capacitance - mean(sort(g$capacitance)[1:3])
 
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 integral=Vectorize(function(X)integrate(z,0,X)$value)

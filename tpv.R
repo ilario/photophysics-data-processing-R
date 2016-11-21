@@ -21,8 +21,8 @@ powerlaw=0
 robust=0
 logy=0
 logx=1
-residuals=1
-thresholdBiexp=70
+residuals=0
+thresholdBiexp=60
 thresholdRobustBiexp=100
 
 files <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
@@ -83,7 +83,7 @@ trashfornullmessages <- lapply(files, function(x) {
 		for(rand in (step*seq(1, 10, by=step))){
 		while(mean(temp[1:10,2]) < mean(temp[10:20,2])) {print("Biexp/Fit: Removing a point for clearing the curve - rough"); temp <- temp[-1,]}
 		while(temp[1,2] < mean(temp[2:4,2]) | temp[1,2] < mean(temp[10:15,2])) {print("Biexp/Fit: Removing a point for clearing the curve - fine"); temp <- temp[-1,]}
-		while(temp[1,2] < mean(temp[5:10,2]) + 0.01*deltavoltage) {print("Biexp/Fit: Removing a point for clearing the curve - flat part"); temp <- temp[-1,]}
+		while(temp[1,2] < mean(temp[5:10,2]) + 0.003*deltavoltage) {print("Biexp/Fit: Removing a point for clearing the curve - flat part"); temp <- temp[-1,]}
 tryCatch({
 		if(exists("CFromPreviousDecay") && rand == step){
 		print("Biexp/Fit: Trying with previous parameters")
