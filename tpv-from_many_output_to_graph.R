@@ -58,7 +58,8 @@ points(output$Voc, output$T1, lwd=1, pch=21+i, bg=colors[i+1], cex=2);
 points(output$Voc, output$T2, lwd=1, pch=21+i, col=colors[i+1], cex=2);
 i <<- i+1
 })
-legend(x="bottomleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=paste("TPV biexp\n",title), bg="gray90",#bty="n"
+legend(x="bottomleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=#paste("TPV biexp\n",
+       title, bg="gray90",#bty="n"
 col=colors)
 graphics.off()
 
