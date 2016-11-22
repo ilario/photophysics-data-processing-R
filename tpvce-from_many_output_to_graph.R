@@ -42,7 +42,7 @@ dirs <- sub("./","",dirs)
 # a$d <- d
 #       	exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
 # expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
-# png(paste(x,"-CEs.png",sep=""), width=640, height=640)
+# jpeg(quality=95, paste(x,"-CEs.jpg",sep=""), width=640, height=480)
 # plot(NULL,xlim=c(0,1),ylim=c(0,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(x,"CE fitted"));
 # points(d, a$ChargeDensityCE, lwd=2, pch=i, col=colors[i+1])
 # lines(d,predict(exp))
@@ -53,7 +53,7 @@ dirs <- sub("./","",dirs)
 #})
 
 i <- 0
-png(paste(filename,"-TPVCEs.png",sep=""), width=640, height=640)
+jpeg(quality=95, paste(filename,"-TPVCEs.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,5,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Extracted Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n")#, main=paste(name,"TPV decay vs Charge from CE");
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -102,7 +102,7 @@ lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })
-legend(x="topright",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs CE\n",
+legend(x="topright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs CE\n",
 title,bg="gray90"#, bty="n")
 	)
 graphics.off()

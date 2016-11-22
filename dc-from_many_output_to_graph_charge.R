@@ -50,7 +50,7 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
  f})
 names(data) <- dirs
 
-png(paste(filename,"-DCs-charge-linlog.png",sep=""), width=640, height=640)
+jpeg(quality=95, paste(filename,"-DCs-charge-linlog.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
 #magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
@@ -74,7 +74,7 @@ title,bg="gray90"#), bty="n"
 graphics.off()
 
 i<-0
-png(paste(filename,"-DCs-charge.png",sep=""), width=640, height=640)
+jpeg(quality=95, paste(filename,"-DCs-charge.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
 eaxis(side=2, cex.axis=1.2)
@@ -93,13 +93,13 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","with geom. cap.\n",
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","with geom. cap.\n",
 title,bg="gray90"#), bty="n"
 )
 graphics.off()
 
 i<-0
-png(paste(filename,"-DCs-nogeom-charge-linlog.png",sep=""), width=640, height=640)
+jpeg(quality=95, paste(filename,"-DCs-nogeom-charge-linlog.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
 #magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
@@ -118,12 +118,13 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=paste("DC charge\n","no geom. cap.\n",title),bg="gray90"#, bty="n"
+legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
+       title,bg="gray90"#, bty="n"
 )
 graphics.off()
 
 i<-0
-png(paste(filename,"-DCs-nogeom-charge.png",sep=""), width=640, height=640)
+jpeg(quality=95, paste(filename,"-DCs-nogeom-charge.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
 eaxis(side=2, cex.axis=1.2)
@@ -143,7 +144,7 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
 title,bg="gray90"#, bty="n"
 )
 graphics.off()

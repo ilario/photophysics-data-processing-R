@@ -34,7 +34,7 @@ dirs <- sub("./","",dirs)
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
 
-png(paste(filename,"-DCs-capacitance.png",sep=""), width=640, height=640)
+jpeg(quality=95, paste(filename,"-DCs-capacitance.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab="",# log="y", 
 yaxt="n",xaxt="n")#main=paste(name,"DCs capacitance"), )
@@ -58,12 +58,12 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=title, bg="gray90"# bty="n"
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=title, bg="gray90"# bty="n"
 )
 graphics.off()
 
 i <- 0
-png(paste(filename,"-DCs-nogeom-capacitance.png",sep=""), width=640, height=640)
+jpeg(quality=95, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
 yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )
@@ -86,6 +86,7 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.1,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=paste("DC capacitance\n","no geom. cap.\n",title), bg="gray90"#bty="n"
+legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=#paste("DC capacitance\n","no geom. cap.\n",
+       title, bg="gray90"#bty="n"
 )
 graphics.off()
