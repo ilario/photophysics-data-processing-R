@@ -42,8 +42,8 @@ revJ=mydata[[rev]]$Current_mA/0.09
 lines(revV, revJ, lwd=3, col=colors[i+1])
 #fwdV=fwdV[c(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)]
 #fwdJ=fwdJ[c(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)]
-revV=revV[c(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)]
-revJ=revJ[c(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)]
+revJ=revJ[revV*10 == floor(revV*10)]
+revV=revV[revV*10 == floor(revV*10)]
 ##points(fwdV, fwdJ, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 points(revV, revJ, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
