@@ -30,6 +30,7 @@ xlim=limvoltage
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
+legend=sub("-ig..-...-.","",sub("^0","",dirs))
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
 
@@ -68,7 +69,7 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n",
+legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n",
 title,bg="gray90"#), bty="n"
 )
 graphics.off()
@@ -93,7 +94,7 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","with geom. cap.\n",
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","with geom. cap.\n",
 title,bg="gray90"#), bty="n"
 )
 graphics.off()
@@ -118,7 +119,7 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
+legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
        title,bg="gray90"#, bty="n"
 )
 graphics.off()
@@ -144,7 +145,7 @@ www <- unlist(lapply(x, ww))
 points(x, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
 i <<- i+1
 })
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
 title,bg="gray90"#, bty="n"
 )
 graphics.off()

@@ -30,6 +30,7 @@ xlim=limvoltage
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
+legend=sub("-ig..-...-.","",sub("^0","",dirs))
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 data <- lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
@@ -58,7 +59,7 @@ lapply(dirs, function(x) {print(x);
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
-legend(x="bottomright",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)), pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90"#, bty="n"
+legend(x="bottomright",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90"#, bty="n"
 )
 graphics.off()
 
@@ -78,7 +79,7 @@ lapply(dirs, function(x) {print(x);
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)), pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90"#bty="n"
+legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90"#bty="n"
 )
 graphics.off()
 

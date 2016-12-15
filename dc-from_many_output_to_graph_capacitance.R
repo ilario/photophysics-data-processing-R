@@ -29,6 +29,7 @@ xlim=limvoltage
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
+legend=sub("-ig..-...-.","",sub("^0","",dirs))
 #files.tpc <- list.files(path=".", pattern="*-outputDeltaV.txt$")
 #files.tpv <- list.files(path=".", pattern="*-outputChargeDensityTPC.txt$")
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
@@ -58,7 +59,7 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=title, bg="gray90"# bty="n"
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=title, bg="gray90"# bty="n"
 )
 graphics.off()
 
@@ -86,7 +87,7 @@ points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,sub("-ig..-...-.","",sub("^0","",dirs)),pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=#paste("DC capacitance\n","no geom. cap.\n",
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=#paste("DC capacitance\n","no geom. cap.\n",
        title, bg="gray90"#bty="n"
 )
 graphics.off()
