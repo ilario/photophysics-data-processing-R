@@ -26,6 +26,9 @@ library(Hmisc)
 ylim=limdccapacitance
 xlim=limvoltage
 
+output=list()
+output.nogeom=list()
+
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
@@ -35,7 +38,7 @@ legend=sub("-ig..-...-.","",sub("^0","",dirs))
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
 
-jpeg(quality=95, paste(filename,"-DCs-capacitance.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-capacitance.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab="",# log="y", 
 yaxt="n",xaxt="n")#main=paste(name,"DCs capacitance"), )
@@ -53,7 +56,9 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 }else{
 	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
 }
+output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
+output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(capacitance,5)
 
 points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
@@ -63,8 +68,13 @@ legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=
 )
 graphics.off()
 
+maxlength = max(sapply(output,length))
+output = lapply(output, function(x){length(x)=maxlength; print(x)})
+output = as.data.frame(output,check.names=FALSE)
+write.table(output, file=paste(filename,"-DCs-capacitance.csv",sep=""), row.names=FALSE, na="", sep=",")
+
 i <- 0
-jpeg(quality=95, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
 yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )
@@ -81,8 +91,10 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 }else{
 	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
 }
+output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
 capacitance <- capacitance - min(capacitance)#mean(sort(capacitance)[1:3])
+output.nogeom[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(capacitance,5)
 points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
  i <<- i+1
 })
@@ -91,3 +103,7 @@ legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=
        title, bg="gray90"#bty="n"
 )
 graphics.off()
+
+output.nogeom = lapply(output.nogeom, function(x){length(x)=maxlength; print(x)})
+output.nogeom = as.data.frame(output.nogeom,check.names=FALSE)
+write.table(output.nogeom, file=paste(filename,"-DCs-nogeom-capacitance.csv",sep=""), row.names=FALSE, na="", sep=",")

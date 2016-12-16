@@ -27,6 +27,8 @@ library(Hmisc)
 ylim=limcecharge
 xlim=limvoltage
 
+output=list()
+
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
@@ -38,14 +40,21 @@ data <- lapply(dirs, function(x) {print(x);
  c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
  d<-as.numeric(gsub("mV", "", c))
  a$d <- d
+ output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- d
  a <- a[with(a, order(a$d)),]
  exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
  g <- predict(exp,a$d)
  a$g <- g
+ output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(g,5)
  a})
 names(data) <- dirs
 
-jpeg(quality=95, paste(filename,"-CEs-linlog.jpg",sep=""), width=640, height=480)
+maxlength = max(sapply(output,length))
+output = lapply(output, function(x){length(x)=maxlength; print(x)})
+output = as.data.frame(output,check.names=FALSE)
+write.table(output, file=paste(filename,"-CEs.csv",sep=""), row.names=FALSE, na="", sep=",")
+
+jpeg(quality=98, paste(filename,"-CEs-linlog.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,5,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"),  cex.lab=1.5, cex.axis=1.2, log="y", yaxt="n");#main=paste(name,"CEs"),
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -64,7 +73,7 @@ legend(x="bottomright",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colo
 graphics.off()
 
 i<-0
-jpeg(quality=95, paste(filename,"-CEs.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-CEs.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="Voltage (V)", ylab="", cex.lab=1.5, cex.axis=1.2, yaxt="n");#main=paste(name,"CEs"),
 eaxis(side=2, cex.axis=1.2)

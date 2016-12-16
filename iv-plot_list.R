@@ -25,7 +25,7 @@ legendlist = c("", "", "")
 colors = c("red","green", "blue")
 
 i = 0
-jpeg(quality=95, paste(filename,"-IVs.jpg",sep=""), width=640, height=480);
+jpeg(quality=98, paste(filename,"-IVs.jpg",sep=""), width=640, height=480);
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=c(-0.1,1),ylim=c(-16,5),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Current Density (mA/cm"^"2"*")"), cex.lab=1.5,cex.axis=1.2, yaxt="n", xaxt="n")#, main=name);
 eaxis(side=2, cex.axis=1.2)
