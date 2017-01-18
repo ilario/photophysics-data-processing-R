@@ -15,6 +15,7 @@
 
 tpcVsTpvVsCe <- function(cedir="ce", tpvdir="tpv", tpcdir="tpc")
 {
+print("TPV vs CE vs TPC dark vs TPC sun: PLOTTING")
 ce.files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
 tpv.files  <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
 tpc.sun.files <- list.files(path=tpcdir, pattern="^TPC.*sun.*\\.txt.table$");
@@ -25,10 +26,10 @@ tpv.file <- tail(tpv.files, n=1)
 tpc.sun.file <- tail(tpc.sun.files, n=1)
 tpc.dark.file <- tail(tpc.dark.files, n=1)
 
-print(paste("CE file:", file.path(cedir, ce.file)))
-print(paste("TPV file:", file.path(tpvdir, tpv.file)))
-print(paste("TPC sun file:", file.path(tpcdir, tpc.sun.file)))
-print(paste("TPC dark file:", file.path(tpcdir, tpc.dark.file)))
+print(paste("CE file:", ce.file))
+print(paste("TPV file:", tpv.file))
+print(paste("TPC sun file:", tpc.sun.file))
+print(paste("TPC dark file:", tpc.dark.file))
 
 ce <- read.table(file.path(cedir, ce.file),header=F)
 tpv <- read.table(file.path(tpvdir, tpv.file),header=F)

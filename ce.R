@@ -1,6 +1,7 @@
 #library(robustbase)
 ce <- function(cedir="ce")
 {
+print("CE: INTEGRATING")
 files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
 mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);

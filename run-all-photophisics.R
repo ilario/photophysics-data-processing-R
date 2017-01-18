@@ -1,6 +1,23 @@
-cedir="ce"
-tpvdir="tpv"
-tpcdir="tpc"
+print("Select CHARGE EXTRACTION Directory")
+cedir=choose.dir("C:\\TPV_Controls_ORGANICS","== Select CHARGE EXTRACTION Dir ==\n")
+print("Select TRANSIENT PHOTO VOLTAGE Directory")
+tpvdir=choose.dir(cedir,"== Select T.P.Voltage Dir ==\n")
+print("Select TRANSIENT PHOTO CURRENT Directory")
+tpcdir=choose.dir(cedir,"== Select T.P.Current Dir ==\n")
+setwd(dirname(cedir))
+
+scriptsdir = "C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+source(file.path(scriptsdir,"from_ce_to_table.R"))
+source(file.path(scriptsdir,"ce.R"))
+source(file.path(scriptsdir,"ce-from_output_to_graph.R"))
+source(file.path(scriptsdir,"from_tpv_tpc_to_table.R"))
+source(file.path(scriptsdir,"tpv.R"))
+source(file.path(scriptsdir,"tpv-from_output_to_graph.R"))
+source(file.path(scriptsdir,"tpvce-from_output_to_graph.R"))
+source(file.path(scriptsdir,"tpc.R"))
+source(file.path(scriptsdir,"dc-from_output_to_graph.R"))
+source(file.path(scriptsdir,"cedc.R"))
+source(file.path(scriptsdir,"tpc-vs-tpv-vs-ce.R"))
 
 fromCeToTable(cedir=cedir)
 ce(cedir=cedir)

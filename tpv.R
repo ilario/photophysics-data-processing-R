@@ -15,6 +15,7 @@
 
 tpv <- function(tpvdir="tpv")
 {
+print("TPV: FITTING")
 library(robustbase)
 
 powerlaw=0
@@ -22,7 +23,7 @@ robust=0
 logy=0
 logx=1
 residuals=0
-thresholdBiexp=60
+thresholdBiexp=5
 thresholdRobustBiexp=100
 
 files <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
@@ -43,11 +44,12 @@ write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=f
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
-#	if(!file.exists(paste(x, "-biexp-log.png", sep="")) | !file.exists(paste(x, "-monoexp-log.png", sep=""))){
+#	if(!file.exists(file.path(tpvdir,paste(x, "-biexp.png", sep=""))) | !file.exists(file.path(tpvdir,paste(x, "-monoexp.png", sep="")))){
 		#names(mydata[[x]]) <- c("time","voltage")
 	
 		#workaround
-		header = as.numeric(system(paste("head -6 '", file.path(tpvdir,paste(x,".txt",sep="")), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
+		header =  read.table(file.path(tpvdir,paste(x,".txt",sep="")), skip=3, header=FALSE, nrows=3)$V2
+#		header = as.numeric(system(paste("head -6 '", file.path(tpvdir,paste(x,".txt",sep="")), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
 
 		indexpeaktime <- which.max(mydata[[x]]$voltage);
 		peaktime <- mydata[[x]]$time[indexpeaktime];
@@ -170,8 +172,8 @@ if(residuals){
 		if(biexpsuccess) {break}
 		else {
 		removedPoints=removedPoints+1
-		print(paste("Biexp/Fit: Removing", removedPoints, "points for helping the fitting"));
-		temp <- temp[-removedPoints,]
+		temp <- tail(temp,-removedPoints*5)
+		print(paste("Biexp/Fit: Removed", removedPoints*5, "points, fitting", nrow(temp), "datapoints"));
 		step <- min((step+0.5),5)
 		}
 		}
@@ -523,6 +525,6 @@ if(residuals){
 
 
 
-#		}
+#		} #if already exists
 	}})
 }

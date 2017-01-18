@@ -15,6 +15,7 @@
 
 ceDc <- function(cedir="ce", tpvdir="tpv", tpcdir="tpc")
 {
+print("CE vs DC: PLOTTING")
 cea <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
 ceb<-strsplit(cea$file, "_")
 cec<-unlist(ceb)[length(ceb[[1]])*(1:length(cea$file))]

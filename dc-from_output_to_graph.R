@@ -15,6 +15,7 @@
 
 dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
 {
+print("DC: PLOTTING")
 
 write.table(t(c("Voc","capacitance")), file="outputDCcapacitance.txt", append=FALSE, col.names=F, row.names=F);
 write.table(t(c("Voc","chargeDC")), file="outputDCcharge.txt", append=FALSE, col.names=F, row.names=F);

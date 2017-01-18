@@ -15,6 +15,7 @@
 
 tpvCeFromOutputToGraph <- function(cedir="ce", tpvdir="tpv", printcefit=FALSE)
 {
+print("TPV-CE: PLOTTING")
 #name=""
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 name<- directory

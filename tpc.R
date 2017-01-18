@@ -17,6 +17,7 @@
 
 tpc <- function(tpcdir="tpc")
 {
+print("TPC: INTEGRATING")
 files <- list.files(path=tpcdir, pattern="^TPC.*\\.txt.table$");
 mydata <- lapply(file.path(tpcdir,files), read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);

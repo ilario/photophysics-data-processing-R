@@ -15,6 +15,7 @@
 
 tpvFromOutputToGraph <- function(tpvdir="tpv")
 {
+print("TPV: PLOTTING")
 #library(Hmisc)
 directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
 name<- directory[1]

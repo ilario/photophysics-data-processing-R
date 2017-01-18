@@ -15,6 +15,7 @@
 
 ceFromOutputToGraph <- function(cedir="ce")
 {
+print("CE: PLOTTING")
 library(robustbase)
 a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
 
