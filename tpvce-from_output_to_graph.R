@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-tpvCeFromOutputToGraph <- function(cedir="ce", tpvdir="tpv", printcefit=FALSE)
+tpvCeFromOutputToGraph <- function(cedir="ce", tpvdir="tpv", printcefit=TRUE)
 {
 print("TPV-CE: PLOTTING")
 #name=""
@@ -31,41 +31,41 @@ if(file.exists(file.path(tpvdir, "output-mixedbimono.txt")))
 }
 
  a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
- b<-strsplit(a$file, "_")
- c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
- d<-as.numeric(gsub("mV", "", c))
- lo <- loess(a$ChargeDensityCE~d,span=0.9)
- a$d <- d
+ lo <- loess(a$ChargeDensityCE~Voc,span=0.9)
 
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ C*exp(D*d), start=list(C=2e-8,D=5), data=a)
+	  exp <- nlrob(ChargeDensityCE~ C*exp(D*Voc), start=list(C=2e-8,D=5), data=a)
 	   }, error=function(e) {print("FAILED ZEROTH FIT")});
  
  tryCatch({
- exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-8,D=0.1), data=a)
+ exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=2e-8,D=0.1), data=a)
  }, error=function(e) {print("FAILED FIRST FIT")});
 
 tryCatch({
-	exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-10,D=1), data=a)
+	exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=2e-10,D=1), data=a)
 	 }, error=function(e) {print("FAILED SECOND FIT")});
 
 tryCatch({
-	 exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
+	 exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=2e-9,D=9), data=a)
          }, error=function(e) {print("FAILED THIRD FIT")});
 
 tryCatch({
-	 exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
+	 exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
          }, error=function(e) {print("FAILED FOURTH FIT")});
 
- expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
+tryCatch({
+	 exp <- nlrob(ChargeDensityCE~ A+B*Voc+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
+         }, error=function(e) {print("FAILED FIFTH FIT")});
+
+ expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
 
 if(printcefit)
 {
  png(paste(name,"-CE-fit.png",sep=""), width=800, height=640)
- plot(d, a$ChargeDensityCE, cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), lwd=2)
- lines(d,predict(exp))
- lines(d,predict(lo),col="green")
- lines(d[round(length(a$file)/2):length(a$file)],predict(expend),col="red")
+ plot(a$Voc, a$ChargeDensityCE, cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), lwd=2)
+ lines(a$Voc,predict(exp))
+ lines(a$Voc,predict(lo),col="green")
+ lines(a$Voc[round(length(a$Voc)/2):length(a$Voc)],predict(expend),col="red")
  graphics.off()
 }
 
@@ -73,9 +73,9 @@ fulloutput <- read.table(file.path(tpvdir, "output-monoexp.txt"), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 tpv <- read.table(file.path(tpvdir, "output-monoexp.txt"), header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
-new <- data.frame(d = tpv$Voc)
+new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
-new2 <- data.frame(d = tpv$Voc[is.na(charge)])
+new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 
 outputTPVCEmonoexp <- data.frame(charge, tpv$T)
@@ -91,9 +91,9 @@ fulloutput <- read.table(file.path(tpvdir, "output-biexp.txt"), header=TRUE)#, f
 n<-tail(grep("file",fulloutput[,1]),n=1)
 #output <- fulloutput[(ifelse(length(n),n,0)+1):nrow(fulloutput),]
 tpv <- read.table(file.path(tpvdir, "output-biexp.txt"), header=TRUE, skip=ifelse(length(n),n,0))#, fill=TRUE);
-new <- data.frame(d = tpv$Voc)
+new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
-new2 <- data.frame(d = tpv$Voc[is.na(charge)])
+new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 
 outputTPVCEbiexp <- data.frame(charge, tpv$T1, tpv$T2)
@@ -118,9 +118,9 @@ fulloutput <- read.table(file.path(tpvdir, "output-mixedbimono.txt"), header=TRU
 n<-tail(grep("file",fulloutput[,1]),n=1)
 #output <- fulloutput[(ifelse(length(n),n,0)+1):nrow(fulloutput),]
 tpv <- read.table(file.path(tpvdir, "output-mixedbimono.txt"), header=TRUE, skip=ifelse(length(n),n,0), fill=TRUE);
-new <- data.frame(d = tpv$Voc)
+new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
-new2 <- data.frame(d = tpv$Voc[is.na(charge)])
+new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 
 outputTPVCEmixedbimono <- data.frame(charge, tpv$T1, tpv$T2)

@@ -20,8 +20,12 @@ name=""
 title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
-fileslist = c("", "", "")
-legendlist = c("", "", "")
+fileslist=list.files(pattern="*-forward.txt|*-reverse.txt")
+fileslist=sub("-forward.txt|-reverse.txt","",fileslist)
+fileslist=fileslist[!duplicated(fileslist)]
+#fileslist = c("", "", "")
+legendlist=sub("-ig..-.{2,3}-.*","",sub("^0","",fileslist))
+#legendlist = c("", "", "")
 colors = c("red","green", "blue")
 
 i = 0

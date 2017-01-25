@@ -19,7 +19,7 @@ title=gsub("-","\n\n",gsub("_"," ",name))
 filename=gsub(",","",gsub(":","",name))
 
 ylim=limlifetime
-xlim=limcecharge
+xlim=limtpvcecharge
 
 output=list()
 
@@ -65,42 +65,38 @@ minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
- b<-strsplit(a$file, "_")
- c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
- d<-as.numeric(gsub("mV", "", c))
- lo <- loess(a$ChargeDensityCE~d,span=0.9)
- a$d <- d
-#exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
-#expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
- expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=-1e-10,C=1e-10,D=9), data=a[round(length(a$file)/2):length(a$file),])
+ lo <- loess(a$ChargeDensityCE~a$Voc,span=0.9)
+#exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
+#expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=9), data=a[round(length(a$Voc)/2):length(a$Voc),])
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+	  exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
  }, error=function(e) {print("FAILED ZEROTH FIT")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+	  exp <- nlrob(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
  }, error=function(e) {print("FAILED FIRST FIT")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-1), start=list(B=2e-8,C=1e-8,D=0.1), data=a)
+	  exp <- nlrob(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=2e-8,C=1e-8,D=0.1), data=a)
  }, error=function(e) {print("FAILED SECOND FIT")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ B*d+C*(exp(D*d)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
+	  exp <- nlrob(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
  }, error=function(e) {print("FAILED THIRD FIT")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ A+B*d+C*exp(D*d), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+	  exp <- nlrob(ChargeDensityCE~ A+B*Voc+C*exp(D*Voc), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
  }, error=function(e) {print("FAILED FOURTH FIT")});
 
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 tpv <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
-new <- data.frame(d = tpv$Voc)
+new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
-new2 <- data.frame(d = tpv$Voc[is.na(charge)])
+new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 output[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(tpv$T,5)
-lo<-loess(tpv$T~charge,span=0.5)
-lines(charge, predict(lo), lwd=2, col=colors[i+1])
+lo2<-loess(tpv$T~charge,span=0.3)
+lines(charge, predict(lo2), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
  i <<- i+1
 })

@@ -6,7 +6,7 @@ files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
 mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
-write.table(t(c("file","ChargeDensityCE")), file=file.path(cedir,"outputChargeDensityCE.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("Voc","ChargeDensityCE")), file=file.path(cedir,"outputChargeDensityCE.txt"), append=FALSE, col.names=F, row.names=F);
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
@@ -21,7 +21,11 @@ trashfornullmessages <- lapply(files, function(x) {
 	charge=charge-charge[match(0,mydata[[x]]$time)]
 	totalcharge=quantile(charge[charge>0],0.75)
 	totalchargedensity=totalcharge/0.09
-        outputChargeDensityCE <- t(c(x, abs(totalchargedensity)));
+
+	b<-strsplit(x, "_")
+	c<-unlist(b)[length(b[[1]])]
+	d<-as.numeric(gsub("mV", "", c))
+        outputChargeDensityCE <- t(c(d, abs(totalchargedensity)));
 	write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
 	png(file.path(cedir,paste(x, ".png", sep="")), width=1280, heigh=800)

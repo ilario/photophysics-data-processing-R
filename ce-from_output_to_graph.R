@@ -19,17 +19,21 @@ print("CE: PLOTTING")
 library(robustbase)
 a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
 
-b<-strsplit(a$file, "_")
-c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
-d<-as.numeric(gsub("mV", "", c))
+#b<-strsplit(a$file, "_")
+#c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
+#d<-as.numeric(gsub("mV", "", c))
+#a$d <- d
 
-a$d <- d
-exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=1e-10,D=9), data=a)
-f <- data.frame(d = sort(d))
+exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
+f <- data.frame(Voc = sort(a$Voc))
 
 directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
 png(file.path(cedir, paste("charge_extraction-", directory[1], ".png", sep="")), width=800, heigh=800)
-plot(d, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4, log="y")
-lines(f$d,predict(exp,f), lwd=1, col="red")
+plot(a$Voc, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4, log="y")
+lines(f$Voc,predict(exp,f), lwd=1, col="red")
 graphics.off()
 }
+
+write.table(t(c("A","C","D")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
+output <- t(c(coef(exp)["A"], coef(exp)["C"], coef(exp)["D"]))
+write.table(output, file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=TRUE, col.names=F, row.names=F)

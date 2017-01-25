@@ -8,7 +8,7 @@ v2g2=v1all[! v1all %in% v2g1]
 v2all=v1all
 
 file.create("output.txt")
-mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="^ig.*", list.excl="output.txt")
+mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="ig.*.txt$", list.excl="output.txt")
 results <- lapply(names(mydata), function(x){
 z <- factor(strsplit(x,"-")[[1]][2], v1all); 
 levels(z) <- list(`` = v1g1, `` = v1g2, `` = v1g3);
