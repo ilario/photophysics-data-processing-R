@@ -32,8 +32,9 @@ png(file.path(cedir, paste("charge_extraction-", directory[1], ".png", sep="")),
 plot(a$Voc, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4, log="y")
 lines(f$Voc,predict(exp,f), lwd=1, col="red")
 graphics.off()
-}
 
-write.table(t(c("A","C","D")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("A","Ch0","gamma")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
 output <- t(c(coef(exp)["A"], coef(exp)["C"], coef(exp)["D"]))
 write.table(output, file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=TRUE, col.names=F, row.names=F)
+}
+

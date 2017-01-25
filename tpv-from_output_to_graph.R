@@ -65,7 +65,7 @@ lines(tpv$Voc, predict(lo), lwd=1,col="red")
 lines(tpv[round(length(tpv$V)/2):length(tpv$V),]$V,predict(fitEnding),col="green")
 graphics.off()
 
-write.table(t(c("B","C")), file=file.path(tpvdir,"output-monoexp-fit.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("Tau0","beta")), file=file.path(tpvdir,"output-monoexp-fit.txt"), append=FALSE, col.names=F, row.names=F);
 output <- t(c(coef(fitEnding)["B"], coef(fitEnding)["C"]))
 write.table(output, file=file.path(tpvdir,"output-monoexp-fit.txt"), append=TRUE, col.names=F, row.names=F)
 
