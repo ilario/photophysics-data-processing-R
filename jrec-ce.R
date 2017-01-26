@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-jrec <- function(cedir="ce", tpvdir="tpv")
+jrecCe <- function(cedir="ce", tpvdir="tpv")
 {
 print("Jrec: CALCULATING")
 ce <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
@@ -33,5 +33,6 @@ print(paste("Tau 1sun", tau1sun))
 beta <- -tpvfit$beta
 print(paste("beta", beta))
 output <- ce1sun/((1+beta/gamma)*tau1sun)
+print(paste("Jrec-CE", output))
 write.table(output, file=paste("jrec-",directory[1],".txt",sep=""), append=TRUE, col.names=F, row.names=F)
 }
