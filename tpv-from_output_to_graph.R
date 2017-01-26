@@ -53,20 +53,22 @@ print("monoexp")
 
 fulloutput <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=TRUE, skip=ifelse(length(n),n,0)); 
+tpv <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- tpv[with(tpv, order(tpv$Voc)),]
 lo<-loess(tpv$T~tpv$Voc,span=0.5)
-fitLM <- nlsLM(T~B*exp(C*Voc), start=list(B=4,C=-15), data=tpv[round(length(tpv$V)/2):length(tpv$V),])
-fitEnding <- nlrob(T~B*exp(C*Voc), start=list(B=coef(fitLM)["B"],C=coef(fitLM)["C"]), data=tpv[round(length(tpv$V)/2):length(tpv$V),])
+tpvEnding <- tpv[round(length(tpv$V)/2):length(tpv$V),]
+fit <- nlsLM(T~B*exp(C*Voc), start=list(B=4,C=-15), data=tpvEnding)
+fit <- nlrob(T~B*exp(C*Voc), start=list(B=coef(fit)["B"],C=coef(fit)["C"]), data=tpvEnding)
 png(file.path(tpvdir, paste(name, "-tpv-monoexp.png",sep="")), width=400, height=400);
 par(mar=c(5.1,5,4.1,2.1))
 plot(tpv$Voc, tpv$T, col="black", log="y", xlab=bquote("V"["oc"]~"(V)"), ylab="Life-time (s)", cex.axis=1.4, cex.lab=1.4)#, main=paste(name, "TPV monoexp"));
 #errbar(tpv$Voc, tpv$T, tpv$T+tpv$T.error, tpv$T-tpv$T.error,log="y",add=TRUE)
 lines(tpv$Voc, predict(lo), lwd=1,col="red")
-lines(tpv[round(length(tpv$V)/2):length(tpv$V),]$V,predict(fitEnding),col="green")
+lines(tpvEnding$V,predict(fit),col="green",lwd=2)
 graphics.off()
 
 write.table(t(c("Tau0","beta")), file=file.path(tpvdir,"output-monoexp-fit.txt"), append=FALSE, col.names=F, row.names=F);
-output <- t(c(coef(fitEnding)["B"], coef(fitEnding)["C"]))
+output <- t(c(coef(fitEnding)[[1]], coef(fitEnding)[[2]]))
 write.table(output, file=file.path(tpvdir,"output-monoexp-fit.txt"), append=TRUE, col.names=F, row.names=F)
 
 #print("robust monoexp")

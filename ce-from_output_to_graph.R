@@ -34,7 +34,7 @@ lines(f$Voc,predict(exp,f), lwd=1, col="red")
 graphics.off()
 
 write.table(t(c("A","Ch0","gamma")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
-output <- t(c(coef(exp)["A"], coef(exp)["C"], coef(exp)["D"]))
+output <- t(c(coef(exp)[[1]], coef(exp)[[2]], coef(exp)[[3]]))
 write.table(output, file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=TRUE, col.names=F, row.names=F)
 }
 
