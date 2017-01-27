@@ -40,7 +40,7 @@ ChargeDensityCE <- ce$ChargeDensityCE*1e9
 png(paste("DC-CE-", directory, ".png", sep=""), heigh=600, width=600)
 par(mar=c(5.1,5,4.1,2.1))
 plot(Vectorize(function(X)integrate(z,0,X)$value*1e9),xlim=c(min(ce$Voc,range(f$Voc)[1]),max(ce$Voc,range(f$Voc)[2])), ylim=c(min(ChargeDensityCE),max(ChargeDensityCE, integrate(z,0,range(g$Voc)[2])$value*1e9))
-     , ylab=bquote("Charge Density (nC/cm"^"2"*")"), xlab="Voltage (V)", main=paste(directory,"DC and CE"), cex.main=1.5, cex.lab=1.5, cex.axis=1.5, log="y")
+     , ylab=bquote("Charge Density (nC/cm"^"2"*")"), xlab="Voltage (V)", main=paste(directory,"DC and CE"), cex.main=1.5, cex.lab=1.5, cex.axis=1.5)#, log="y")
 points(ce$Voc, ChargeDensityCE)
 legend(x="topleft",inset=0.1,c("Differential Charging", "Charge Extraction"), lty=c(1,NA), pch=c(NA,1), lwd=2, cex=1.5)
 graphics.off()
