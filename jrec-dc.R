@@ -16,8 +16,8 @@
 jrecDc <- function(tpvdir="tpv")
 {
 print("Jrec-DC: CALCULATING")
-dc <- read.table(file.path(basedir(tpvdir), "outputDCcharge.txt"), header=T,stringsAsFactors=F)
-dcfit <- read.table(file.path(basedir(tpvdir),"outputDC-fit.txt"), header=T,stringsAsFactors=F)
+dc <- read.table(file.path(dirname(tpvdir), "outputDCcharge.txt"), header=T,stringsAsFactors=F)
+dcfit <- read.table(file.path(dirname(tpvdir),"outputDC-fit.txt"), header=T,stringsAsFactors=F)
 tpv <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=T,stringsAsFactors=F)
 tpvfit <- read.table(file.path(tpvdir,"output-monoexp-fit.txt"), header=T,stringsAsFactors=F)
 
