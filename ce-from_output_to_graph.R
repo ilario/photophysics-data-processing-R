@@ -17,6 +17,7 @@ ceFromOutputToGraph <- function(cedir="ce")
 {
 print("CE: PLOTTING")
 library(robustbase)
+require(minpack.lm)
 a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
 
 #b<-strsplit(a$file, "_")
@@ -24,16 +25,20 @@ a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsA
 #d<-as.numeric(gsub("mV", "", c))
 #a$d <- d
 
-exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
+exp <- nlsLM(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=max(a$ChargeDensityCE)/max(a$Voc),C=1e-10,D=9), data=a)
+tryCatch({
+exp <- nlrob(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=coef(exp)[[1]],C=coef(exp)[[2]],D=coef(exp)[[3]]), data=a)
+}, error=function(e) print("Failed robust fit"))
+
 f <- data.frame(Voc = sort(a$Voc))
 
 directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
 png(file.path(cedir, paste("charge_extraction-", directory[1], ".png", sep="")), width=800, heigh=800)
-plot(a$Voc, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4, log="y")
-lines(f$Voc,predict(exp,f), lwd=1, col="red")
+plot(a$Voc, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4)#, log="y")
+lines(f$Voc,predict(exp,f), lwd=2, col="red")
 graphics.off()
 
-write.table(t(c("A","Ch0","gamma")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("B","Ch0","gamma")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
 output <- t(c(coef(exp)[[1]], coef(exp)[[2]], coef(exp)[[3]]))
 write.table(output, file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=TRUE, col.names=F, row.names=F)
 }
