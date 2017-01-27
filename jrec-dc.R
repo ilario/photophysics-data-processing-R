@@ -13,26 +13,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-jrecCe <- function(cedir="ce", tpvdir="tpv")
+jrecDc <- function(tpvdir="tpv")
 {
-print("Jrec-CE: CALCULATING")
-ce <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
-cefit <- read.table(file.path(cedir,"outputChargeDensityCE-fit.txt"), header=T,stringsAsFactors=F)
+print("Jrec-DC: CALCULATING")
+dc <- read.table(file.path(basedir(tpvdir), "outputDCcharge.txt"), header=T,stringsAsFactors=F)
+dcfit <- read.table(file.path(basedir(tpvdir),"outputDC-fit.txt"), header=T,stringsAsFactors=F)
 tpv <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=T,stringsAsFactors=F)
 tpvfit <- read.table(file.path(tpvdir,"output-monoexp-fit.txt"), header=T,stringsAsFactors=F)
 
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
-write.table(t(c("Jrec")), file=paste("jrec-ce-",directory[1],".txt",sep=""), append=FALSE, col.names=F, row.names=F);
-ce1sun <- tail(ce$ChargeDensityCE[order(ce$Voc)], n=1)
-print(paste("CE 1sun",ce1sun))
-gamma <- cefit$gamma
+write.table(t(c("Jrec")), file=paste("jrec-dc-",directory[1],".txt",sep=""), append=FALSE, col.names=F, row.names=F);
+dc1sun <- tail(dc$ChargeDensityDC[order(dc$Voc)], n=1)
+print(paste("DC 1sun",dc1sun))
+gamma <- dcfit$gamma
 print(paste("gamma", gamma))
 tau1sun <- tail(tpv$T[order(tpv$Voc)], n=1)
 print(paste("Tau 1sun", tau1sun))
 beta <- -tpvfit$beta
 print(paste("beta", beta))
-output <- ce1sun/((1+beta/gamma)*tau1sun)
-print(paste("Jrec-CE", output))
-write.table(output, file=paste("jrec-ce-",directory[1],".txt",sep=""), append=TRUE, col.names=F, row.names=F)
+output <- dc1sun/((1+beta/gamma)*tau1sun)
+print(paste("Jrec-DC", output))
+write.table(output, file=paste("jrec-dc-",directory[1],".txt",sep=""), append=TRUE, col.names=F, row.names=F)
 }
