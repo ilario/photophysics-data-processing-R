@@ -16,10 +16,12 @@
 dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
 {
 print("DC: PLOTTING")
+require(minpack.lm)
+require(robustbase)
 
 write.table(t(c("Voc","capacitance")), file="outputDCcapacitance.txt", append=FALSE, col.names=F, row.names=F);
-write.table(t(c("Voc","chargeDC")), file="outputDCcharge.txt", append=FALSE, col.names=F, row.names=F);
-write.table(t(c("Voc","chargeDC")), file="outputDCcharge-nogeom.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge-nogeom.txt", append=FALSE, col.names=F, row.names=F);
 
 a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
 charge <- mean(a$ChargeDensityTPC)
@@ -32,12 +34,23 @@ capacitance <- charge/b$deltaV
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
 outputDCcapacitance <- data.frame(b$Voc, capacitance);
+names(outputDCcapacitance) <- c("Voc","capacitance")
 write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, col.names=F, row.names=F, quote=F);
+
+exp <- nlsLM(capacitance ~ B + C*D*exp(D*Voc), start=list(B=min(outputDCcapacitance$capacitance),C=1e-10,D=9), data=outputDCcapacitance)
+tryCatch({
+	exp <- nlrob(capacitance ~ B + C*D*exp(D*Voc), start=list(B=coef(exp)[[1]],C=coef(exp)[[2]],D=coef(exp)[[3]]), data=outputDCcapacitance)
+}, error=function(e) print("Failed robust fit"))
 
 png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
 plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4, log="y")
+lines(outputDCcapacitance$Voc, predict(exp),lwd=2, col="red")
 graphics.off()
+
+write.table(t(c("B","Ch0","gamma")), file="outputDC-fit.txt", append=FALSE, col.names=F, row.names=F);
+output <- t(c(coef(exp)[[1]], coef(exp)[[2]], coef(exp)[[3]]))
+write.table(output, file="outputDC-fit.txt", append=TRUE, col.names=F, row.names=F)
 
 c<- data.frame(b$Voc,capacitance)
 d <- c[with(c, order(b.Voc)), ]

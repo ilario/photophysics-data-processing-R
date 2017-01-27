@@ -40,9 +40,9 @@ dirs <- sub("./","",dirs)
 legend=sub("-ig..-...-.","",sub("^0","",dirs))
 #lapply(dirs, function(x) {print(x);
 # a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
-#  lo <- loess(a$chargeDC~a$Voc, span=0.9)
-#       	exp <- nlrob(chargeDC~ B*Voc + C*(exp(D*Voc)-1), start=list(B=1e-8,C=2e-9,D=9), data=a)
-# expend <- nlsLM(chargeDC~ C*(exp(D*Voc)-A), start=list(A=1,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
+#  lo <- loess(a$ChargeDensityDC~a$Voc, span=0.9)
+#       	exp <- nlrob(ChargeDensityDC~ B*Voc + C*(exp(D*Voc)-1), start=list(B=1e-8,C=2e-9,D=9), data=a)
+# expend <- nlsLM(ChargeDensityDC~ C*(exp(D*Voc)-A), start=list(A=1,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
 # jpeg(quality=98, paste(x,"-DCfitting.jpg",sep=""), width=640, height=480)
 # plot(NULL,xlim=c(0,1),ylim=c(0,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Charge Density (C/cm2)", main=paste(x,"DC fitted"));
 # points(a, lwd=2, pch=1, col=colors[i+1])
@@ -63,25 +63,25 @@ minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
- lo <- loess(a$chargeDC~a$Voc,span=0.9)
- expend <- nlsLM(chargeDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
+ expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
 tryCatch({
- exp <- nlrob(chargeDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED ZEROTH FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED FIRST FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED SECOND FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
+ exp <- nlrob(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
 }, error=function(e) {print("FAILED THIRD FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-8,C=1e-9,D=1), data=a)
+ exp <- nlrob(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-8,C=1e-9,D=1), data=a)
 }, error=function(e) {print("FAILED THIRD FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ A+B*Voc+C*exp(D*Voc), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(ChargeDensityDC~ A+B*Voc+C*exp(D*Voc), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED FOURTH FIT")});
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
@@ -122,16 +122,16 @@ minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge-nogeom.txt",sep=""),header=T,stringsAsFactors=F)
- lo <- loess(a$chargeDC~a$Voc,span=0.9)
- expend <- nlsLM(chargeDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
+ expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
 tryCatch({
- exp <- nlrob(chargeDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED ZEROTH nogeom FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED FIRST nogeom FIT")});
 tryCatch({
- exp <- nlrob(chargeDC~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=8), data=a)
+ exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=8), data=a)
 }, error=function(e) {print("FAILED SECOND nogeom FIT")});
 
 filex <- file.path(x, "tpv", "output-monoexp.txt")
