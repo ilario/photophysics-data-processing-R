@@ -27,10 +27,11 @@ fileslist=fileslist[!duplicated(fileslist)]
 legendlist=sub("-ig..-.{2,3}-.*","",sub("^0","",fileslist))
 legendlist=c(legendlist,"fwd","rev")
 #legendlist = c("", "", "", "fwd", "rev")
-colors = c("red","green", "blue", "black", "black")
+#colors = c("red","green", "blue", "black", "black")
+colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(fileslist),3))
 
 i = 0
-jpeg(quality=98, paste(filename,"-IVs.jpg",sep=""), width=640, height=480);
+jpeg(quality=98, paste(filename,"-IVs.jpg",sep=""), width=800, height=800);
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=c(-0.1,1.2),ylim=c(-16,9),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Current Density (mA/cm"^"2"*")"), cex.lab=1.5,cex.axis=1.2, yaxt="n", xaxt="n")#, main=name);
 eaxis(side=2, cex.axis=1.2)
@@ -56,10 +57,10 @@ fwdJ=fwdJ[fwdV*10 == floor(fwdV*10)]
 fwdV=fwdV[fwdV*10 == floor(fwdV*10)]
 revJ=revJ[revV*10 == floor(revV*10)]
 revV=revV[revV*10 == floor(revV*10)]
-points(fwdV, fwdJ, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
-points(revV, revJ, bg=colors[i+1], cex=2, pch=21+i)
+points(fwdV, fwdJ, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(revV, revJ, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
-legend(x="topleft",inset=c(0.15,0.05),legendlist, lty=c(1,1,1,1,2), pch=c(21,22,23,NA,NA), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=title,bg="gray90")
+legend(x="topleft",inset=c(0.15,0.05),legendlist, lty=c(rep(1,length(fileslist)),1,2), pch=c(rep(seq(21,25),3)[seq(1,length(fileslist))],NA,NA), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=title,bg="gray90")
 graphics.off()
 

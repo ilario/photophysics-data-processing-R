@@ -31,7 +31,7 @@ if(file.exists(file.path(tpvdir, "output-mixedbimono.txt")))
 }
 
  a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
- lo <- loess(a$ChargeDensityCE~Voc,span=0.9)
+ lo <- loess(a$ChargeDensityCE~a$Voc,span=0.9)
 
  tryCatch({
 	  exp <- nlrob(ChargeDensityCE~ C*exp(D*Voc), start=list(C=2e-8,D=5), data=a)

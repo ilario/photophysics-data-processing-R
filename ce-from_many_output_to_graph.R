@@ -57,7 +57,7 @@ eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3
 minor.tick(nx=10)
 lapply(dirs, function(x) {print(x);
  lines(data[[x]]$Voc, data[[x]]$g, col=colors[i+1],lwd=2)
- points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+i, cex=2)
+ points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+(i%%5), cex=2)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
 # mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
@@ -77,7 +77,7 @@ minor.tick(nx=10, ny=10)
 title(ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
 lapply(dirs, function(x) {print(x);
  lines(data[[x]]$Voc, data[[x]]$g, col=colors[i+1],lwd=2)
- points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+i, cex=2)
+ points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+(i%%5), cex=2)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
 # mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 

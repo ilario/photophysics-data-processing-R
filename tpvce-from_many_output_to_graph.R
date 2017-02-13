@@ -84,6 +84,9 @@ lapply(dirs, function(x) {print(x);
  tryCatch({
 	  exp <- nlrob(ChargeDensityCE~ A+B*Voc+C*exp(D*Voc), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
  }, error=function(e) {print("FAILED FOURTH FIT")});
+ tryCatch({
+	  exp <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
+ }, error=function(e) {print("FAILED FIFTH FIT")});
 
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
@@ -97,7 +100,7 @@ output[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")
 output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(tpv$T,5)
 lo2<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo2), lwd=2, col=colors[i+1])
-points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
+points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
  i <<- i+1
 })
 legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs CE\n",

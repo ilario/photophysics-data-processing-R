@@ -1,12 +1,15 @@
+library(tcltk)
+ 
+datadir="~/exp"#"C:\\TPV_Controls_ORGANICS"
 print("Select CHARGE EXTRACTION Directory")
-cedir=choose.dir("C:\\TPV_Controls_ORGANICS","== Select CHARGE EXTRACTION Dir ==\n")
+cedir=tk_choose.dir(datadir,"== Select CHARGE EXTRACTION Dir ==\n")
 print("Select TRANSIENT PHOTO VOLTAGE Directory")
-tpvdir=choose.dir(cedir,"== Select T.P.Voltage Dir ==\n")
+tpvdir=tk_choose.dir(dirname(cedir),"== Select T.P.Voltage Dir ==\n")
 print("Select TRANSIENT PHOTO CURRENT Directory")
-tpcdir=choose.dir(cedir,"== Select T.P.Current Dir ==\n")
+tpcdir=tk_choose.dir(dirname(cedir),"== Select T.P.Current Dir ==\n")
 setwd(dirname(cedir))
 
-scriptsdir = "C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+scriptsdir = "~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
 source(file.path(scriptsdir,"from_ce_to_table.R"))
 source(file.path(scriptsdir,"ce.R"))
 source(file.path(scriptsdir,"ce-from_output_to_graph.R"))

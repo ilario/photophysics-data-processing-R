@@ -26,7 +26,8 @@ fileslist=fileslist[!duplicated(fileslist)]
 #fileslist = c("", "", "")
 legendlist=sub("-ig..-.{2,3}-.*","",sub("^0","",fileslist))
 #legendlist = c("", "", "")
-colors = c("red","green", "blue")
+#colors = c("red","green", "blue")
+colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(fileslist),3))
 
 i = 0
 jpeg(quality=98, paste(filename,"-IVs.jpg",sep=""), width=640, height=480);
@@ -48,8 +49,8 @@ lines(revV, revJ, lwd=3, col=colors[i+1])
 #fwdJ=fwdJ[c(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)]
 revJ=revJ[revV*10 == floor(revV*10)]
 revV=revV[revV*10 == floor(revV*10)]
-##points(fwdV, fwdJ, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
-points(revV, revJ, bg=colors[i+1], cex=2, pch=21+i)
+##points(fwdV, fwdJ, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(revV, revJ, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
 legend(x="topleft",inset=c(0.15,0.05),legendlist, lty=c(1,1,1,1), pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=title,bg="gray90")

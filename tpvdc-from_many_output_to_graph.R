@@ -98,7 +98,7 @@ output[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")
 output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(tpv$T,5)
 lo<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo), lwd=2, col=colors[i+1])
-points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
+points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
  i <<- i+1
 })
 legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs DC\n","with geom. cap.\n",
@@ -147,7 +147,7 @@ output.nogeom[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),
 output.nogeom[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(tpv$T,5)
 lo<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo), lwd=2, col=colors[i+1])
-points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+i);
+points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
 i <<- i+1
 })
 legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs DC\n","no geom. cap.\n",

@@ -60,8 +60,8 @@ output.biexp[[paste(sub("-ig..-...-.","",sub("^0","",x)),"T1",sep="")]] <<- sign
 output.biexp[[paste(sub("-ig..-...-.","",sub("^0","",x)),"T2",sep="")]] <<- signif(output$T2,5)
 #errbar(output$Voc, output$T1, output$T1+output$T1.error, output$T1-output$T1.error,log="y",add=TRUE)
 #errbar(output$Voc, output$T2, output$T2+output$T2.error, output$T2-output$T2.error,log="y",add=TRUE)
-points(output$Voc, output$T1, lwd=1, pch=21+i, bg=colors[i+1], cex=2);
-points(output$Voc, output$T2, lwd=1, pch=21+i, col=colors[i+1], cex=2);
+points(output$Voc, output$T1, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
+points(output$Voc, output$T2, lwd=1, pch=21+(i%%5), col=colors[i+1], cex=2);
 i <<- i+1
 })
 legend(x="bottomleft",inset=0.05,legend,pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=#paste("TPV biexp\n",
@@ -107,7 +107,7 @@ output <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, ski
 output.monoexp[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(output$Voc,5)
 output.monoexp[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(output$T,5)
 #errbar(output$Voc, output$T, output$T+output$T.error, output$T-output$T.error,log="y",add=TRUE)
-points(output$Voc, output$T, lwd=1, pch=21+i, bg=colors[i+1], cex=2);
+points(output$Voc, output$T, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
 i <<- i+1
 })
 legend(x="bottomleft",inset=0.05,legend,pt.cex=2, pt.lwd=2,cex=1.5, pch=seq(21,25), pt.bg=colors, col=colors, title=#paste("TPV exp\n",

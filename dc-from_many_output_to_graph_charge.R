@@ -71,7 +71,7 @@ xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[
 output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
 www <- unlist(lapply(xx, ww))
 output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(www,5)
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
 legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n",
@@ -102,7 +102,7 @@ curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1]
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
 www <- unlist(lapply(xx, ww))
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
 legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","with geom. cap.\n",
@@ -129,7 +129,7 @@ xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[
 output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
 www <- unlist(lapply(xx, ww))
 output.nogeom[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(www,5)
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
 legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
@@ -160,7 +160,7 @@ curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1]
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
 www <- unlist(lapply(xx, ww))
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
 legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",

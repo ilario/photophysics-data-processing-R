@@ -60,7 +60,7 @@ output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] 
 capacitance <- charge/b$deltaV
 output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(capacitance,5)
 
-points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
  i <<- i+1
 })
 #abline(h=0)
@@ -95,7 +95,7 @@ output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep
 capacitance <- charge/b$deltaV
 capacitance <- capacitance - min(capacitance)#mean(sort(capacitance)[1:3])
 output.nogeom[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(capacitance,5)
-points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+i)
+points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
  i <<- i+1
 })
 #abline(h=0)
