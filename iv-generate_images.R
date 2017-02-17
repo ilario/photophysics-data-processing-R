@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-lapply(names(mydata), function(x){print(x);cell = substr(x,1,nchar(x)-12);
+trashfornullmessages <- lapply(names(mydata), function(x){print(x);cell = substr(x,1,nchar(x)-12);
       if(!file.exists(paste(cell,".png",sep=""))){
        fwd=gsub("reverse","forward",x);rev=gsub("forward","reverse",x);dark=gsub("-bis|-tris|-quater|-penta|-exa|-epta|-octa|-nona|-deca|-undeca|-dodeca","",gsub("forward","dark-forward",x)); title=paste(cell, "(",results[[x]][5],")"); 
        png(paste(cell,".png",sep=""), width=640, height=640);
