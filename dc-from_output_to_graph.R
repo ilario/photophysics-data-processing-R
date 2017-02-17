@@ -54,8 +54,14 @@ plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab
 lines(outputDCcapacitance$Voc, predict(expfit),lwd=2, col="red")
 graphics.off()
 
-write.table(t(c("B","Ch0","gamma")), file="outputDC-fit.txt", append=FALSE, col.names=F, row.names=F);
-output <- t(c(exp(coef(expfit)[[1]]), exp(coef(expfit)[[2]]), exp(coef(expfit)[[3]])))
+write.table(t(c("B","Ch0","gamma","GeomCh","ChemCh")), file="outputDC-fit.txt", append=FALSE, col.names=F, row.names=F);
+eB=exp(coef(expfit)[[1]])
+eCh0=exp(coef(expfit)[[2]])
+egamma=exp(coef(expfit)[[3]])
+Voc=max(outputDCcapacitance$Voc)
+GeomCh=eB*Voc
+ChemCh=eCh0*(exp(egamma*Voc)-1)
+output <- t(c(eB, eCh0, egamma, GeomCh, ChemCh))
 write.table(output, file="outputDC-fit.txt", append=TRUE, col.names=F, row.names=F)
 
 c<- data.frame(b$Voc,capacitance)

@@ -38,8 +38,14 @@ plot(a$Voc, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)"
 lines(f$Voc,predict(expfit,f), lwd=2, col="red")
 graphics.off()
 
-write.table(t(c("B","Ch0","gamma")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
-output <- t(c(exp(coef(expfit)[[1]]), exp(coef(expfit)[[2]]), exp(coef(expfit)[[3]])))
+write.table(t(c("B","Ch0","gamma","GeomCh","ChemCh")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
+eB=exp(coef(expfit)[[1]])
+eCh0=exp(coef(expfit)[[2]])
+egamma=exp(coef(expfit)[[3]])
+Voc=max(a$Voc)
+GeomCh=eB*Voc
+ChemCh=eCh0*(exp(egamma*Voc)-1)
+output <- t(c(eB, eCh0, egamma, GeomCh, ChemCh))
 write.table(output, file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=TRUE, col.names=F, row.names=F)
 }
 
