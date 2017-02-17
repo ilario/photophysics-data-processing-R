@@ -1,5 +1,5 @@
 library(tcltk)
- 
+
 datadir="~/exp"#"C:\\TPV_Controls_ORGANICS"
 print("Select CHARGE EXTRACTION Directory")
 cedir=tk_choose.dir(datadir,"== Select CHARGE EXTRACTION Dir ==\n")
@@ -38,3 +38,5 @@ ceDc(cedir=cedir, tpvdir=tpvdir, tpcdir=tpcdir)
 tpcVsTpvVsCe(cedir=cedir, tpvdir=tpvdir, tpcdir=tpcdir)
 jrecCe(cedir=cedir, tpvdir=tpvdir)
 jrecDc(tpvdir=tpvdir)
+
+Sys.sleep(1e5)
