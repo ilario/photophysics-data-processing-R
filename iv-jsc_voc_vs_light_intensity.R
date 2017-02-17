@@ -21,35 +21,49 @@ name=directory
 library(robustbase)
 a <- read.table("output.txt",header=F,stringsAsFactors=F)
 #file <- strsplit(a$V1,"/")
-splittedfilename <- strsplit(a$V2, "-")
-suns <- as.numeric(gsub("sun","",unlist(splittedfilename)[grepl("sun",unlist(splittedfilename))]))
 
-if(length(a$V1) != length(suns))
-{ suns[length(suns)+1] <- 1; suns[length(suns)+1] <- 1}
+illumination <- function(names){
+values <- lapply(names, function(name){
+splittedname <- strsplit(name, "-")
+value=100
+if(grepl("dark",name)){value=0}
+if(grepl("sun",name)){value=100*as.numeric(gsub("sun","",unlist(splittedname)[grepl("sun",unlist(splittedname))]))}
+return(value)})
+return(unlist(values))
+}
 
-suns <- suns * 100
+a$suns <- illumination(a$V2)
+a<-a[with(a, order(a$suns)), ]
 
-a$suns <- suns
+#suns <- as.numeric(gsub("sun","",unlist(splittedfilename)[grepl("sun",unlist(splittedfilename))]))
+
+#if(length(a$V1) != length(suns))
+#{ suns[length(suns)+1] <- 1; suns[length(suns)+1] <- 1}
+
+#suns <- suns * 100
+
+#a$suns <- suns
 
 fitJsc<-nlrob(V4 ~ A + B*suns^C, start=list(A=0, B=20, C=1), data=a)
 alfa=signif(fitJsc$coefficients["C"],3)
 
 png(paste(name,"-Jsc_vs_LI.png",sep=""), width=640, height=640)
 par(mar=c(7,7,4.1,2.1))
-plot(suns,a$V4,cex.main=2,ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5, main=paste(name,"Jsc vs LI"))
-lines(suns, predict(fitJsc))
+plot(a$suns,a$V4,cex.main=2,ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5)#, main=paste(name,"Jsc vs LI"))
+lines(a$suns, predict(fitJsc))
 mtext(bquote("Jsc" == .(signif(fitJsc$coefficients["A"],3)) + .(signif(fitJsc$coefficients["B"],3)) * "LI" ^ .(alfa)),side=3,line=-3,cex=2)
 mtext(bquote(alpha == .(alfa)),side=3,line=-5,cex=2)
 graphics.off()
 
-fitVoc<-lmrob(a$V5 ~ log(suns)) #log = ln; log10 = Log
+b=a[a$suns != 0,]
+fitVoc<-lmrob(b$V5 ~ log(b$suns)) #log = ln; log10 = Log
 
 nid <- signif(fitVoc$coefficients[2],3)
 
 png(paste(name,"-Voc_vs_LI.png",sep=""), width=640, height=640)
 par(mar=c(5.5,5,4.1,2.1))
-plot(suns,a$V5,cex.main=2,ylab="Voc (V)",xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5, log="x", main=paste(name,"Voc vs LI"))
-lines(suns, predict(fitVoc))
+plot(b$suns,b$V5,cex.main=2,ylab=bquote("V"["oc"]~"(V)"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5, log="x")#, main=paste(name,"Voc vs LI"))
+lines(b$suns, predict(fitVoc))
 mtext(bquote("Voc" == .(signif(fitVoc$coefficients[1],3)) + .(signif(nid,3)) ~ "ln(LI)"),side=3,line=-3,cex=2)
 mtext(bquote("n"["id"] == .(signif(nid/0.02585,3))),side=3,line=-5,cex=2)
 graphics.off()

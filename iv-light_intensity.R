@@ -16,21 +16,42 @@
 directory=tail(strsplit(getwd(), "/")[[1]], n=1)
 name=directory
 
-files <- list.files(path=".", pattern="\\.txt$");
+files <- list.files(path=".", pattern="^ig.*\\.txt$");
 #files <- grep(name,files,value=T)
 #files <- grep("sun",files,value=T)
-splittedfilename <- strsplit(files, "-")
-suns <- gsub("sun","",unique(unlist(splittedfilename)[grepl("sun",unlist(splittedfilename))]))
+#splittedfilename <- strsplit(files, "-")
+#suns <- gsub("sun","",unique(unlist(splittedfilename)[grepl("sun",unlist(splittedfilename))]))
 
+illumination <- function(names){
+	values <- lapply(names, function(name){
+				 splittedname <- strsplit(name, "-")
+				 value=100
+				 if(grepl("dark",name)){value=0}
+				 if(grepl("sun",name)){value=100*as.numeric(gsub("sun","",unlist(splittedname)[grepl("sun",unlist(splittedname))]))}
+				 return(value)})
+	return(unlist(values))
+}
+
+colorsfwd=colorRampPalette(c("black","blue","green"))(max(length(files[grepl("forward",files)]),3))
+colorsrev=colorRampPalette(c("black","blue","green"))(max(length(files[grepl("reverse",files)]),3))
+
+suns <- illumination(files)
+files <- files[order(suns)]
+uniquesortsuns <- unique(sort(suns))
+
+i<-1
 png(paste(name,"-suns.png",sep=""), width=640, height=640);
-plot(NULL,xlim=c(-0.1,1.2),ylim=c(-2,0.8),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5, main=paste(name, "at various Light Intensities"));
+plot(NULL,xlim=c(-0.2,1.2),ylim=c(-1.4,1),cex.main=1.5,xlab="Voltage (V)",ylab="Current (mA)", cex.lab=1.5)#, main=paste(name, "at various Light Intensities"));
 lapply(files[grepl("forward",files)], function(x){print(x); 
-lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=2)
+lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=1, col=colorsfwd[i])
+i<<-i+1
 })
+i<-1
 lapply(files[grepl("reverse",files)], function(x){print(x); 
-lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=2, lty=2);
+lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=1, lty=2, col=colorsrev[i]);
+i<<-i+1
 })
 abline(h=0);abline(v=0)
-legend(x="topleft",inset=0.05,suns, cex=1.5)
+legend(x="topleft",inset=c(0.2,0.05),legend=uniquesortsuns, col=colorRampPalette(c("black","blue","green"))(length(uniquesortsuns)), cex=1.5, title="Illumination Intensity:", lwd=4, bty="n")
 graphics.off()
 
