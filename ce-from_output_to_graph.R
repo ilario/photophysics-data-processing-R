@@ -25,9 +25,15 @@ a <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsA
 #d<-as.numeric(gsub("mV", "", c))
 #a$d <- d
 
+expfit <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
+expSuccess = FALSE
+tryCatch({
 expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
+expSuccess = TRUE
+}, error=function(e) print("Failed fit"))
 tryCatch({
 expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)[[1]],C=coef(exp)[[2]],D=coef(exp)[[3]]), data=a)
+expSuccess = TRUE
 }, error=function(e) print("Failed robust fit"))
 
 f <- data.frame(Voc = sort(a$Voc))
@@ -35,17 +41,19 @@ f <- data.frame(Voc = sort(a$Voc))
 directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
 png(file.path(cedir, paste("charge_extraction-", directory[1], ".png", sep="")), width=800, heigh=800)
 plot(a$Voc, a$ChargeDensityCE, ylab="Charge Density (C/cm2)", xlab="Voltage (V)",cex.lab=1.4, cex.axis=1.4)#, log="y")
-lines(f$Voc,predict(expfit,f), lwd=2, col="red")
+if(exists("expfit")){lines(f$Voc,predict(expfit,f), lwd=2, col="red")}
 graphics.off()
 
+if(exists("expfit")){
 write.table(t(c("B","Ch0","gamma","GeomCh","ChemCh")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
-eB=exp(coef(expfit)[[1]])
-eCh0=exp(coef(expfit)[[2]])
-egamma=exp(coef(expfit)[[3]])
+eB=if(expSuccess){exp(coef(expfit)[[1]])} else {coef(expfit)[[1]]}
+eCh0=if(expSuccess){exp(coef(expfit)[[2]])} else {0}
+egamma=if(expSuccess){exp(coef(expfit)[[3]])} else {0}
 Voc=max(a$Voc)
 GeomCh=eB*Voc
 ChemCh=eCh0*(exp(egamma*Voc)-1)
 output <- t(c(eB, eCh0, egamma, GeomCh, ChemCh))
 write.table(output, file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=TRUE, col.names=F, row.names=F)
+}
 }
 
