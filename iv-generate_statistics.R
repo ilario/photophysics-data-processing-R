@@ -35,30 +35,30 @@ levels(d$rev) <- list('fwd' = 0, 'rev' = 1)
 
 png(paste(name, "-", variable1, ".png", sep=""));
 #pdf(paste(name, "-", variable1, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
 boxplot(PCE~droplevels(interaction(rev,PCBM)), d#[d$HTM=="",]
-	, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE",main=paste(name, variable1))#,xaxt="n")
+	, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE (%)")#,main=paste(name, variable1))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name, "-", variable1, "-Jsc.png", sep=""));
 #pdf(paste(name, "-", variable1, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(Jsc~droplevels(interaction(rev,PCBM)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="Jsc",main=paste(name, variable1))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(Jsc~droplevels(interaction(rev,PCBM)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"))#,main=paste(name, variable1))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name, "-", variable1, "-Voc.png", sep=""));
 #pdf(paste(name, "-", variable1, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(Voc~droplevels(interaction(rev,PCBM)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="Voc",main=paste(name, variable1))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(Voc~droplevels(interaction(rev,PCBM)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("V"["oc"]~"(V)"))#,main=paste(name, variable1))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name, "-", variable1, "-FF.png", sep=""));
 #pdf(paste(name, "-", variable1, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(FF~droplevels(interaction(rev,PCBM)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF",main=paste(name, variable1))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(FF~droplevels(interaction(rev,PCBM)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF")#,main=paste(name, variable1))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
@@ -67,30 +67,30 @@ graphics.off()
 if(exists("variable2")){
 png(paste(name, "-", variable2, ".png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
 boxplot(PCE~droplevels(interaction(rev,Vacuum)), d#[d$HTM=="",]
-	, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE",main=paste(name, variable2))#,xaxt="n")
+	, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE (%)")#,main=paste(name, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name, "-", variable2, "-Jsc.png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(Jsc~droplevels(interaction(rev,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="Jsc",main=paste(name, variable2))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(Jsc~droplevels(interaction(rev,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"))#,main=paste(name, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name, "-", variable2, "-Voc.png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(Voc~droplevels(interaction(rev,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="Voc",main=paste(name, variable2))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(Voc~droplevels(interaction(rev,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("V"["oc"]~"(V)"))#,main=paste(name, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name, "-", variable2, "-FF.png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(FF~droplevels(interaction(rev,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF",main=paste(name, variable2))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(FF~droplevels(interaction(rev,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF")#,main=paste(name, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
@@ -100,30 +100,30 @@ graphics.off()
 
 png(paste(name, "-", variable1, "-", variable2, ".png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
 boxplot(PCE~droplevels(interaction(rev,PCBM,Vacuum)), d#[d$HTM=="",]
-	, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE",main=paste(name, variable1, variable2))#,xaxt="n")
+	, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE (%)")#,main=paste(name, variable1, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name,  "-", variable1,"-", variable2, "-Jsc.png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(Jsc~droplevels(interaction(rev,PCBM,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="Jsc",main=paste(name, variable1, variable2))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(Jsc~droplevels(interaction(rev,PCBM,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"))#,main=paste(name, variable1, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name,  "-", variable1,"-", variable2, "-Voc.png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(Voc~droplevels(interaction(rev,PCBM,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="Voc",main=paste(name, variable1, variable2))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(Voc~droplevels(interaction(rev,PCBM,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("V"["oc"]~"(V)"))#,main=paste(name, variable1, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 
 png(paste(name,  "-", variable1,"-", variable2, "-FF.png", sep=""));
 #pdf(paste(name, "-", variable2, ".pdf", sep=""), width=10, height=10);
-par(mar=c(13,5,1,1))
-boxplot(FF~droplevels(interaction(rev,PCBM,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF",main=paste(name, variable1, variable2))#,xaxt="n")
+par(mar=c(8,6,1,1), mgp = c(4, 1, 0))
+boxplot(FF~droplevels(interaction(rev,PCBM,Vacuum)), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF")#,main=paste(name, variable1, variable2))#,xaxt="n")
 #axis(side=1,labels=c("",""), at=seq(1,), las=2, cex.axis=2)
 graphics.off()
 }
