@@ -45,58 +45,91 @@ if(exists("var2")){
 d <- data.frame(z, rev = factor(z$reverse, c(0,1)))
 levels(d$rev) <- list('fwd' = 0, 'rev' = 1)
 
-single <- function(x,mar,mgp){
+## Add an alpha value to a colour https://gist.github.com/mages/5339689
+add.alpha <- function(col, alpha=1){
+  if(missing(col))
+    stop("Please provide a vector of colours.")
+  apply(sapply(col, col2rgb)/255, 2,
+                     function(x)
+                       rgb(x[1], x[2], x[3], alpha=alpha))
+}
+
+single <- function(x,mar,mgp.y,mgp.x){
 	png(paste(name, "-", x, ".png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(PCE~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE (%)")
+	par(mar=mar)
+	boxplot(PCE~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(PCE ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab="PCE (%)", mgp=mgp.y, cex.lab=1.5)
+	title(xlab=x, mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
 	png(paste(name, "-", x, "-Jsc.png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(Jsc~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"))
+	par(mar=mar)
+	boxplot(Jsc~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(Jsc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"), mgp=mgp.y, cex.lab=1.5)
+	title(xlab=x, mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
 	png(paste(name, "-", x, "-Voc.png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(Voc~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("V"["oc"]~"(V)"))
+	par(mar=mar)
+	boxplot(Voc~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(Voc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab=bquote("V"["oc"]~"(V)"), mgp=mgp.y, cex.lab=1.5)
+	title(xlab=x, mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
 	png(paste(name, "-", x, "-FF.png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(FF~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF")
+	par(mar=mar)
+	boxplot(FF~droplevels(interaction(rev,get(x))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(FF ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab="FF", mgp=mgp.y, cex.lab=1.5)
+	title(xlab=x, mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 }
 
-single(x=var1, mar=c(8,6,1,1), mgp=c(4,1,0))
-if(exists("var2")){single(x=var2, mar=c(8,6,1,1), mgp=c(4,1,0))
-if(exists("var3")){single(x=var3, mar=c(8,6,1,1), mgp=c(4,1,0))}}
+single(x=var1, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(8,1,0))
+if(exists("var2")){single(x=var2, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(8,1,0))
+if(exists("var3")){single(x=var3, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(8,1,0))}}
 
-double <- function(x,y,mar,mgp){
+double <- function(x,y,mar,mgp.y,mgp.x){
 	png(paste(name, "-", x, "-", y, ".png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(PCE~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="PCE (%)")
+	par(mar=mar)
+	boxplot(PCE~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(PCE ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab="PCE (%)", mgp=mgp.y, cex.lab=1.5)
+	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
 	png(paste(name,  "-", x,"-", y, "-Jsc.png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(Jsc~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"))
+	par(mar=mar)
+	boxplot(Jsc~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(Jsc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"), mgp=mgp.y, cex.lab=1.5)
+	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
 	png(paste(name,  "-", x,"-", y, "-Voc.png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(Voc~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab=bquote("V"["oc"]~"(V)"))
+	par(mar=mar)
+	boxplot(Voc~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(Voc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab=bquote("V"["oc"]~"(V)"), mgp=mgp.y, cex.lab=1.5)
+	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
 	png(paste(name,  "-", x,"-", y, "-FF.png", sep=""));
-	par(mar=mar, mgp = mgp)
-	boxplot(FF~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, cex.lab=1.5, border=colors, las=2, ylab="FF")
+	par(mar=mar)
+	boxplot(FF~droplevels(interaction(rev,get(x),get(y))), d, cex.axis=1.5, border=colors, las=2, outline=FALSE)
+	stripchart(FF ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
+	title(ylab="FF", mgp=mgp.y, cex.lab=1.5)
+	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 	}
 
 if(exists("var2")){
-	double(x=var1, y=var2, mar=c(12,6,1,1), mgp=c(4,1,0))
+	double(x=var1, y=var2, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(10,1,0))
 	if(exists("var3")){
-		double(x=var1, y=var3, mar=c(12,6,1,1), mgp=c(4,1,0))
-		double(x=var2, y=var3, mar=c(12,6,1,1), mgp=c(4,1,0))
+		double(x=var1, y=var3, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(10,1,0))
+		double(x=var2, y=var3, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(10,1,0))
 		}
 	}
