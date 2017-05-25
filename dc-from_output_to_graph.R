@@ -45,7 +45,7 @@ write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, co
 	expfit <- nlsLM(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(min(outputDCcapacitance$capacitance)),C=log(1e-10),D=2), data=outputDCcapacitance)
 #}, error=function(e) print("Failed restricted to positive gamma fit"))
 tryCatch({
-	expfit <- nlrob(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=coef(exp)[[1]],C=coef(exp)[[2]],D=coef(exp)[[3]]), data=outputDCcapacitance)
+	expfit <- nlrob(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=coef(expfit)[[1]],C=coef(expfit)[[2]],D=coef(expfit)[[3]]), data=outputDCcapacitance)
 }, error=function(e) print("Failed restricted to positive gamma robust fit"))
 
 png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
