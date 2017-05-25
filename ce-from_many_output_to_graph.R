@@ -24,8 +24,8 @@ library(robustbase)
 library(sfsmisc)
 library(Hmisc)
 
-ylim=limcecharge
-xlim=limvoltage
+ylim=lim.CE.charge
+xlim=lim.CE.voltage
 
 output=list()
 

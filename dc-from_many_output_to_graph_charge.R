@@ -24,8 +24,10 @@ library(RColorBrewer)
 library(sfsmisc)
 library(Hmisc)
 
-ylim=limdccharge
-xlim=limvoltage
+ylim=lim.DCcharge.charge
+xlim=lim.DCcharge.voltage
+ylimnogeom=lim.DCcharge.nogeom.charge
+xlimnogeom=lim.DCcharge.nogeom.voltage
 
 output=list()
 output.nogeom=list()
@@ -113,7 +115,7 @@ graphics.off()
 i<-0
 jpeg(quality=98, paste(filename,"-DCs-nogeom-charge-linlog.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
+plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
 #magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
 eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 minor.tick(nx=10)#, tick.ratio=n)
@@ -145,7 +147,7 @@ write.table(output.nogeom, file=paste(filename,"-DCs-nogeom-charge.csv",sep=""),
 i<-0
 jpeg(quality=98, paste(filename,"-DCs-nogeom-charge.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
+plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
 eaxis(side=2, cex.axis=1.2)
 eaxis(side=1, cex.axis=1.2)
 minor.tick(nx=10, ny=10)

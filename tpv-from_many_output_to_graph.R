@@ -21,8 +21,8 @@
 title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
-ylim=limlifetime
-xlim=limtpvvoltage
+ylim=lim.TPV.lifetime
+xlim=lim.TPV.voltage
 
 output.biexp=list()
 output.monoexp=list()

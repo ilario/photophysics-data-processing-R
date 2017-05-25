@@ -23,8 +23,10 @@ library(RColorBrewer)
 library(sfsmisc)
 library(Hmisc)
 
-ylim=limdccapacitance
-xlim=limvoltage
+ylim=lim.DCcapacitance.capacitance
+xlim=lim.DCcapacitance.voltage
+ylimnogeom=lim.DCcapacitance.nogeom.capacitance
+xlimnogeom=lim.DCcapacitance.nogeom.voltage
 
 output=list()
 output.nogeom=list()
@@ -76,7 +78,7 @@ write.table(output, file=paste(filename,"-DCs-capacitance.csv",sep=""), row.name
 i <- 0
 jpeg(quality=98, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
+plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
 yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.2)

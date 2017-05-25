@@ -18,8 +18,8 @@
 title=gsub("-","\n\n",gsub("_"," ",name))
 filename=gsub(",","",gsub(":","",name))
 
-ylim=limlifetime
-xlim=limtpvcecharge
+ylim=lim.TPVCE.lifetime
+xlim=lim.TPVCE.charge
 
 output=list()
 
