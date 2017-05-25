@@ -13,15 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import.iv.separated <-
-       	function(dir = ".", pattern="", pattern.excl="\\.png$", list.excl="output.txt", header=TRUE, skip=22){
+import.iv.separated <- function(dir = ".", pattern="", pattern.excl="\\.png$", list.excl="output.txt", header=TRUE, skip=22){
 	files.all <- list.files(path=dir, pattern=pattern)
 #	files.all <- grep(pattern=grep_pattern, files.all)
 	files.pattern.excl <- list.files(path=dir, pattern=pattern.excl)
 	files.excl <- append(files.pattern.excl, list.excl)
 	files <- files.all[!files.all %in% files.excl]
-	mydata <- lapply(files, read.table, header=header,skip=skip)
+	mydata <- lapply(files, function(x){
+		tryCatch({read.table(x, header=header, skip=skip)}, error=function(e) {write(paste("Import error with file", x), stderr())})})
 	names(mydata) <- files
+	mydata <- Filter(function(x) length(x) > 0, mydata)
 	return(mydata)
 }
 
@@ -61,7 +62,7 @@ extract.iv <- function(voltage, current, current.positive=FALSE, cell.surface=0.
 	voc <- extract.iv.voc(voltage, current);
 	ff <- efficiency / (jsc * voc);
 	if(formatted.output){
-		result.formatted <- paste(format(directory,width=20), format(sample,width=20), format(reverse,width=8), format(jsc,digits=4,width=9), format(voc,digits=4,width=9), format(ff,digits=2,width=6), format(efficiency,digits=4));
+		result.formatted <- paste(format(directory,width=20), format(sample,width=20), format(reverse,width=8), format(jsc,digits=4,width=9), format(voc,digits=4,width=9), format(ff,digits=2,width=6), format(efficiency,digits=4), gsub(" ", "-", comment));
 		return(result.formatted);
 	}else{
 		names <- c("Jsc", "Voc", "FF", "efficiency", "comment");
