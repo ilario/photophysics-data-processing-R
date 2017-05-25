@@ -122,7 +122,11 @@ minor.tick(nx=10)#, tick.ratio=n)
 lapply(dirs, function(x) {print(x);
 g <- data[[x]]
 g$capacitance[g$capacitance < 0] <- 0
-g$capacitance <- g$capacitance - min(g$capacitance)#mean(sort(g$capacitance)[1:3])
+dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
+dataframe <- subset(dataframe, Voc < max(Voc)/2)
+geometrical <- median(dataframe$capacitance)
+g$capacitance <- g$capacitance - geometrical
+#g$capacitance <- g$capacitance - min(g$capacitance)#mean(sort(g$capacitance)[1:3])
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 w <- Vectorize(function(X)integrate(z,0,X)$value)
 curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
@@ -155,7 +159,11 @@ title(ylab=bquote("Charge Density (C/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
 lapply(dirs, function(x) {print(x);
 g <- data[[x]]
 g$capacitance[g$capacitance < 0] <- 0
-g$capacitance <- g$capacitance - min(g$capacitance) #mean(sort(g$capacitance)[1:3])
+dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
+dataframe <- subset(dataframe, Voc < max(Voc)/2)
+geometrical <- median(dataframe$capacitance)
+g$capacitance <- g$capacitance - geometrical
+#g$capacitance <- g$capacitance - min(g$capacitance) #mean(sort(g$capacitance)[1:3])
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 w <- Vectorize(function(X)integrate(z,0,X)$value)
 curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
