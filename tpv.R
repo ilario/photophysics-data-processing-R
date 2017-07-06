@@ -23,8 +23,9 @@ robust=0
 logy=0
 logx=1
 residuals=0
-thresholdBiexp=5
+thresholdBiexp=10
 thresholdRobustBiexp=100
+forbidNegativeDecays=0
 
 files <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
 mydata <- lapply(file.path(tpvdir,files), read.table, header=FALSE, col.names=c("time","voltage"));
@@ -51,13 +52,15 @@ trashfornullmessages <- lapply(files, function(x) {
 		header =  read.table(file.path(tpvdir,paste(x,".txt",sep="")), skip=3, header=FALSE, nrows=3)$V2
 #		header = as.numeric(system(paste("head -6 '", file.path(tpvdir,paste(x,".txt",sep="")), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
 
-		indexpeaktime <- which.max(mydata[[x]]$voltage);
-		peaktime <- mydata[[x]]$time[indexpeaktime];
+#		indexpeaktime <- which.max(mydata[[x]]$voltage);
+#		peaktime <- mydata[[x]]$time[indexpeaktime];
+		peaktime <- 0;
+		starttime <- head(mydata[[x]]$time, n=1)
 		voltage2 <- subset(mydata[[x]], time >= peaktime, select=voltage); 
 		time2 <- subset(mydata[[x]], time >= peaktime, select=time);
 		temp <- data.frame(time2, voltage2);
+		endtime = tail(temp$time, n=1)
 		#names(temp) <- c("time","voltage")
-		maxtemp=max(temp$time)
 		startingvoltage <- mean(mydata[[x]]$voltage[0:10]);
 		outputDeltaV <- t(c(x, startingvoltage, max(temp$voltage)-startingvoltage));
 		write.table(outputDeltaV, file=file.path(tpvdir,"outputDeltaV.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
@@ -65,8 +68,8 @@ trashfornullmessages <- lapply(files, function(x) {
 		expectedresult <- 0.00002;
 		A=startingvoltage; B=deltavoltage; 
 		C=expectedresult; slowdecay <- C; fastdecay <- C; #in caso non venisse effettuato il monoexp esplorativo
-		tempsubset <- subset(mydata[[x]], time >= peaktime & time < tail(temp$time, n=1)/20, select=c(time,voltage));
-		tempsubset2 <- subset(mydata[[x]], time > tail(temp$time, n=1)/120, select=c(time,voltage));
+		tempsubset <- subset(mydata[[x]], time >= peaktime & time < endtime/20, select=c(time,voltage));
+		tempsubset2 <- subset(mydata[[x]], time > endtime/120, select=c(time,voltage));
 		lo2 <- loess(tempsubset2$voltage~tempsubset2$time, span=0.02);
 		tryCatch({
 		print("EvaluationMonoexp/Fit: Performing");
@@ -83,35 +86,42 @@ trashfornullmessages <- lapply(files, function(x) {
 		removedPoints <- 0
 		while(!biexpsuccess & removedPoints < thresholdBiexp){
 		for(rand in (step*seq(1, 10, by=step))){
-		while(mean(temp[1:10,2]) < mean(temp[10:20,2])) {print("Biexp/Fit: Removing a point for clearing the curve - rough"); temp <- temp[-1,]}
+		if(forbidNegativeDecays){while(mean(temp[1:10,2]) < mean(temp[10:20,2])) {print("Biexp/Fit: Removing a point for clearing the curve - rough"); temp <- temp[-1,]}
 		while(temp[1,2] < mean(temp[2:4,2]) | temp[1,2] < mean(temp[10:15,2])) {print("Biexp/Fit: Removing a point for clearing the curve - fine"); temp <- temp[-1,]}
-		while(temp[1,2] < mean(temp[5:10,2]) + 0.003*deltavoltage) {print("Biexp/Fit: Removing a point for clearing the curve - flat part"); temp <- temp[-1,]}
+		while(temp[1,2] < mean(temp[5:10,2]) + 0.003*deltavoltage) {print("Biexp/Fit: Removing a point for clearing the curve - flat part"); temp <- temp[-1,]}}
 tryCatch({
 		if(exists("CFromPreviousDecay") && rand == step){
 		print("Biexp/Fit: Trying with previous parameters")
 		Crand <- CFromPreviousDecay*(2^runif(1,-step,step))
 		Frand <- FFromPreviousDecay*(2^runif(1,-step,step))
 		} else {
-		Crand <- C*(3^runif(1,-rand,rand))*10;
-		Frand <- C*(3^runif(1,-rand,rand))/10;
+		Crand <- C*(3^runif(1,-rand,rand))*2;
+		Frand <- max(endtime/500*(3^runif(1,-rand,rand)), endtime/1500)#C*(3^runif(1,-rand,rand))/100;
 		}
 		fit2 <- nls(voltage ~ cbind(1, exp(-time/C), exp(-time/F)), start=list(C=Crand, F=Frand),trace=F,data=temp,alg="plinear");
 		CFromPreviousDecay <<- coef(fit2)["C"] 
 		FFromPreviousDecay <<- coef(fit2)["F"]
 			A2 <- coef(fit2)[".lin1"]; A2.err <- summary(fit2)$coefficients[".lin1",2];
-			if(coef(fit2)[".lin2"] < 0 | coef(fit2)[".lin3"] < 0 | coef(fit2)["C"] < 0 | coef(fit2)["F"] < 0){print("Biexp/Fit: Bad result"); next};
 			#print(paste(startingvoltage, "=>", coef(fit2)[".lin1"], "/// ... =>", coef(fit2)[".lin2"], "///", Crand, "=>", coef(fit2)["C"], "/// ... =>", coef(fit2)[".lin3"], "--", Frand, "=>", coef(fit2)["F"]));
 			if(coef(fit2)["C"] > coef(fit2)["F"]) {slowampl <- coef(fit2)[".lin2"]; slowdecay <- coef(fit2)["C"]; fastampl <- coef(fit2)[".lin3"]; fastdecay <- coef(fit2)["F"]; slowampl.err <- summary(fit2)$coefficients[".lin2",2]; slowdecay.err <- summary(fit2)$coefficients["C",2]; fastampl.err <- summary(fit2)$coefficients[".lin3",2]; fastdecay.err <- summary(fit2)$coefficients["F",2]} else {fastampl <- coef(fit2)[".lin2"]; fastdecay <- coef(fit2)["C"]; slowampl <- coef(fit2)[".lin3"]; slowdecay <- coef(fit2)["F"]; fastampl.err <- summary(fit2)$coefficients[".lin2",2]; fastdecay.err <- summary(fit2)$coefficients["C",2]; slowampl.err <- summary(fit2)$coefficients[".lin3",2]; slowdecay.err <- summary(fit2)$coefficients["F",2]};
+			biexpNext=0
+			if(fastdecay < endtime/1500){print("Biexp/Fit: Bad result, a decay is too fast"); biexpNext=1}
+			if(slowampl < 0){print("Biexp/Fit: Bad result, slow decay is negative"); biexpNext=1}
+			if(biexpNext){next}
+			if(forbidNegativeDecays){if(coef(fit2)[".lin2"] < 0 | coef(fit2)[".lin3"] < 0){print("Biexp/Fit: Bad result"); next}};
+		print(paste("C starting: ", Crand, ", C fitted: ", CFromPreviousDecay))
+		print(paste("F starting: ", Frand, ", F fitted: ", FFromPreviousDecay))
 			capture.output(summary(fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 			
 
 			print("Biexp/Plot/Linear: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-biexp.png", sep="")), width = 1280, height = 800);
-			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"biexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, col="yellow");
-			points(temp, pch=3);
+			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"biexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+			points(temp, pch=".");
 			lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
 			lines(temp$time, predict(fit2), col="aquamarine4", lwd=2);
+			segments(starttime, A2, 0, A2, col="aquamarine4")
 			lines(temp$time+header[3]/10*header[1], A2 + slowampl*exp(-temp$time/slowdecay)+deltavoltage/10, col="green");
 			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			lines(temp$time+header[3]/10*header[1], A2 + fastampl*exp(-temp$time/fastdecay)+deltavoltage/10, col="blue");
@@ -123,8 +133,8 @@ if(logy){			print("Biexp/Plot/Log: Performing");
 			quitelowerpointbiexp <- max((predict(fit2, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A2)/5,min(subset(tempsubset, voltage > A2, select=voltage)-A2));
 			higherpointbiexp <- max(predict(fit2, newdata = data.frame(time=0))-A2,head(tempsubset$voltage,n=1)-A2);
 			png(file.path(tpvdir,paste(x, "-biexp-log.png", sep="")), width = 1280, height = 800);
-			plot(tempsubset$time, tempsubset$voltage - A2, main=paste(x,"biexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=3, log="y", ylim=c(quitelowerpointbiexp,higherpointbiexp), col="yellow");
-			points(temp$time, temp$voltage - A2, pch=3);
+			plot(tempsubset$time, tempsubset$voltage - A2, main=paste(x,"biexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=".", log="y", ylim=c(quitelowerpointbiexp,higherpointbiexp), col="yellow");
+			points(temp$time, temp$voltage - A2, pch=".");
 			lines(tempsubset2$time, predict(lo2) - A2, col='black', lwd=3);
 			lines(temp$time,predict(fit2) - A2, col="aquamarine4", lwd=2);
 			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
@@ -137,7 +147,7 @@ if(logx){
 		tryCatch({
 
 			png(file.path(tpvdir,paste(x, "-biexp-logx.png", sep="")), width = 1280, height = 800);
-			plot(temp$time, temp$voltage, main=paste(x,"biexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=3, log="x", xlim=c(max(temp$time[1],-temp$time[1]),tail(temp$time,1)));
+			plot(temp$time, temp$voltage, main=paste(x,"biexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x", xlim=c(max(temp$time[1],-temp$time[1]),endtime));
 			#lines(temp$time, predict(lo2), col='black', lwd=3);
 			lines(temp$time,predict(fit2), col="aquamarine4", lwd=2);
 			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
@@ -150,7 +160,7 @@ if(residuals){
 			print("Biexp/Plot/Residuals: Performing");
 			png(file.path(tpvdir,paste(x, "-biexp-residuals.png", sep="")), width = 1280, height = 800);
 			yresidualfit2 <- temp$voltage-predict(fit2,newdata=data.frame(time=temp$time))
-			plot(temp$time, yresidualfit2, ylim=c(quantile(yresidualfit2,0.001),quantile(yresidualfit2,0.999)), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+			plot(temp$time, yresidualfit2, ylim=c(quantile(yresidualfit2,0.001),quantile(yresidualfit2,0.999)), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", log="x", col=rgb(0,0,0, (((endtime*8)-temp$time)/(endtime*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("Tau2 =", signif(fastdecay,digits=4), "\u00b1", signif(fastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
@@ -172,8 +182,8 @@ if(residuals){
 		if(biexpsuccess) {break}
 		else {
 		removedPoints=removedPoints+1
-		temp <- tail(temp,-removedPoints*5)
-		print(paste("Biexp/Fit: Removed", removedPoints*5, "points, fitting", nrow(temp), "datapoints"));
+		temp <- tail(temp,-removedPoints*2)
+		print(paste("Biexp/Fit: Removed", removedPoints*2, "points, fitting", nrow(temp), "datapoints"));
 		step <- min((step+0.5),5)
 		}
 		}
@@ -183,7 +193,7 @@ if(residuals){
 tryCatch({
 		print("Monoexp/Fit: Performing");
 
-		Crand=sqrt(slowdecay*fastdecay)*(2^runif(1,-rand,rand))
+		Crand=sign(slowdecay*fastdecay)*sqrt(abs(slowdecay*fastdecay))*(2^runif(1,-rand,rand))
 		fit <- nls(voltage ~ cbind(1, exp(-time/C)), start=list(C=Crand),trace=F,data=temp,alg="plinear");
 		capture.output(summary(fit), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 		A <- coef(fit)[".lin1"]; B <- coef(fit)[".lin2"]; C <- coef(fit)["C"];
@@ -194,17 +204,18 @@ tryCatch({
 		
 		print("Monoexp/Plot/Linear: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp.png", sep="")), width = 1280, height = 800);
-		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, col="yellow");
-		points(temp, pch=3);
+		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+		points(temp, pch=".");
 		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time, predict(fit), col="red", lwd=2);
+		segments(starttime, A, 0, A, col="red", lwd=2)
 		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
 if(logy){
 		print("Monoexp/Plot/Log: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp-log.png", sep="")), width = 1280, height = 800);
-		plot(tempsubset$time, tempsubset$voltage - A, main=paste(x,"monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A, "V)"), pch=3, log="y", ylim=c(quitelowerpointmonoexp,higherpointmonoexp), col="yellow");
-		points(temp$time, temp$voltage - A, pch=3);
+		plot(tempsubset$time, tempsubset$voltage - A, main=paste(x,"monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A, "V)"), pch=".", log="y", ylim=c(quitelowerpointmonoexp,higherpointmonoexp), col="yellow");
+		points(temp$time, temp$voltage - A, pch=".");
 		lines(tempsubset2$time, predict(lo2) - A, col='black', lwd=3);
 		lines(temp$time,predict(fit) - A, col="red", lwd=2);
 		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
@@ -213,7 +224,7 @@ if(logy){
 if(logx){
 		print("Monoexp/Plot/LogX: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp-logx.png", sep="")), width = 1280, height = 800);
-		plot(temp$time, temp$voltage, main=paste(x,"monoexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=3, log="x");
+		plot(temp$time, temp$voltage, main=paste(x,"monoexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x");
 		#lines(temp$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time,predict(fit), col="red", lwd=2);
 		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
@@ -223,7 +234,7 @@ if(residuals){
 		print("Monoexp/Plot/Residuals: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp-residuals.png", sep="")), width = 1280, height = 800);
 		yresidualfit <- temp$voltage-predict(fit,newdata=data.frame(time=temp$time))
-                plot(temp$time, yresidualfit, ylim=c(quantile(yresidualfit,0.001),quantile(yresidualfit,0.999)), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, 0.5));
+                plot(temp$time, yresidualfit, ylim=c(quantile(yresidualfit,0.001),quantile(yresidualfit,0.999)), main=paste(x,"residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", log="x", col=rgb(0,0,0, 0.5));
 		abline(h=0, col="red");
 		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
@@ -264,8 +275,8 @@ if(powerlaw){
 		print("PowerMonoexp/Plot/Linear: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-powermonoexp.png", sep="")), width = 1280, height = 800);
-			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"power + monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, col="yellow");
-			points(temp, pch=3);
+			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"power + monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+			points(temp, pch=".");
 			lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
 			lines(temp$time, predict(fit3), col="red", lwd=2);
 			lines(temp$time+header[3]/10*header[1], A3 + Gampl*exp(-temp$time/G)+deltavoltage/10, col="green");
@@ -278,8 +289,8 @@ if(logy){
 			print("PowerMonoexp/Plot/Log: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-powermonoexp-log.png", sep="")), width = 1280, height = 800);
-			plot(tempsubset$time, tempsubset$voltage - A3, main=paste(x,"power + monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A3, "V)"), pch=3, log="y", ylim=c(quitelowerpointbiexp,higherpointbiexp), col="yellow");
-			points(temp$time, temp$voltage - A3, pch=3);
+			plot(tempsubset$time, tempsubset$voltage - A3, main=paste(x,"power + monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A3, "V)"), pch=".", log="y", ylim=c(quitelowerpointbiexp,higherpointbiexp), col="yellow");
+			points(temp$time, temp$voltage - A3, pch=".");
 			lines(tempsubset2$time, predict(lo2) - A3, col='black', lwd=3);
 			lines(temp$time,predict(fit3) - A3, col="red", lwd=2);
 			mtext(paste("Tau =", signif(G,digits=4), "\u00b1", signif(G.err,digits=2), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
@@ -292,7 +303,7 @@ if(residuals){
 			print("PowerMonoexp/Plot/Residuals: Performing");
 			png(file.path(tpvdir,paste(x, "-powermonoexp-residuals.png", sep="")), width = 1280, height = 800);
 			yresidualfit3 <- temp$voltage-predict(fit3,newdata=data.frame(time=temp$time))
-                        plot(temp$time, yresidualfit3, ylim=c(quantile(yresidualfit3,0.001),quantile(yresidualfit3,0.999)), main=paste(x,"power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+                        plot(temp$time, yresidualfit3, ylim=c(quantile(yresidualfit3,0.001),quantile(yresidualfit3,0.999)), main=paste(x,"power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", log="x", col=rgb(0,0,0, (((endtime*8)-temp$time)/(endtime*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau =", signif(G,digits=4), "\u00b1", signif(G.err,digits=2), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("K =", signif(K,digits=4), "\u00b1", signif(K.err,digits=2), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
@@ -321,8 +332,8 @@ if(robust){
 		higherpointmonoexp <- max(predict(fitR, newdata = data.frame(time=0))-AR,head(tempsubset$voltage,n=1)-AR);
 		print("RobustMonoexp/Plot/Linear: Performing");
 		png(file.path(tpvdir,paste(x, "-robustmonoexp.png", sep="")), width = 1280, height = 800);
-		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, col="yellow");
-		points(temp, pch=3);
+		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+		points(temp, pch=".");
 		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time, predict(fitR), col="red", lwd=2);
 		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
@@ -330,8 +341,8 @@ if(robust){
 if(logy){
 		print("RobustMonoexp/Plot/Log: Performing");
 		png(file.path(tpvdir,paste(x, "-robustmonoexp-log.png", sep="")), width = 1280, height = 800);
-		plot(tempsubset$time, tempsubset$voltage - AR, main=paste(x,"robust monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", AR, "V)"), pch=3, log="y", ylim=c(quitelowerpointmonoexp,higherpointmonoexp), col="yellow");
-		points(temp$time, temp$voltage - AR, pch=3);
+		plot(tempsubset$time, tempsubset$voltage - AR, main=paste(x,"robust monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", AR, "V)"), pch=".", log="y", ylim=c(quitelowerpointmonoexp,higherpointmonoexp), col="yellow");
+		points(temp$time, temp$voltage - AR, pch=".");
 		lines(tempsubset2$time, predict(lo2) - AR, col='black', lwd=3);
 		lines(temp$time,predict(fitR) - AR, col="red", lwd=2);
 		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
@@ -340,7 +351,7 @@ if(logy){
 if(logx){
 		print("RobustMonoexp/Plot/LogX: Performing");
 		png(file.path(tpvdir,paste(x, "-robustmonoexp-logx.png", sep="")), width = 1280, height = 800);
-		plot(temp$time, temp$voltage, main=paste(x,"robust monoexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=3, log="x");
+		plot(temp$time, temp$voltage, main=paste(x,"robust monoexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x");
 		#lines(temp$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time,predict(fitR), col="red", lwd=2);
 		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
@@ -350,7 +361,7 @@ if(residuals){
 		print("RobustMonoexp/Plot/Residuals: Performing");
 		png(file.path(tpvdir,paste(x, "-robustmonoexp-residuals.png", sep="")), width = 1280, height = 800);
 		yresidualfitR <- temp$voltage-predict(fitR,newdata=data.frame(time=temp$time))
-                plot(temp$time, yresidualfitR, ylim=c(quantile(yresidualfitR,0.001),quantile(yresidualfitR,0.999)), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, 0.5));
+                plot(temp$time, yresidualfitR, ylim=c(quantile(yresidualfitR,0.001),quantile(yresidualfitR,0.999)), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", log="x", col=rgb(0,0,0, 0.5));
 		abline(h=0, col="red");
 		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
@@ -394,8 +405,8 @@ if(powerlaw){if(robust){
 		print("RobustPowerMonoexp/Plot/Linear: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-robustpowermonoexp.png", sep="")), width = 1280, height = 800);
-			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust power + monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, col="yellow");
-			points(temp, pch=3);
+			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust power + monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+			points(temp, pch=".");
 			lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
 			lines(temp$time, predict(fit3r), col="red", lwd=2);
 			lines(temp$time+header[3]/10*header[1], A3r + Iampl*exp(-temp$time/I)+deltavoltage/10, col="green");
@@ -409,8 +420,8 @@ if(logy){
 			print("RobustPowerMonoexp/Plot/Log: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-robustpowermonoexp-log.png", sep="")), width = 1280, height = 800);
-			plot(tempsubset$time, tempsubset$voltage - A3r, main=paste(x,"robust power + monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A3r, "V)"), pch=3, log="y", ylim=c(quitelowerpointbiexp,higherpointbiexp), col="yellow");
-			points(temp$time, temp$voltage - A3r, pch=3);
+			plot(tempsubset$time, tempsubset$voltage - A3r, main=paste(x,"robust power + monoexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A3r, "V)"), pch=".", log="y", ylim=c(quitelowerpointbiexp,higherpointbiexp), col="yellow");
+			points(temp$time, temp$voltage - A3r, pch=".");
 			lines(tempsubset2$time, predict(lo2) - A3r, col='black', lwd=3);
 			lines(temp$time,predict(fit3r) - A3r, col="red", lwd=2);
 			mtext(paste("Tau =", signif(I,digits=4), "\u00b1", signif(I.err,digits=2), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
@@ -423,7 +434,7 @@ if(residuals){
 			print("RobustPowerMonoexp/Plot/Residuals: Performing");
 			png(file.path(tpvdir,paste(x, "-robustpowermonoexp-residuals.png", sep="")), width = 1280, height = 800);
 			yresidualfit3r <- temp$voltage-predict(fit3r,newdata=data.frame(time=temp$time))
-                        plot(temp$time, yresidualfit3r, ylim=c(quantile(yresidualfit3r,0.001),quantile(yresidualfit3r,0.999)), main=paste(x,"robust power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+                        plot(temp$time, yresidualfit3r, ylim=c(quantile(yresidualfit3r,0.001),quantile(yresidualfit3r,0.999)), main=paste(x,"robust power + monoexp residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", log="x", col=rgb(0,0,0, (((endtime*8)-temp$time)/(endtime*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau =", signif(I,digits=4), "\u00b1", signif(I.err,digits=2), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("K =", signif(Kr,digits=4), "\u00b1", signif(Kr.err,digits=2), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
@@ -461,8 +472,8 @@ if(robust){
 			print("RobustBiexp/Plot/Linear: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-robustbiexp.png", sep="")), width = 1280, height = 800);
-			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust biexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, col="yellow");
-			points(temp, pch=3);
+			plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust biexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+			points(temp, pch=".");
 			lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
 			lines(temp$time, predict(fit2R), col="aquamarine4", lwd=2);
 			lines(temp$time+header[3]/10*header[1], A2R + Rslowampl*exp(-temp$time/Rslowdecay)+deltavoltage/10, col="green");
@@ -476,8 +487,8 @@ if(logy){			print("RobustBiexp/Plot/Log: Performing");
 			Rquitelowerpointbiexp <- max((predict(fit2R, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A2R)/5,min(subset(tempsubset, voltage > A2R, select=voltage)-A2R));
 			Rhigherpointbiexp <- max(predict(fit2R, newdata = data.frame(time=0))-A2R,head(tempsubset$voltage,n=1)-A2R);
 			png(file.path(tpvdir,paste(x, "-robustbiexp-log.png", sep="")), width = 1280, height = 800);
-			plot(tempsubset$time, tempsubset$voltage - A2R, main=paste(x,"robust biexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2R, "V)"), pch=3, log="y", ylim=c(Rquitelowerpointbiexp,Rhigherpointbiexp), col="yellow");
-			points(temp$time, temp$voltage - A2R, pch=3);
+			plot(tempsubset$time, tempsubset$voltage - A2R, main=paste(x,"robust biexp LOG"), xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2R, "V)"), pch=".", log="y", ylim=c(Rquitelowerpointbiexp,Rhigherpointbiexp), col="yellow");
+			points(temp$time, temp$voltage - A2R, pch=".");
 			lines(tempsubset2$time, predict(lo2) - A2R, col='black', lwd=3);
 			lines(temp$time,predict(fit2R) - A2R, col="aquamarine4", lwd=2);
 			mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
@@ -489,7 +500,7 @@ if(logx){
 			print("RobustBiexp/Plot/LogX: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-robustbiexp-logx.png", sep="")), width = 1280, height = 800);
-			plot(temp$time, temp$voltage, main=paste(x,"robust biexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=3, log="x", xlim=c(max(temp$time[1],-temp$time[1]),tail(temp$time,1)));
+			plot(temp$time, temp$voltage, main=paste(x,"robust biexp LogX"), xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x", xlim=c(max(temp$time[1],-temp$time[1]),endtime));
 			lines(temp$time,predict(fit2R), col="aquamarine4", lwd=2);
 			mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
@@ -501,7 +512,7 @@ if(residuals){
 			print("RobustBiexp/Plot/Residuals: Performing");
 			png(file.path(tpvdir,paste(x, "-robustbiexp-residuals.png", sep="")), width = 1280, height = 800);
 			yresidualfit2R <- temp$voltage-predict(fit2R,newdata=data.frame(time=temp$time))
-                        plot(temp$time, yresidualfit2R, ylim=c(quantile(yresidualfit2R,0.001),quantile(yresidualfit2R,0.999)), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=3, log="x", col=rgb(0,0,0, (((maxtemp*8)-temp$time)/(maxtemp*8))^10));
+                        plot(temp$time, yresidualfit2R, ylim=c(quantile(yresidualfit2R,0.001),quantile(yresidualfit2R,0.999)), main=paste(x,"robust residuals"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", log="x", col=rgb(0,0,0, (((endtime*8)-temp$time)/(endtime*8))^10));
 			abline(h=0, col="red");
 			mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
