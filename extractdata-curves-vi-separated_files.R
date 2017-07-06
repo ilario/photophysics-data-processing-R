@@ -62,7 +62,7 @@ extract.iv <- function(voltage, current, current.positive=FALSE, cell.surface=0.
 	voc <- extract.iv.voc(voltage, current);
 	ff <- efficiency / (jsc * voc);
 	if(formatted.output){
-		result.formatted <- paste(format(directory,width=20), format(sample,width=20), format(reverse,width=8), format(jsc,digits=4,width=9), format(voc,digits=4,width=9), format(ff,digits=2,width=6), format(efficiency,digits=4), gsub(" ", "-", comment));
+		result.formatted <- paste(as.character(directory), as.character(sample), reverse, as.character(format(jsc,digits=4)), as.character(format(voc,digits=4)), as.character(format(ff,digits=2)), as.character(format(efficiency,digits=4)), gsub(" ", "-", comment), sep="\t");
 		return(result.formatted);
 	}else{
 		names <- c("Jsc", "Voc", "FF", "efficiency", "comment");
