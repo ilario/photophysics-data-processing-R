@@ -124,7 +124,7 @@ g <- data[[x]]
 g$capacitance[g$capacitance < 0] <- 0
 dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
 dataframe <- subset(dataframe, Voc < max(Voc)/2)
-geometrical <- median(dataframe$capacitance)
+geometrical <- mean(min(dataframe$capacitance),median(dataframe$capacitance))
 g$capacitance <- g$capacitance - geometrical
 #g$capacitance <- g$capacitance - min(g$capacitance)#mean(sort(g$capacitance)[1:3])
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
@@ -161,7 +161,7 @@ g <- data[[x]]
 g$capacitance[g$capacitance < 0] <- 0
 dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
 dataframe <- subset(dataframe, Voc < max(Voc)/2)
-geometrical <- median(dataframe$capacitance)
+geometrical <- mean(min(dataframe$capacitance),median(dataframe$capacitance))
 g$capacitance <- g$capacitance - geometrical
 #g$capacitance <- g$capacitance - min(g$capacitance) #mean(sort(g$capacitance)[1:3])
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)

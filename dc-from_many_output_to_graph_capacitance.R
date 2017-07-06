@@ -97,7 +97,7 @@ output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep
 capacitance <- charge/b$deltaV
 dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)
 dataframe <- subset(dataframe, Voc < max(Voc)/2)
-geometrical <- median(dataframe$capacitance)
+geometrical <- mean(min(dataframe$capacitance),median(dataframe$capacitance))
 capacitance <- capacitance - geometrical
 #capacitance <- capacitance - min(capacitance)#mean(sort(capacitance)[1:3])
 

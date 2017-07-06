@@ -86,7 +86,7 @@ plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/c
 graphics.off()
 dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
 dataframe <- subset(dataframe, Voc < max(Voc)/2)
-geometrical <- median(dataframe$capacitance)
+geometrical <- mean(min(dataframe$capacitance),median(dataframe$capacitance))
 g$capacitance <- g$capacitance - geometrical
 #g$capacitance <- g$capacitance - mean(sort(g$capacitance)[1:3])
 
