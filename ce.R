@@ -25,6 +25,11 @@ trashfornullmessages <- lapply(files, function(x) {
 #	totalcharge=quantile(charge[charge>0],0.75)
 	totalchargedensity=totalcharge/0.09
 
+	voltagezero <- mydata[[x]]$voltage
+	currentzero <- voltagezero/50
+	chargezero <- cumsum(currentzero)*(mydata[[x]]$time[2]-mydata[[x]]$time[1])
+	chargezero=chargezero-chargezero[match(0,mydata[[x]]$time)]
+
 	b<-strsplit(x, "_")
 	c<-unlist(b)[length(b[[1]])]
 	d<-as.numeric(gsub("mV", "", c))
@@ -49,6 +54,10 @@ expfit <- nlsLM(voltage~ C*exp(D*time), start=list(C=0.5*max(decay$voltage),D=-0
 	axis(4,col.ticks="red",col.axis="red", col="red")
 	mtext("Collected Charge Density (C/cm2)",side=4,line=3,col="red")
 	text(tail(mydata[[x]]$time,1)*0.9,totalchargedensity*0.95,labels=paste(signif(totalchargedensity,4), "C/cm2"),cex=2,col="red")
+	
+	par(new=TRUE)
+	plot(mydata[[x]]$time,chargezero/0.09, type="l", col="orange", xaxt="n",yaxt="n",xlab="",ylab="")
+	
 	graphics.off()
 #}
 })
