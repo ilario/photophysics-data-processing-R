@@ -1,3 +1,5 @@
+source("~/software/photophysics-data-processing-R/extractdata-curves-vi-separated_files.R")
+
 #name="ig"
 
 #var1=""

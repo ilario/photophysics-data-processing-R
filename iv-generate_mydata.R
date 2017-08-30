@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+source("~/software/photophysics-data-processing-R/extractdata-curves-vi-separated_files.R")
+
 mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="^ig.*.txt$", list.excl="output.txt")
 #mydata <- import.iv.separated(pattern.excl="\\.pdf$")
 file.create("output.txt")
