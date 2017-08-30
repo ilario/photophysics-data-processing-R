@@ -23,6 +23,7 @@ library(RColorBrewer)
 library(robustbase)
 library(sfsmisc)
 library(Hmisc)
+require(minpack.lm)
 
 ylim=lim.CE.charge
 xlim=lim.CE.voltage
@@ -38,7 +39,17 @@ data <- lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- a$Voc
  a <- a[with(a, order(a$Voc)),]
- exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
+ lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
+ tryCatch({
+ exp <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
+ }, error=function(e) print("Failed fit"))
+ tryCatch({
+ exp <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
+ }, error=function(e) print("Failed fit"))
+ tryCatch({
+ exp <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)[[1]],C=coef(exp)[[2]],D=coef(exp)[[3]]), data=a)
+ }, error=function(e) print("Failed robust fit"))
+# exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
  g <- predict(exp,a$Voc)
  a$g <- g
  output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(g,5)
