@@ -35,6 +35,7 @@ names(mydata) <- files;
 write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-biexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-monoexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaV.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVloess.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-robustmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
@@ -71,6 +72,8 @@ trashfornullmessages <- lapply(files, function(x) {
 		tempsubset <- subset(mydata[[x]], time >= peaktime & time < endtime/20, select=c(time,voltage));
 		tempsubset2 <- subset(mydata[[x]], time > endtime/120, select=c(time,voltage));
 		lo2 <- loess(tempsubset2$voltage~tempsubset2$time, span=0.02);
+		outputDeltaVloess <- t(c(x, startingvoltage, max(predict(lo2))-startingvoltage));
+		write.table(outputDeltaVloess, file=file.path(tpvdir,"outputDeltaVloess.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 		tryCatch({
 		print("EvaluationMonoexp/Fit: Performing");
 		fit <- nls(voltage ~ cbind(1, exp(-time/C)), start=list(C=expectedresult*runif(1,0.5,2)),trace=F,data=temp,alg="plinear");
