@@ -44,14 +44,14 @@ a<-a[with(a, order(a$suns)), ]
 
 #a$suns <- suns
 
-fitJsc<-nlrob(V4 ~ A + B*suns^C, start=list(A=0, B=20, C=1), data=a)
+fitJsc<-nlrob(V4 ~ B*suns^C, start=list(B=20, C=1), data=a)
 alfa=signif(fitJsc$coefficients["C"],3)
 
 png(paste(name,"-Jsc_vs_LI.png",sep=""), width=640, height=640)
 par(mar=c(7,7,4.1,2.1))
 plot(a$suns,a$V4,cex.main=2,ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5)#, main=paste(name,"Jsc vs LI"))
 lines(a$suns, predict(fitJsc))
-mtext(bquote("Jsc" == .(signif(fitJsc$coefficients["A"],3)) + .(signif(fitJsc$coefficients["B"],3)) * "LI" ^ .(alfa)),side=3,line=-3,cex=2)
+mtext(bquote("Jsc" == .(signif(fitJsc$coefficients["B"],3)) * " LI" ^ .(alfa)),side=3,line=-3,cex=2)
 mtext(bquote(alpha == .(alfa)),side=3,line=-5,cex=2)
 graphics.off()
 
