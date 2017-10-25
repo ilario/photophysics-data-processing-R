@@ -45,7 +45,7 @@ data <- lapply(dirs, function(x) {print(x);
 if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
                b <- read.table(file.path(x, "tpv", "outputDeltaVmixed.txt"), header=T)
 }else{
-	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
+	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
 }
 capacitance <- charge/b$deltaV
  c<- data.frame(b$Voc,capacitance)

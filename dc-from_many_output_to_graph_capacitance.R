@@ -56,7 +56,7 @@ charge <- mean(a$ChargeDensityTPC)
 if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 	        b <- read.table(file.path(x, "tpv", "outputDeltaVmixed.txt"), header=T)
 }else{
-	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
+	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
 }
 output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
@@ -91,7 +91,7 @@ charge <- mean(a$ChargeDensityTPC)
 if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 	        b <- read.table(file.path(x, "tpv", "outputDeltaVmixed.txt"), header=T)
 }else{
-	        b <- read.table(file.path(x, "tpv", "outputDeltaV.txt"), header=T)
+	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
 }
 output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV

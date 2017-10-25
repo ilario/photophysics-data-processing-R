@@ -22,7 +22,7 @@ directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
 a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
 charge <- mean(a$ChargeDensityTPC)
-b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
 capacitance <- charge/b$deltaV
 
 c<- data.frame(b$Voc,capacitance)

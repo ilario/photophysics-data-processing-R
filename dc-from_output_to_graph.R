@@ -28,7 +28,7 @@ charge <- mean(a$ChargeDensityTPC)
 if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
 	b <- read.table(file.path(tpvdir, "outputDeltaVmixed.txt"), header=T)
 }else{
-	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+	b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
 }
 capacitance <- charge/b$deltaV
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
