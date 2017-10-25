@@ -3,8 +3,9 @@ name="ig"
 var1=""
 v1g1=c()
 v1g2=c()
-v1all=c(v1g1, v1g2)
-list1=list(`` = v1g1, `` = v1g2)
+#v1g3=c()
+v1all=c(v1g1, v1g2)#, v1g3)
+list1=list(`` = v1g1, `` = v1g2)#, `` = v1g3)
 
 #var2=""
 #v2g1=c()
