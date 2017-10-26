@@ -32,18 +32,21 @@ if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
 }else if(file.exists(file.path(tpvdir, "outputDeltaVloess.txt"))){
 	b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
 }else{
-	b1 <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
-	b2 <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
-	if(length(b1) == length(b2)){
-		b <- (b1 + b2)/2
+	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+	bMonoexp <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
+	if(length(b$file) == length(bMonoexp$file)){
+		b$deltaV <- (b$deltaV + bMonoexp$deltaV) / 2
 	}else{
-		b <- b1
+		matchIndex <- match(bMonoexp$file, b$file)
+		b$deltaV[matchIndex] <- (b$deltaV[matchIndex] + bMonoexp$deltaV) / 2
 	}
 }
 
 b <- b[with(b, order(b$Voc)), ]
 
 len <- length(b$deltaV)
+
+# this is completely arbitrary and likely wrong, but the difference between chargeDark and chargeSun should be small
 chargeArray = seq(chargeDark, chargeSun, length.out=len)
 
 capacitance <- chargeArray/b$deltaV
