@@ -24,13 +24,29 @@ write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge.txt", append=FAL
 write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge-nogeom.txt", append=FALSE, col.names=F, row.names=F);
 
 a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
-charge <- mean(a$ChargeDensityTPC)
+chargeDark <- mean(a[grep("dark", a$file),]$ChargeDensityTPC)
+chargeSun <- mean(a[grep("sun", a$file),]$ChargeDensityTPC)
+
 if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
 	b <- read.table(file.path(tpvdir, "outputDeltaVmixed.txt"), header=T)
-}else{
+}else if(file.exists(file.path(tpvdir, "outputDeltaVloess.txt"))){
 	b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
+}else{
+	b1 <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+	b2 <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
+	if(length(b1) == length(b2)){
+		b <- (b1 + b2)/2
+	}else{
+		b <- b1
+	}
 }
-capacitance <- charge/b$deltaV
+
+b <- b[with(b, order(b$Voc)), ]
+
+len <- length(b$deltaV)
+chargeArray = seq(chargeDark, chargeSun, length.out=len)
+
+capacitance <- chargeArray/b$deltaV
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
 outputDCcapacitance <- data.frame(b$Voc, capacitance);
