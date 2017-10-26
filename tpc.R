@@ -26,15 +26,15 @@ write.table(t(c("file","ChargeDensityTPC")), file=file.path(tpcdir,"outputCharge
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
-#	if(!file.exists(paste(x, ".png", sep=""))){
 	len<-length(mydata[[x]]$voltage)
-	endingvoltage <- mean(mydata[[x]]$voltage[(len*0.9):len])
-	message(endingvoltage)
-	voltage2 <- mydata[[x]]$voltage - endingvoltage
+	startVoltage <- mean(mydata[[x]]$voltage[1:100])
+	endVoltage <- mean(mydata[[x]]$voltage[(len-200):len])
+	baseline <- seq(startVoltage, endVoltage, length.out=len)
+
+	voltage2 <- mydata[[x]]$voltage - baseline
 	current <- voltage2/50
 	charge <- cumsum(current)*(mydata[[x]]$time[2]-mydata[[x]]$time[1])
 
-#	charge=charge-charge[which.min(mydata[[x]]$voltage)]
 	charge=charge-charge[match(0,mydata[[x]]$time)]
 	totalcharge=quantile(charge,0.30)
 	totalchargedensity=totalcharge/0.09
@@ -45,8 +45,7 @@ trashfornullmessages <- lapply(files, function(x) {
 	png(file.path(tpcdir,paste(x, ".png", sep="")), width=1280, heigh=800)
 	par(mar=c(5,4,4,5)+.1)
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x, "TPC"))
-#	lines(mydata[[x]]$time, predict(fitR), col="green")
-	abline(h=endingvoltage, col="green")
+	lines(mydata[[x]]$time, baseline, col="green")
 	par(new=TRUE)
 	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="")
 	abline(h=0,col="red")
