@@ -20,16 +20,18 @@ ce <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,strings
 
 directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 
-a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
-charge <- mean(a$ChargeDensityTPC)
-b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
-capacitance <- charge/b$deltaV
+#a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
+#charge <- mean(a$ChargeDensityTPC)
+#b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
+#capacitance <- charge/b$deltaV
 
-c<- data.frame(b$Voc,capacitance)
-d <- c[with(c, order(b.Voc)), ]
+c <- read.table(file.path(getwd(), outputDCcapacitance.txt), header=T)
+
+#c<- data.frame(b$Voc,capacitance)
+d <- c[with(c, order(Voc)), ]
 e <- d[1:(nrow(d)/2),]
 
-f <- data.frame(d$b.Voc, d$capacitance)
+f <- data.frame(d$Voc, d$capacitance)
 names(f) <- c("Voc","capacitance")
 g <- f
 g$capacitance[g$capacitance < 0] <- 0
