@@ -27,8 +27,8 @@ write.table(t(c("file","ChargeDensityTPC")), file=file.path(tpcdir,"outputCharge
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
 	len<-length(mydata[[x]]$voltage)
-	startVoltage <- mean(mydata[[x]]$voltage[1:100])
-	endVoltage <- mean(mydata[[x]]$voltage[(len-200):len])
+	startVoltage <- mean(mydata[[x]]$voltage[1:1000])
+	endVoltage <- mean(mydata[[x]]$voltage[(len-1000):len])
 	baseline <- seq(startVoltage, endVoltage, length.out=len)
 
 	voltage2 <- mydata[[x]]$voltage - baseline

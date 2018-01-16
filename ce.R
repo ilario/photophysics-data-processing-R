@@ -12,11 +12,14 @@ write.table(t(c("Voc","ChargeDensityCE")), file=file.path(cedir,"outputChargeDen
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
-#	if(!file.exists(paste(x, ".png", sep=""))){
 	len<-length(mydata[[x]]$voltage)
-	endingvoltage <- mean(mydata[[x]]$voltage[(len*0.9):len]) #could be just zero
-	message(endingvoltage)
-	voltage2 <- mydata[[x]]$voltage - endingvoltage#, newdata = data.frame(mydata[[x]]$time))
+#	endingvoltage <- mean(mydata[[x]]$voltage[(len*0.9):len]) #could be just zero, better a linear baseline from the beginning value to the final one
+#	voltage2 <- mydata[[x]]$voltage - endingvoltage#, newdata = data.frame(mydata[[x]]$time))
+	startVoltage <- mean(mydata[[x]]$voltage[1:600])
+	endVoltage <- mean(mydata[[x]]$voltage[(len-600):len])
+	baseline <- seq(startVoltage, endVoltage, length.out=len)
+	voltage2 <- mydata[[x]]$voltage - baseline
+	
 	current <- voltage2/50
 	charge <- cumsum(current)*(mydata[[x]]$time[2]-mydata[[x]]$time[1])
 
@@ -31,8 +34,9 @@ trashfornullmessages <- lapply(files, function(x) {
 	chargezero=chargezero-chargezero[match(0,mydata[[x]]$time)]
 
 	b<-strsplit(x, "_")
-	c<-unlist(b)[length(b[[1]])]
-	d<-as.numeric(gsub("mV", "", c))
+	c<-unlist(b)
+	c2 <- c[grepl("mV",c)]
+	d<-as.numeric(sub("mV.*", "", c2))
         outputChargeDensityCE <- t(c(d, totalchargedensity));
 	write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
@@ -46,7 +50,7 @@ tryCatch({
 expfit <- nlsLM(voltage~ C*exp(D*time), start=list(C=0.5*max(decay$voltage),D=-0.1*tail(decay$time, n=1)), data=decay)
 	lines(decay$time, predict(expfit), lwd=2, col="blue")
 }, error=function(e) print("Failed monoexponential fit"))
-	abline(h=endingvoltage, col="green")
+	lines(mydata[[x]]$time, baseline, col="green")
 	par(new=TRUE)
 	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="")
 	abline(h=0,col="red")

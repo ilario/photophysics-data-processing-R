@@ -96,7 +96,11 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
 dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)
-dataframe <- subset(dataframe, Voc < max(Voc)/2)
+
+dataframe1 <- subset(dataframe, Voc < max(Voc)/2)
+dataframe2 <- dataframe[1:2,]
+dataframe <- unique(rbind(dataframe1, dataframe2))
+
 geometrical <- mean(min(dataframe$capacitance),median(dataframe$capacitance))
 capacitance <- capacitance - geometrical
 #capacitance <- capacitance - min(capacitance)#mean(sort(capacitance)[1:3])

@@ -25,7 +25,7 @@ directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
 #b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
 #capacitance <- charge/b$deltaV
 
-c <- read.table(file.path(getwd(), outputDCcapacitance.txt), header=T)
+c <- read.table(file.path(getwd(), "outputDCcapacitance.txt"), header=T)
 
 #c<- data.frame(b$Voc,capacitance)
 d <- c[with(c, order(Voc)), ]

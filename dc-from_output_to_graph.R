@@ -27,22 +27,39 @@ a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
 chargeDark <- mean(a[grep("dark", a$file),]$ChargeDensityTPC)
 chargeSun <- mean(a[grep("sun", a$file),]$ChargeDensityTPC)
 
-if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
-	b <- read.table(file.path(tpvdir, "outputDeltaVmixed.txt"), header=T)
-}else if(file.exists(file.path(tpvdir, "outputDeltaVloess.txt"))){
-	b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
-}else{
+if(file.exists(file.path(tpvdir, "outputDeltaVloess.txt"))){
+	print("DC: using DeltaV from LOESS")
 	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
-	bMonoexp <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
-	if(length(b$file) == length(bMonoexp$file)){
-		b$deltaV <- (b$deltaV + bMonoexp$deltaV) / 2
-	}else{
+	bLoess <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
+	names(b) <- c("file", "Voc", "deltaV")
+	names(bLoess) <- c("file", "Voc", "deltaV")
+	b <- b[with(b, order(b$Voc)), ]
+	bLoess <- bLoess[with(bLoess, order(bLoess$Voc)), ]
+	len <- length(b$file)
+	b$deltaV <- (seq(len,1)*b$deltaV + seq(1,len)*bLoess$deltaV) / (len+1)
+}else if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
+	print("DC: using DeltaV from mixed monoexp and biexp")
+	b <- read.table(file.path(tpvdir, "outputDeltaVmixed.txt"), header=T)
+	names(b) <- c("file", "Voc", "deltaV")
+	b <- b[with(b, order(b$Voc)), ]
+}else{
+	print("DC: using DeltaV from maximum voltage point")
+	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+	names(b) <- c("file", "Voc", "deltaV")
+	b <- b[with(b, order(b$Voc)), ]
+	if(file.exists(file.path(tpvdir, "outputDeltaVmonoexp.txt"))){
+		bMonoexp <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
+		names(bMonoexp) <- c("file", "Voc", "deltaV")
+		bMonoexp <- bMonoexp[bMonoexp$deltaV > 0,]
+		bMonoexp <- bMonoexp[with(bMonoexp, order(bMonoexp$Voc)), ]
 		matchIndex <- match(bMonoexp$file, b$file)
-		b$deltaV[matchIndex] <- (b$deltaV[matchIndex] + bMonoexp$deltaV) / 2
+		# uses the Monoexp close to Voc and the plain deltaV close to dark, with a linear mixing between the two
+		lenMatch <- length(matchIndex)
+		b$deltaV[matchIndex] <- (seq(lenMatch,1)*b$deltaV[matchIndex] + seq(1,lenMatch)*bMonoexp$deltaV) / (lenMatch+1)
 	}
 }
 
-b <- b[with(b, order(b$Voc)), ]
+write.table(b, file=file.path(tpvdir, "outputDeltaVprocessedForDC.txt"), append=FALSE, row.names=FALSE)
 
 len <- length(b$deltaV)
 
@@ -56,13 +73,13 @@ outputDCcapacitance <- data.frame(b$Voc, capacitance);
 names(outputDCcapacitance) <- c("Voc","capacitance")
 write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
-#exp <- nlsLM(capacitance ~ B + C*D*exp(D*Voc), start=list(B=min(outputDCcapacitance$capacitance),C=1e-10,D=9), data=outputDCcapacitance)
-#tryCatch({
-#	exp <- nlrob(capacitance ~ B + C*D*exp(D*Voc), start=list(B=coef(exp)[[1]],C=coef(exp)[[2]],D=coef(exp)[[3]]), data=outputDCcapacitance)
-#}, error=function(e) print("Failed robust fit"))
-#tryCatch({
-	expfit <- nlsLM(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(min(outputDCcapacitance$capacitance)),C=log(1e-10),D=2), data=outputDCcapacitance)
-#}, error=function(e) print("Failed restricted to positive gamma fit"))
+
+tryCatch({
+	expfit <- nls(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
+}, error=function(e) print("Failed restricted to positive gamma fit - first"))
+tryCatch({
+	expfit <- nlsLM(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
+}, error=function(e) print("Failed restricted to positive gamma fit - second"))
 tryCatch({
 	expfit <- nlrob(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=coef(expfit)[[1]],C=coef(expfit)[[2]],D=coef(expfit)[[3]]), data=outputDCcapacitance)
 }, error=function(e) print("Failed restricted to positive gamma robust fit"))
@@ -103,11 +120,14 @@ png(paste("DC-charge-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))
 plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4)#, log="y")
 graphics.off()
+
 dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
-dataframe <- subset(dataframe, Voc < max(Voc)/2)
-geometrical <- mean(min(dataframe$capacitance),median(dataframe$capacitance))
+dataframe1 <- subset(dataframe, Voc < max(Voc)/2)
+dataframe2 <- dataframe[1:2,]
+dataframe <- unique(rbind(dataframe1, dataframe2))
+
+geometrical <- mean(c(min(dataframe$capacitance),median(dataframe$capacitance)))
 g$capacitance <- g$capacitance - geometrical
-#g$capacitance <- g$capacitance - mean(sort(g$capacitance)[1:3])
 
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 integral=Vectorize(function(X)integrate(z,0,X)$value)

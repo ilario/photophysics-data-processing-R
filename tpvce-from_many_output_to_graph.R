@@ -36,25 +36,6 @@ colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(
 dirs <- sub("./","",dirs)
 legend=sub("-ig..-...-.","",sub("^0","",dirs))
 
-#lapply(dirs, function(x) {print(x);
-# a <- read.table(paste(x,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
-# b<-strsplit(a$file, "_")
-# c<-unlist(b)[length(b[[1]])*(1:length(a$file))]
-# d<-as.numeric(gsub("mV", "", c))
-# lo <- loess(a$ChargeDensityCE~d,span=0.9)
-# a$d <- d
-#       	exp <- nlrob(ChargeDensityCE~ A+C*exp(D*d), start=list(A=0,C=2e-9,D=9), data=a)
-# expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*d), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$file)/2):length(a$file),])
-# jpeg(quality=98, paste(x,"-CEs.jpg",sep=""), width=640, height=480)
-# plot(NULL,xlim=c(0,1),ylim=c(0,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(x,"CE fitted"));
-# points(d, a$ChargeDensityCE, lwd=2, pch=i, col=colors[i+1])
-# lines(d,predict(exp))
-# lines(d,predict(lo),col="green")
-# lines(d[round(length(a$file)/2):length(a$file)],predict(expend),col="red")
-# graphics.off()
-# i <<- i+1
-#})
-
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=640, height=480)
 par(mar=c(5.1,5,2,2.1))
@@ -69,6 +50,12 @@ lapply(dirs, function(x) {print(x);
 #exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
 #expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
  expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=9), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ tryCatch({
+	  exp <- lm(ChargeDensityCE ~ Voc, data=a)
+ }, error=function(e) {print("FAILED LINEAR FIT")});
+ tryCatch({
+	  exp <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ }, error=function(e) {print("FAILED non-robust FIT")});
  tryCatch({
 	  exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
  }, error=function(e) {print("FAILED ZEROTH FIT")});
@@ -93,7 +80,7 @@ n<-tail(grep("file",fulloutput[,1]),n=1)
 tpv <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
-charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
+charge <- (predict(lo, tpv$Voc) + predict(exp, new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 output[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(charge,5)

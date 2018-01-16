@@ -34,26 +34,11 @@ library(minpack.lm)
 library(sfsmisc)
 library(Hmisc)
 
-#i <- 0
 dirs <- list.dirs(recursive=FALSE)
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 ##brewer.pal(max(length(dirs),3),"Spectral")
 dirs <- sub("./","",dirs)
 legend=sub("-ig..-...-.","",sub("^0","",dirs))
-#lapply(dirs, function(x) {print(x);
-# a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
-#  lo <- loess(a$ChargeDensityDC~a$Voc, span=0.9)
-#       	exp <- nlrob(ChargeDensityDC~ B*Voc + C*(exp(D*Voc)-1), start=list(B=1e-8,C=2e-9,D=9), data=a)
-# expend <- nlsLM(ChargeDensityDC~ C*(exp(D*Voc)-A), start=list(A=1,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
-# jpeg(quality=98, paste(x,"-DCfitting.jpg",sep=""), width=640, height=480)
-# plot(NULL,xlim=c(0,1),ylim=c(0,2e-7),cex.main=1.5,xlab="Voltage (V)",ylab="Charge Density (C/cm2)", main=paste(x,"DC fitted"));
-# points(a, lwd=2, pch=1, col=colors[i+1])
-# lines(a$Voc,predict(exp))
-# lines(a$Voc,predict(lo),col="green")
-# lines(a$Voc[round(length(a$Voc)/2):length(a$Voc)],predict(expend),col="red")
-# graphics.off()
-# i <<- i+1
-#})
 
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVDCs.jpg",sep=""), width=640, height=480)
@@ -67,6 +52,12 @@ lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
  expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+tryCatch({
+ exp <- lm(ChargeDensityDC ~ Voc, data=a)
+}, error=function(e) {print("FAILED LINEAR FIT")});
+tryCatch({
+ exp <- nls(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED non-robust FIT")});
 tryCatch({
  exp <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED ZEROTH FIT")});
@@ -127,8 +118,14 @@ lapply(dirs, function(x) {print(x);
  lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
  expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
 tryCatch({
+ exp <- nlsLM(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED ZEROTH nogeom FIT non-robust")});
+tryCatch({
  exp <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED ZEROTH nogeom FIT")});
+tryCatch({
+ exp <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+}, error=function(e) {print("FAILED FIRST nogeom FIT non-robust")});
 tryCatch({
  exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED FIRST nogeom FIT")});

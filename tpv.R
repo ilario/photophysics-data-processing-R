@@ -19,7 +19,7 @@ print("TPV: FITTING")
 library(robustbase)
 
 powerlaw=0
-robust=0
+robust=1
 logy=0
 logx=1
 residuals=0
@@ -206,8 +206,9 @@ tryCatch({
 
 		
 		print("Monoexp/Plot/Linear: Performing");
-		png(file.path(tpvdir,paste(x, "-monoexp.png", sep="")), width = 1280, height = 800);
-		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+		png(file.path(tpvdir,paste(x, "-monoexp.png", sep="")), width = 640, height = 640);
+		par(mar=c(5.1, 4.1+1, 4.1, 2.1))
+		plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow", cex.lab=2, cex.axis=2);#, main=paste(x,"monoexp")
 		points(temp, pch=".");
 		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time, predict(fit), col="red", lwd=2);
@@ -334,12 +335,13 @@ if(robust){
 		quitelowerpointmonoexp <- max((predict(fitR, newdata = data.frame(time=tail(tempsubset$time, n=1)))-AR)/5,min(subset(tempsubset, voltage > AR, select=voltage)-AR));
 		higherpointmonoexp <- max(predict(fitR, newdata = data.frame(time=0))-AR,head(tempsubset$voltage,n=1)-AR);
 		print("RobustMonoexp/Plot/Linear: Performing");
-		png(file.path(tpvdir,paste(x, "-robustmonoexp.png", sep="")), width = 1280, height = 800);
-		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+		png(file.path(tpvdir,paste(x, "-robustmonoexp.png", sep="")), width = 800, height = 800);
+		par(mar=c(5.1, 4.1+1, 4.1, 2.1))
+		plot(mydata[[x]]$time, mydata[[x]]$voltage, main=paste(x,"robust monoexp"), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow", cex.lab=2.5, cex.axis=2.5);
 		points(temp, pch=".");
 		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time, predict(fitR), col="red", lwd=2);
-		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
+		mtext(paste("Tau =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
 if(logy){
 		print("RobustMonoexp/Plot/Log: Performing");
