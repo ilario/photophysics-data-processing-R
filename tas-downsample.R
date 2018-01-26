@@ -17,9 +17,7 @@ logdownsampling <- function(data, s=0.001)
   )
 }
 
-allfiles = list.files(pattern='*nm.dat')
-pngfiles = list.files(pattern='png')
-list=allfiles[!allfiles %in% pngfiles] 
+list = list.files(pattern='*nm.dat')
 
 print(list[1])
 data=read.table(list[1], skip=244, header=F)
@@ -27,11 +25,11 @@ time=logdownsampling(data$V1)/10000
 
 wavelength=as.numeric(read.table(list[1], nrows=1, header=F)$V2)
 wavelengths=wavelength
-negative=read.table(list[1], skip=2, nrows=242, header=F)
+negative=read.table(list[1], skip=2, nrows=100, header=F)
 bias=mean(negative$V2)
 data=read.table(list[1], skip=243, header=F, colClasses=c("numeric","numeric"))
 deltaOD=logdownsampling(data$V2)
-deltaOD=(deltaOD-bias)/10000
+deltaOD=(deltaOD-bias)/1000
 deltaODmatrix=matrix(deltaOD)
 list <- list[-1]
 
@@ -39,7 +37,7 @@ invisible(lapply(list, function(x){print(x);
 wavelength=as.numeric(read.table(x, nrows=1, header=F)$V2)
 wavelengths<<-c(wavelengths, wavelength)
 
-negative=read.table(x, skip=2, nrows=242, header=F)
+negative=read.table(x, skip=2, nrows=100, header=F)
 bias=mean(negative$V2)
 
 data=read.table(x, skip=244, header=F)
