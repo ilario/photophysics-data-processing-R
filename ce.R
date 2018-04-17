@@ -1,7 +1,7 @@
-#library(robustbase)
 ce <- function(cedir="ce")
 {
 require(minpack.lm)
+library(robustbase)
 print("CE: INTEGRATING")
 files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
 mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("time","voltage"));
@@ -47,7 +47,10 @@ trashfornullmessages <- lapply(files, function(x) {
 	par(mar=c(5,4,4,5)+.1)
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x,"CE"))
 tryCatch({
-expfit <- nlsLM(voltage~ C*exp(D*time), start=list(C=0.5*max(decay$voltage),D=-0.1*tail(decay$time, n=1)), data=decay)
+	expfit <- nlsLM(voltage~ C*exp(D*time), start=list(C=0.5*max(decay$voltage),D=-0.1*tail(decay$time, n=1)), data=decay)
+	tryCatch({
+		expfit <- nlrob(voltage~ C*exp(D*time), start=list(C=coef(expfit)["C"],D=coef(expfit)["D"]), data=decay)
+	}, error=function(e) print("Failed monoexponential robust fit"))
 	lines(decay$time, predict(expfit), lwd=2, col="blue")
 }, error=function(e) print("Failed monoexponential fit"))
 	lines(mydata[[x]]$time, baseline, col="green")
