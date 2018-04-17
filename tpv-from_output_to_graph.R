@@ -45,7 +45,7 @@ tpv <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=TRUE, skip=ifel
 tpv <- tpv[with(tpv, order(tpv$Voc)),]
 lo<-loess(tpv$T~tpv$Voc,span=0.5)
 
-tpvEnding <- tpv[round(length(tpv$V)*0.4):length(tpv$V),]
+tpvEnding <- tpv[round(length(tpv$V)*0.5):length(tpv$V),]
 fit <- nlsLM(T~B*exp(C*Voc), start=list(B=4,C=-15), data=tpvEnding)
 tryCatch({
 fit <- nlrob(T~B*exp(C*Voc), start=list(B=coef(fit)["B"],C=coef(fit)["C"]), data=tpvEnding)
