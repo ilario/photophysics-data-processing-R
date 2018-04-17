@@ -50,8 +50,10 @@ discharge_func_fixedC = function(t) exp(-t/(impedance*geometrical_capacitance))
 
 lapply(files, function(x) {
 	message(x);
-
-	maxV = mean(sort(mydata[[x]]$voltage, decreasing = TRUE)[1:10])
+	lo = loess(mydata[[x]]$voltage~mydata[[x]]$time, span=0.01);
+	loess_voltage = predict(lo)
+	maxV = max(loess_voltage)
+#maxV=mean(sort(mydata[[x]]$voltage, decreasing = TRUE)[1:10])
 
 	b<-strsplit(x, "_")
 	c<-unlist(b)
@@ -62,7 +64,7 @@ lapply(files, function(x) {
 	new <- data.frame(Voc = Voc_fromfilename)
 
 	local_capacitance <- 0.09*predict(expfit, new)
-	t_max = mydata[[x]]$time[which.max(mydata[[x]]$voltage)]
+	t_max = mydata[[x]]$time[which.max(loess_voltage)]
 
 	discharge_profile = maxV * discharge_func(mydata[[x]]$time, local_capacitance)
 	discharge_profile_fixedC = maxV * discharge_func_fixedC(mydata[[x]]$time)
@@ -72,7 +74,9 @@ lapply(files, function(x) {
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x,"CE"), xlim=c(-1e-6, 8e-6))
 	lines(mydata[[x]]$time + t_max, discharge_profile, col="red")
 	lines(mydata[[x]]$time + t_max, discharge_profile_fixedC, col="blue")
-	legend(x="topright",inset=0.1,c("Charge Extraction", "RC time local capacitance DC", "RC time geometrical capacitance DC"), lty=1, lwd=10, cex=1.5, col=c("black","red","blue"))
+#abline(h=maxV)
+#lines(mydata[[x]]$time, predict(lo), col="green", lwd=2)
+	legend(x="topright",inset=0.1,c("Charge Extraction", "RC time local capacitance DC", "RC time geometrical capacitance DC"), lty=1, lwd=6, cex=1.5, col=c("black","red","blue"))
 	graphics.off()
 })
 }
