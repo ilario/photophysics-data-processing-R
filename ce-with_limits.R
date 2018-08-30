@@ -70,7 +70,7 @@ lapply(files, function(x) {
 	discharge_profile = maxV * discharge_func(mydata[[x]]$time, local_capacitance)
 	discharge_profile_fixedC = maxV * discharge_func_fixedC(mydata[[x]]$time)
 
-	png(file.path(cedir,paste(x, "-limits.png", sep="")), width=800, heigh=600)
+	png(file.path(cedir,paste(x, "-limits.png", sep="")), width=800, height=600)
 	par(mar=c(5,4,4,5)+.1)
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x,"CE"), xlim=c(-1e-6, 8e-6))
 	lines(mydata[[x]]$time + t_max, discharge_profile, col="red")

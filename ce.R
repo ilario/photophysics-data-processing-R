@@ -50,7 +50,7 @@ trashfornullmessages <- lapply(files, function(x) {
 
 	decay <- mydata[[x]][mydata[[x]]$time > time_start_decay,]
 
-	png(file.path(cedir,paste(x, ".png", sep="")), width=1280, heigh=800)
+	png(file.path(cedir,paste(x, ".png", sep="")), width=1280, height=800)
 	par(mar=c(5,4,4,5)+.1)
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x,"CE"), xlim=c(0,1e-5))
 

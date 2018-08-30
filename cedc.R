@@ -39,7 +39,7 @@ g$capacitance[g$capacitance < 0] <- 0
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 
 ChargeDensityCE <- ce$ChargeDensityCE*1e9
-png(paste("DC-CE-", directory, ".png", sep=""), heigh=600, width=600)
+png(paste("DC-CE-", directory, ".png", sep=""), height=600, width=600)
 par(mar=c(5.1,5,4.1,2.1))
 plot(Vectorize(function(X)integrate(z,0,X)$value*1e9),xlim=c(min(ce$Voc,range(f$Voc)[1]),max(ce$Voc,range(f$Voc)[2])), ylim=c(min(ChargeDensityCE),max(ChargeDensityCE, integrate(z,0,range(g$Voc)[2])$value*1e9))
      , ylab=bquote("Charge Density (nC/cm"^"2"*")"), xlab="Voltage (V)", main=paste(directory,"DC and CE"), cex.main=1.5, cex.lab=1.5, cex.axis=1.5)#, log="y")

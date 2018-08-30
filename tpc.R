@@ -42,7 +42,7 @@ trashfornullmessages <- lapply(files, function(x) {
 	write.table(outputChargeDensityTPC, file=file.path(tpcdir,"outputChargeDensityTPC.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
 
-	png(file.path(tpcdir,paste(x, ".png", sep="")), width=1280, heigh=800)
+	png(file.path(tpcdir,paste(x, ".png", sep="")), width=1280, height=800)
 	par(mar=c(5,4,4,5)+.1)
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x, "TPC"))
 	lines(mydata[[x]]$time, baseline, col="green")

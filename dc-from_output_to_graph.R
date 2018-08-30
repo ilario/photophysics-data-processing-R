@@ -94,7 +94,7 @@ if(!exists("expfit")){
 
 write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
-png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
+png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, height=400)
 par(mar=c(5,6,1,1))
 plot(b$Voc, capacitance, ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4, log="y")
 lines(outputDCcapacitance$Voc, predict(expfit),lwd=2, col="red")
@@ -126,7 +126,7 @@ integral=Vectorize(function(X)integrate(z,0,X)$value)
 outputDCcharge <- data.frame(f$Voc, integral(f$Voc));
 write.table(outputDCcharge, file="outputDCcharge.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
-png(paste("DC-charge-", directory, ".png", sep=""), width=400, heigh=400)
+png(paste("DC-charge-", directory, ".png", sep=""), width=400, height=400)
 par(mar=c(5,6,1,1))
 plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4)#, log="y")
 graphics.off()
@@ -145,7 +145,7 @@ integral=Vectorize(function(X)integrate(z,0,X)$value)
 outputDCcharge <- data.frame(f$Voc, integral(f$Voc));
 write.table(outputDCcharge, file="outputDCcharge-nogeom.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
-png(paste("DC-nogeom-charge-", directory, ".png", sep=""), width=400, heigh=400)
+png(paste("DC-nogeom-charge-", directory, ".png", sep=""), width=400, height=400)
 par(mar=c(5,6,1,1))
 plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/cm"^"2"*")"), xlab=bquote("V"["oc"]~"(V)"),cex.axis=1, cex.lab=1.4)#, log="y")
 graphics.off()

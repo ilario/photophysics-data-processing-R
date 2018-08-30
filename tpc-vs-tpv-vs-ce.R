@@ -51,7 +51,7 @@ tpv.min <- mean(tpv$V2[1:50])
 #main <- gsub(".txt.table","",gsub("CE_","",ce.file))
 #main <- strsplit(main, "_")[[1]][1]
 main <- basename(dirname(normalizePath(cedir)))
-png(paste("tpc_vs_tpv_vs_ce-", main, ".png", sep=""), width=600, heigh=600)
+png(paste("tpc_vs_tpv_vs_ce-", main, ".png", sep=""), width=600, height=600)
 plot(tpv$V1, (tpv$V2-tpv.min)/(tpv.max-tpv.min), xlim=c(-5e-7,0.5e-5), ylim=c(-0.1,1), type="l", ylab="Normalized Voltage", xlab="Time (s)", col="blue", yaxt='n', cex.axis=1.4, cex.lab=1.4)#main=paste(main, "TPC dark vs TPC 1sun vs TPV vs CE"),)
 lines(ce$V1, (ce$V2-ce.min)/(ce.max-ce.min), lwd=2, col="green")
 lines(tpc.sun$V1, (tpc.sun$V2-tpc.sun.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dark.max-tpc.dark.min)), lwd=1, col="red")
@@ -59,7 +59,7 @@ lines(tpc.dark$V1, (tpc.dark$V2-tpc.dark.min)/(max(tpc.sun.max-tpc.sun.min, tpc.
 legend(x="topright",inset=0.05, c("PI-TPC 1sun","PI-TPC dark", "PI-TPV 1sun", "PICE 1sun"), lwd=4, col=c("red","black","blue","green"), cex=2)
 graphics.off()
 
-png(paste("tpc_vs_tpc-", main, ".png", sep=""), width=600, heigh=600)
+png(paste("tpc_vs_tpc-", main, ".png", sep=""), width=600, height=600)
 plot(NULL, xlim=c(-5e-7,0.5e-5), ylim=c(-0.1,1), type="l", ylab="Voltage", xlab="Time (s)", yaxt='n', xaxt='n', cex.axis=1.4, cex.lab=1.4)# main=paste(main, "TPC dark vs TPC 1sun"),
 eaxis(side=1, cex.axis=1.2)
 lines(tpc.sun$V1, (tpc.sun$V2-tpc.sun.min)/(max(tpc.sun.max-tpc.sun.min, tpc.dark.max-tpc.dark.min)), lwd=1, col="red")
@@ -67,7 +67,7 @@ lines(tpc.dark$V1, (tpc.dark$V2-tpc.dark.min)/(max(tpc.sun.max-tpc.sun.min, tpc.
 legend(x="topright",inset=0.05, c("PI-TPC 1sun","PI-TPC dark"), lwd=4, col=c("red","black"), cex=2)
 graphics.off()
 
-png(paste("tpv_vs_ce-", main, ".png", sep=""), width=600, heigh=600)
+png(paste("tpv_vs_ce-", main, ".png", sep=""), width=600, height=600)
 plot(tpv$V1, (tpv$V2-tpv.min)/(tpv.max-tpv.min), xlim=c(-5e-7,0.5e-5), ylim=c(-0.1,1), type="l", ylab="Normalized Voltage", xlab="Time (s)", col="blue", yaxt='n', xaxt='n', cex.axis=1.4, cex.lab=1.4)#, main=paste(main, "TPV vs CE")
 eaxis(side=1, cex.axis=1.2)
 lines(ce$V1, (ce$V2-ce.min)/(ce.max-ce.min), lwd=2, col="green")
