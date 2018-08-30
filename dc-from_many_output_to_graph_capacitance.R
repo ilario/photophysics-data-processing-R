@@ -15,8 +15,7 @@
 
 #name=""
 
-#title=gsub("-","\n\n",gsub("_"," ",name))
-title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
+#title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
 library(RColorBrewer)
@@ -40,7 +39,7 @@ legend=sub("-ig..-...-.","",sub("^0","",dirs))
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
 
-jpeg(quality=98, paste(filename,"-DCs-capacitance.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-capacitance.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab="",# log="y", 
 yaxt="n",xaxt="n")#main=paste(name,"DCs capacitance"), )
@@ -76,7 +75,7 @@ output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-DCs-capacitance.csv",sep=""), row.names=FALSE, na="", sep=",")
 
 i <- 0
-jpeg(quality=98, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
 yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )

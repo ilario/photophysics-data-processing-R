@@ -15,7 +15,7 @@
 
 #name=""
 
-title=gsub("-","\n\n",gsub("_"," ",name))
+#title=gsub("-","\n\n",gsub("_"," ",name))
 filename=gsub(",","",gsub(":","",name))
 
 ylim=lim.TPVCE.lifetime
@@ -34,10 +34,10 @@ dirs <- list.dirs(recursive=FALSE)
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
 dirs <- sub("./","",dirs)
-legend=sub("-ig..-...-.","",sub("^0","",dirs))
+legend=sub("-ig.*","",sub("^0","",dirs))
 
 i <- 0
-jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,5,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Extracted Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n")#, main=paste(name,"TPV decay vs Charge from CE");
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)

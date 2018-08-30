@@ -16,8 +16,7 @@
 #name=""
 
 
-#title=gsub("-","\n\n",gsub("_"," ",name))
-title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
+#title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
 ylim=lim.TPVDC.lifetime
@@ -41,7 +40,7 @@ dirs <- sub("./","",dirs)
 legend=sub("-ig..-...-.","",sub("^0","",dirs))
 
 i <- 0
-jpeg(quality=98, paste(filename,"-TPVDCs.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-TPVDCs.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -106,7 +105,7 @@ write.table(output, file=paste(filename,"-TPVDCs.csv",sep=""), row.names=FALSE, 
 
 
 i <- 0
-jpeg(quality=98, paste(filename,"-TPVDCs-nogeom.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-TPVDCs-nogeom.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(1,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)

@@ -17,8 +17,7 @@
 
 #name=""
 
-#title=gsub("-","\n\n",gsub("_"," ",name))
-title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
+#title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
 ylim=lim.TPV.lifetime
@@ -37,7 +36,7 @@ dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
-legend=sub("-ig..-...-.","",sub("^0","",dirs))
+legend=sub("-ig.*","",sub("^0","",dirs))
 print("errori derivano da avere molti header in output, bisogna pulirlo")
 #directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
 #name<- directory[1]
@@ -45,9 +44,9 @@ print("errori derivano da avere molti header in output, bisogna pulirlo")
 print("biexp")
 
 i <- 0
-jpeg(quality=98, paste(filename, "-TPVs-biexp.jpg",sep=""), width=640, height=480);
+jpeg(quality=98, paste(filename, "-TPVs-biexp.jpg",sep=""), width=image_width, height=image_height);
 par(mar=c(5.1,5,2,2.1))
-plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Life-time (s)", yaxt="n")#, main=paste(name, "TPV biexp"));
+plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Charge carrier lifetime (s)", yaxt="n")#, main=paste(name, "TPV biexp"));
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 minor.tick(nx=10)
 
@@ -58,15 +57,11 @@ output <- read.table(paste(x,"/tpv/output-biexp.txt",sep=""), header=TRUE, skip=
 output.biexp[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(output$Voc,5)
 output.biexp[[paste(sub("-ig..-...-.","",sub("^0","",x)),"T1",sep="")]] <<- signif(output$T1,5)
 output.biexp[[paste(sub("-ig..-...-.","",sub("^0","",x)),"T2",sep="")]] <<- signif(output$T2,5)
-#errbar(output$Voc, output$T1, output$T1+output$T1.error, output$T1-output$T1.error,log="y",add=TRUE)
-#errbar(output$Voc, output$T2, output$T2+output$T2.error, output$T2-output$T2.error,log="y",add=TRUE)
 points(output$Voc, output$T1, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
 points(output$Voc, output$T2, lwd=1, pch=21+(i%%5), col=colors[i+1], cex=2);
 i <<- i+1
 })
-legend(x="bottomleft",inset=0.05,legend,pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=#paste("TPV biexp\n",
-       title, bg="gray90",#bty="n"
-col=colors)
+legend(x="topright",inset=0.05,legend,pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=title, bg="gray90", col=colors)
 graphics.off()
 
 maxlength.biexp = max(sapply(output.biexp,length))
@@ -75,28 +70,11 @@ output.biexp = as.data.frame(output.biexp,check.names=FALSE)
 write.table(output.biexp, file=paste(filename,"-TPVs-biexp.csv",sep=""), row.names=FALSE, na="", sep=",")
 
 
-#print("robust biexp")
-#i <- 0
-#jpeg(quality=98, paste(name, "-TPVs-robustbiexp.jpg",sep=""), width=640, height=480);
-#plot(1, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.5,cex.lab=1.5, log="y", xlab="Voc (V)", ylab="Life-time (s)", main=paste(name, "TPV robust biexp"));
-#lapply(dirs, function(x) {print(x);
-#fulloutput <- read.table(paste(x,"/output-robustbiexp.txt",sep=""), header=TRUE);
-#n<-tail(grep("file",fulloutput[,1]),n=1)
-#output <- read.table(paste(x,"/output-robustbiexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
-##errbar(output$Voc, output$T1, output$T1+output$T1.error, output$T1-output$T1.error,log="y",add=TRUE)
-##errbar(output$Voc, output$T2, output$T2+output$T2.error, output$T2-output$T2.error,log="y",add=TRUE)
-#points(output$Voc, output$T1, pch=21, col=colors[i+1], bg=colors[i+1]);
-#points(output$Voc, output$T2, col=colors[i+1]);
-#i <<- i+1
-#})
-#legend(x="bottomleft",inset=0.05,dirs,pt.cex=2,cex=1.5,pch=seq(0,10,1), col=colors)
-#graphics.off()
-
 print("monoexp")
 i <- 0
-jpeg(quality=98, paste(filename, "-TPVs-monoexp.jpg",sep=""), width=640, height=480);
+jpeg(quality=98, paste(filename, "-TPVs-monoexp.jpg",sep=""), width=image_width, height=image_height);
 par(mar=c(5.1,5,2,2.1))
-plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Life-time (s)", yaxt="n")#, main=paste(name, "TPV monoexp"));
+plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Charge carrier lifetime (s)", yaxt="n")#, main=paste(name, "TPV monoexp"));
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 minor.tick(nx=10)
 
@@ -106,32 +84,15 @@ n<-tail(grep("file",fulloutput[,1]),n=1)
 output <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
 output.monoexp[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(output$Voc,5)
 output.monoexp[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(output$T,5)
-#errbar(output$Voc, output$T, output$T+output$T.error, output$T-output$T.error,log="y",add=TRUE)
 points(output$Voc, output$T, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
 i <<- i+1
 })
-legend(x="bottomleft",inset=0.05,legend,pt.cex=2, pt.lwd=2,cex=1.5, pch=seq(21,25), pt.bg=colors, col=colors, title=#paste("TPV exp\n",
-title, bg="gray90"#), bty="n"
-)
+legend(x="topright",inset=0.05,legend,pt.cex=2, pt.lwd=2,cex=1.5, pch=seq(21,25), pt.bg=colors, col=colors, title=title, bg="gray90")
 
 graphics.off()
 
 maxlength.monoexp = max(sapply(output.monoexp,length))
-output.monoexp = lapply(output.monoexp, function(x){length(x)=maxlength.monoexp; print(x)})
+output.monoexp = lapply(output.monoexp, function(x){length(x)=maxlength.monoexp})
 output.monoexp = as.data.frame(output.monoexp,check.names=FALSE)
 write.table(output.monoexp, file=paste(filename,"-TPVs-monoexp.csv",sep=""), row.names=FALSE, na="", sep=",")
 
-#print("robust monoexp")
-#i <- 0
-#jpeg(quality=98, paste(name, "-TPVs-robustmonoexp.jpg",sep=""), width=640, height=480);
-#plot(1, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.5,cex.lab=1.5, log="y", xlab="Voc (V)", ylab="Life-time (s)", main=paste(name, "TPV robust monoexp"));
-#lapply(dirs, function(x) {print(x);
-#fulloutput <- read.table(paste(x,"/output-robustmonoexp.txt",sep=""), header=TRUE);
-#n<-tail(grep("file",fulloutput[,1]),n=1)
-#output <- read.table(paste(x,"/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
-##errbar(output$Voc, output$T, output$T+output$T.error, output$T-output$T.error,log="y",add=TRUE)
-#points(output$Voc, output$T, lwd=2, pch=i, col=colors[i+1]);
-#i <<- i+1
-#})
-#legend(x="bottomleft",inset=0.05,dirs,pt.cex=2,cex=1.5,pch=seq(0,10,1), col=colors)
-#graphics.off()

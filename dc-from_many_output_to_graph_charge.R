@@ -15,8 +15,7 @@
 
 #name=""
 
-#title=gsub("-","\n\n",gsub("_"," ",name))
-title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
+#title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
 library(RColorBrewer)
@@ -56,7 +55,7 @@ capacitance <- charge/b$deltaV
  f})
 names(data) <- dirs
 
-jpeg(quality=98, paste(filename,"-DCs-charge-linlog.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-charge-linlog.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
 #magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
@@ -88,7 +87,7 @@ write.table(output, file=paste(filename,"-DCs-charge.csv",sep=""), row.names=FAL
 
 
 i<-0
-jpeg(quality=98, paste(filename,"-DCs-charge.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-charge.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
 eaxis(side=2, cex.axis=1.2)
@@ -113,7 +112,7 @@ title,bg="gray90"#), bty="n"
 graphics.off()
 
 i<-0
-jpeg(quality=98, paste(filename,"-DCs-nogeom-charge-linlog.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-nogeom-charge-linlog.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
 #magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
@@ -153,7 +152,7 @@ write.table(output.nogeom, file=paste(filename,"-DCs-nogeom-charge.csv",sep=""),
 
 
 i<-0
-jpeg(quality=98, paste(filename,"-DCs-nogeom-charge.jpg",sep=""), width=640, height=480)
+jpeg(quality=98, paste(filename,"-DCs-nogeom-charge.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
 eaxis(side=2, cex.axis=1.2)

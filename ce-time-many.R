@@ -15,7 +15,7 @@
 
 #name=""
 
-title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
+#title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
 filename=gsub(",","",gsub(":","",name))
 
 library(RColorBrewer)
@@ -30,7 +30,7 @@ ce.max = 0
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig..-...-.","",sub("^0","",dirs))
+legend=sub("-ig.*","",sub("^0","",dirs))
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 data <- lapply(dirs, function(x) {print(x);
 ce.files <- list.files(path=file.path(x, "ce"), pattern="^CE.*\\.txt.table$");
@@ -43,9 +43,9 @@ ce.max <<- max(ce.max, max(ce$V2))
 names(data) <- dirs
 
 ylim=c(-0.05*ce.max, ce.max)
-xlim=c(-5e-8,2e-6)
+xlim=c(-5e-8,5e-6)
 
-png(paste(filename, "-CE_times.png", sep=""), width=1000, heigh=1000)
+png(paste(filename, "-CE_times.png", sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,5,2,2.1))
 plot(NULL, xlim=xlim, ylim=ylim, cex.main=1.5, xlab="Time (s)", ylab="Current (a.u.)", cex.lab=1.5, cex.axis=1.2, yaxt="n")
 lapply(dirs, function(x) {print(x);

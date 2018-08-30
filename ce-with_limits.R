@@ -24,6 +24,7 @@ files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
 mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
+write.table(t(c("Voc","RCtime")), file=file.path(cedir,"outputRCtime.txt"), append=FALSE, col.names=F, row.names=F);
 
 impedance = 50
 
@@ -78,5 +79,8 @@ lapply(files, function(x) {
 #lines(mydata[[x]]$time, predict(lo), col="green", lwd=2)
 	legend(x="topright",inset=0.1,c("Charge Extraction", "RC time local capacitance DC", "RC time geometrical capacitance DC"), lty=1, lwd=6, cex=1.5, col=c("black","red","blue"))
 	graphics.off()
+
+	outputRCtime <- t(c(Voc_fromfilename, impedance*local_capacitance));
+	write.table(outputRCtime, file=file.path(cedir,"outputRCtime.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 })
 }

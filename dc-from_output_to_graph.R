@@ -66,23 +66,33 @@ len <- length(b$deltaV)
 # this is completely arbitrary and likely wrong, but the difference between chargeDark and chargeSun should be small
 chargeArray = seq(chargeDark, chargeSun, length.out=len)
 
-capacitance <- chargeArray/b$deltaV
-directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
+getExpFit <- function(){
+	capacitance <<- chargeArray/b$deltaV
+	directory <<- tail(strsplit(getwd(), "/")[[1]], n=1)
 
-outputDCcapacitance <- data.frame(b$Voc, capacitance);
-names(outputDCcapacitance) <- c("Voc","capacitance")
+	outputDCcapacitance <<- data.frame(b$Voc, capacitance);
+	names(outputDCcapacitance) <<- c("Voc","capacitance")
+
+	tryCatch({
+		expfit <<- nls(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
+	}, error=function(e) print("Failed restricted to positive gamma fit - first"))
+	tryCatch({
+		expfit <<- nlsLM(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
+	}, error=function(e) print("Failed restricted to positive gamma fit - second"))
+	tryCatch({
+		expfit <<- nlrob(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=coef(expfit)[[1]],C=coef(expfit)[[2]],D=coef(expfit)[[3]]), data=outputDCcapacitance)
+	}, error=function(e) print("Failed restricted to positive gamma robust fit"))
+}
+
+
+getExpFit()
+if(!exists("expfit")){
+	print("Linearly changing from TPC dark to TPC sun value failed, trying with an AVERAGED value as TPC value")
+	chargeArray = rep(mean(c(chargeDark, chargeSun)), len)
+	getExpFit()
+}
+
 write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, col.names=F, row.names=F, quote=F);
-
-
-tryCatch({
-	expfit <- nls(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
-}, error=function(e) print("Failed restricted to positive gamma fit - first"))
-tryCatch({
-	expfit <- nlsLM(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
-}, error=function(e) print("Failed restricted to positive gamma fit - second"))
-tryCatch({
-	expfit <- nlrob(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=coef(expfit)[[1]],C=coef(expfit)[[2]],D=coef(expfit)[[3]]), data=outputDCcapacitance)
-}, error=function(e) print("Failed restricted to positive gamma robust fit"))
 
 png(paste("DC-capacitance-", directory, ".png", sep=""), width=400, heigh=400)
 par(mar=c(5,6,1,1))

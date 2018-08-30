@@ -23,7 +23,7 @@ a <- read.table("table", col.names = c("device","diode","reverse","Jsc","Voc","F
 levels(a$notes) <- c(levels(a$notes), "NANA")
 a[is.na(a)] <- "NANA"
 
-colors<-c("blue","blue","darkviolet","darkviolet","darkred","darkred")
+colors<-c("blue","blue","darkviolet","darkviolet","darkred","darkred", "darkgreen", "darkgreen")
 
 a1 <- data.frame(a, temp1 = factor(a$device, v1all))
 colnames(a1)[ncol(a1)] <- var1
@@ -59,7 +59,9 @@ signif.mean <- function(values, digits){
 }
 
 single <- function(x,mar,mgp.y,mgp.x){
-	png(paste(name, "-", x, ".png", sep=""));
+	print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=length))
+
+	png(paste(name, "-", x, ".png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(PCE~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$PCE),max(d$PCE)))
 	stripchart(PCE ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
@@ -68,28 +70,31 @@ single <- function(x,mar,mgp.y,mgp.x){
 	print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
 	graphics.off()
 
-	png(paste(name, "-", x, "-Jsc.png", sep=""));
+	png(paste(name, "-", x, "-Jsc.png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(Jsc~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$Jsc),max(d$Jsc)))
 	stripchart(Jsc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
 	title(ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.5)
+	print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
 	graphics.off()
 
-	png(paste(name, "-", x, "-Voc.png", sep=""));
+	png(paste(name, "-", x, "-Voc.png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(Voc~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$Voc),max(d$Voc)))
 	stripchart(Voc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
 	title(ylab=bquote("V"["oc"]~"(V)"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.5)
+	print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
 	graphics.off()
 
-	png(paste(name, "-", x, "-FF.png", sep=""));
+	png(paste(name, "-", x, "-FF.png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(FF~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$FF),max(d$FF)))
 	stripchart(FF ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
 	title(ylab="FF", mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.5)
+	print(aggregate(d$FF, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
 	graphics.off()
 }
 
@@ -98,7 +103,7 @@ if(exists("var2")){single(x=var2, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(8,1,0
 if(exists("var3")){single(x=var3, mar=c(12,6,1,1), mgp.y=c(4,1,0), mgp.x=c(8,1,0))}}
 
 double <- function(x,y,mar,mgp.y,mgp.x){
-	png(paste(name, "-", x, "-", y, ".png", sep=""));
+	png(paste(name, "-", x, "-", y, ".png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(PCE~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$PCE),max(d$PCE)))
 	stripchart(PCE ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
@@ -106,7 +111,7 @@ double <- function(x,y,mar,mgp.y,mgp.x){
 	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
-	png(paste(name,  "-", x,"-", y, "-Jsc.png", sep=""));
+	png(paste(name,  "-", x,"-", y, "-Jsc.png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(Jsc~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$Jsc),max(d$Jsc)))
 	stripchart(Jsc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
@@ -114,7 +119,7 @@ double <- function(x,y,mar,mgp.y,mgp.x){
 	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
-	png(paste(name,  "-", x,"-", y, "-Voc.png", sep=""));
+	png(paste(name,  "-", x,"-", y, "-Voc.png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(Voc~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$Voc),max(d$Voc)))
 	stripchart(Voc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
@@ -122,7 +127,7 @@ double <- function(x,y,mar,mgp.y,mgp.x){
 	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.5)
 	graphics.off()
 
-	png(paste(name,  "-", x,"-", y, "-FF.png", sep=""));
+	png(paste(name,  "-", x,"-", y, "-FF.png", sep=""), width=1200, heigh=600);
 	par(mar=mar)
 	boxplot(FF~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.5, border=colors, las=2, outline=FALSE, ylim=c(min(d$FF),max(d$FF)))
 	stripchart(FF ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)

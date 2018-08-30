@@ -1,3 +1,7 @@
+name="photophysics"
+title=NULL
+image_width=1600
+image_height=900
 lim.TPV.voltage=c(0,1.15)
 lim.TPV.lifetime=c(2e-7,1e-3)
 lim.CE.voltage=lim.TPV.voltage
