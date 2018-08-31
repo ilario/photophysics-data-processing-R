@@ -31,7 +31,12 @@ i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
 legend=sub("-ig.*","",sub("^0","",dirs))
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
+
+# try to obtain the color from the file name
+colors=gsub(".*-col_","",dirs)
+# if the color is not set, use the default one
+if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
+
 data <- lapply(dirs, function(x) {print(x);
 ce.files <- list.files(path=file.path(x, "ce"), pattern="^CE.*\\.txt.table$");
 ce.file <- tail(ce.files, n=1)

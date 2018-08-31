@@ -34,10 +34,11 @@ i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
 legend=sub("-ig.*","",sub("^0","",dirs))
-#files.tpc <- list.files(path=".", pattern="*-outputDeltaV.txt$")
-#files.tpv <- list.files(path=".", pattern="*-outputChargeDensityTPC.txt$")
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
-#brewer.pal(max(length(dirs),3),"Spectral")
+
+# try to obtain the color from the file name
+colors=gsub(".*-col_","",dirs)
+# if the color is not set, use the default one
+if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
 
 jpeg(quality=98, paste(filename,"-DCs-capacitance.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))

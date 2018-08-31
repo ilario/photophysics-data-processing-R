@@ -34,10 +34,13 @@ library(sfsmisc)
 library(Hmisc)
 
 dirs <- list.dirs(recursive=FALSE)
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
-##brewer.pal(max(length(dirs),3),"Spectral")
 dirs <- sub("./","",dirs)
 legend=sub("-ig.*","",sub("^0","",dirs))
+
+# try to obtain the color from the file name
+colors=gsub(".*-col_","",dirs)
+# if the color is not set, use the default one
+if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
 
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVDCs.jpg",sep=""), width=image_width, height=image_height)

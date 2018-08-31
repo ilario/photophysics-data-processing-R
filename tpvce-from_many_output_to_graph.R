@@ -29,12 +29,14 @@ library(minpack.lm)
 library(sfsmisc)
 library(Hmisc)
 
-i <- 0
 dirs <- list.dirs(recursive=FALSE)
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
-#brewer.pal(max(length(dirs),3),"Spectral")
 dirs <- sub("./","",dirs)
 legend=sub("-ig.*","",sub("^0","",dirs))
+
+# try to obtain the color from the file name
+colors=gsub(".*-col_","",dirs)
+# if the color is not set, use the default one
+if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
 
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
@@ -90,9 +92,7 @@ lines(charge, predict(lo2), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
  i <<- i+1
 })
-legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs CE\n",
-title,bg="gray90"#, bty="n")
-	)
+legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=title,bg="gray90", bty="n")
 graphics.off()
 
 maxlength = max(sapply(output,length))

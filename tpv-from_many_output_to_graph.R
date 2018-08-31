@@ -34,12 +34,14 @@ library(Hmisc)
 
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
-#brewer.pal(max(length(dirs),3),"Spectral")
 legend=sub("-ig.*","",sub("^0","",dirs))
+
+# try to obtain the color from the file name
+colors=gsub(".*-col_","",dirs)
+# if the color is not set, use the default one
+if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
+
 print("errori derivano da avere molti header in output, bisogna pulirlo")
-#directory <- tail(strsplit(getwd(), "/")[[1]], n=2)
-#name<- directory[1]
 
 print("biexp")
 
