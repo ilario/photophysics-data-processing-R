@@ -34,7 +34,7 @@ output.nogeom=list()
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig..-...-.","",sub("^0","",dirs))
+legend=sub("-ig.*","",sub("^0","",dirs))
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 #brewer.pal(max(length(dirs),3),"Spectral")
 
@@ -69,9 +69,9 @@ w <- Vectorize(function(X)integrate(z,0,X)$value)
 curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
-output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
+output[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
 www <- unlist(lapply(xx, ww))
-output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(www,5)
+output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(www,5)
 points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
@@ -135,9 +135,9 @@ w <- Vectorize(function(X)integrate(z,0,X)$value)
 curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
-output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
+output.nogeom[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
 www <- unlist(lapply(xx, ww))
-output.nogeom[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(www,5)
+output.nogeom[[sub("-ig.*","",sub("^0","",x))]] <<- signif(www,5)
 points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })

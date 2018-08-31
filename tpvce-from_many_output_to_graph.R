@@ -83,8 +83,8 @@ new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo, tpv$Voc) + predict(exp, new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
-output[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
-output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(tpv$T,5)
+output[[paste("Charge",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
+output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
 lo2<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo2), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));

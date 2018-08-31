@@ -37,7 +37,7 @@ dirs <- list.dirs(recursive=FALSE)
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
 ##brewer.pal(max(length(dirs),3),"Spectral")
 dirs <- sub("./","",dirs)
-legend=sub("-ig..-...-.","",sub("^0","",dirs))
+legend=sub("-ig.*","",sub("^0","",dirs))
 
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVDCs.jpg",sep=""), width=image_width, height=image_height)
@@ -86,8 +86,8 @@ new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
-output[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
-output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(tpv$T,5)
+output[[paste("Charge",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
+output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
 lo<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
@@ -141,8 +141,8 @@ new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
-output.nogeom[[paste("Charge",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
-output.nogeom[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(tpv$T,5)
+output.nogeom[[paste("Charge",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
+output.nogeom[[sub("-ig.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
 lo<-loess(tpv$T~charge,span=0.3)
 lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));

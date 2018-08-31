@@ -27,16 +27,34 @@ require(minpack.lm)
 ylim=lim.CE.charge
 xlim=lim.CE.voltage
 
+## Add an alpha value to a colour https://gist.github.com/mages/5339689
+add.alpha <- function(col, alpha=1){
+	if(missing(col))
+		stop("Please provide a vector of colours.")
+	apply(sapply(col, col2rgb)/255, 2,
+		function(x)
+			rgb(x[1], x[2], x[3], alpha=alpha))
+}
+change.lightness <- function(col, lightness=1){
+	if(missing(col))
+		stop("Please provide a vector of colours.")
+	apply(sapply(col, col2rgb, alpha=TRUE)/255, 2,
+		function(x)
+			rgb(x[1]*lightness, x[2]*lightness, x[3]*lightness, alpha=x[4]))
+}
+
 output=list()
 
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig..-...-.","",sub("^0","",dirs))
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
+legend=sub("-ig.*","",sub("^0","",dirs))
+
+colors=colorRampPalette(c("red","green","blue","gray"))(max(length(dirs),3))
+
 data <- lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
- output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- a$Voc
+ output[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- a$Voc
  a <- a[with(a, order(a$Voc)),]
  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
  tryCatch({
@@ -51,7 +69,7 @@ data <- lapply(dirs, function(x) {print(x);
 # exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
  g <- predict(exp,a$Voc)
  a$g <- g
- output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(g,5)
+ output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(g,5)
  a})
 names(data) <- dirs
 
@@ -66,16 +84,15 @@ plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extra
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 minor.tick(nx=10)
 lapply(dirs, function(x) {print(x);
- lines(data[[x]]$Voc, data[[x]]$g, col=colors[i+1],lwd=2)
- points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+(i%%5), cex=2)
+ points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.3), pch=21+(i%%5), cex=2)
+ lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.5),lwd=3)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
 # mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
-legend(x="bottomright",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90"#, bty="n"
-)
+legend(x="bottomright",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90", bty="n")
 graphics.off()
 
 i<-0
@@ -86,15 +103,14 @@ eaxis(side=2, cex.axis=1.2)
 minor.tick(nx=10, ny=10)
 title(ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
 lapply(dirs, function(x) {print(x);
- lines(data[[x]]$Voc, data[[x]]$g, col=colors[i+1],lwd=2)
- points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=1, bg=colors[i+1], pch=21+(i%%5), cex=2)
+ points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.3), pch=21+(i%%5), cex=2)
+ lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.5),lwd=3)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
 # mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
-legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90"#bty="n"
-)
+legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90",bty="n")
 graphics.off()
 

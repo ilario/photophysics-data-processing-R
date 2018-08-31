@@ -33,7 +33,7 @@ output.nogeom=list()
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig..-...-.","",sub("^0","",dirs))
+legend=sub("-ig.*","",sub("^0","",dirs))
 #files.tpc <- list.files(path=".", pattern="*-outputDeltaV.txt$")
 #files.tpv <- list.files(path=".", pattern="*-outputChargeDensityTPC.txt$")
 colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))
@@ -57,9 +57,9 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 }else{
 	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
 }
-output[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
+output[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
-output[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(capacitance,5)
+output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(capacitance,5)
 
 points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
  i <<- i+1
@@ -92,7 +92,7 @@ if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
 }else{
 	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
 }
-output.nogeom[[paste("Voc",sub("nm","",sub("-ig..-...-.","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
+output.nogeom[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
 dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)
 
@@ -104,7 +104,7 @@ geometrical <- mean(min(dataframe$capacitance),median(dataframe$capacitance))
 capacitance <- capacitance - geometrical
 #capacitance <- capacitance - min(capacitance)#mean(sort(capacitance)[1:3])
 
-output.nogeom[[sub("-ig..-...-.","",sub("^0","",x))]] <<- signif(capacitance,5)
+output.nogeom[[sub("-ig.*","",sub("^0","",x))]] <<- signif(capacitance,5)
 points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
  i <<- i+1
 })
