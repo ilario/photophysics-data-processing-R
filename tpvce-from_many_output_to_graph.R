@@ -29,6 +29,23 @@ library(minpack.lm)
 library(sfsmisc)
 library(Hmisc)
 
+## Add an alpha value to a colour https://gist.github.com/mages/5339689
+add.alpha <- function(col, alpha=1){
+	if(missing(col))
+		stop("Please provide a vector of colours.")
+	apply(sapply(col, col2rgb)/255, 2,
+		function(x)
+			rgb(x[1], x[2], x[3], alpha=alpha))
+}
+change.lightness <- function(col, lightness=1){
+	if(missing(col))
+		stop("Please provide a vector of colours.")
+	apply(sapply(col, col2rgb, alpha=TRUE)/255, 2,
+		function(x)
+			rgb(x[1]*lightness, x[2]*lightness, x[3]*lightness, alpha=x[4]))
+}
+
+
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
 legend=sub("-ig.*","",sub("^0","",dirs))
@@ -40,11 +57,16 @@ if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","r
 
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
-par(mar=c(5.1,5,2,2.1))
-plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Extracted Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n")#, main=paste(name,"TPV decay vs Charge from CE");
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
-eaxis(side=1, cex.axis=1.2)
-minor.tick(nx=10)
+op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
+plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="",cex.lab=2,cex.axis=1.5,log="xy", yaxt="n", xaxt="n")
+#line is for introducing more space between label and axis
+title(ylab = "Charge carrier lifetime (s)", cex.lab = 2, line = 4)
+title(xlab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 4)
+
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
+xtick = 10^(floor(log10(xlim[2])))
+eaxis(side=1,at=seq(xtick, xlim[2], xtick), cex.axis=1.5)
+#minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
@@ -87,13 +109,32 @@ new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 output[[paste("Charge",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
-lo2<-loess(tpv$T~charge,span=0.3)
-lines(charge, predict(lo2), lwd=2, col=colors[i+1])
-points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
- i <<- i+1
+points(charge, tpv$T, lwd=0.2, bg=add.alpha(colors[i+1],0.5), cex=2, pch=21+(i%%5));
+#lo2<-loess(tpv$T~charge,span=0.3)
+#lines(charge, predict(lo2), lwd=3, col=change.lightness(colors[i+1],0.5))
+index_shown_charge = which(charge >= xlim[1] & charge <= xlim[2])
+shown_charge = charge[index_shown_charge]
+shown_T = tpv$T[index_shown_charge]
+weights= (1/(shown_T/min(shown_T)))^3
+j=0
+while(!exists("powerlaw")){
+	j <- j + 1
+	start <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
+	tryCatch({
+		powerlaw <- nlsLM(shown_T~exp(y0)+exp(A)*shown_charge^alpha, start=start, weights=weights)
+		print(powerlaw)
+	}, error=function(e) {print("FAILED POWERLAW FIT")});
+}
+
+lines(shown_charge, predict(powerlaw, shown_charge), lwd=3, col=change.lightness(colors[i+1],0.5))
+
+i <<- i+1
 })
-legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=title,bg="gray90", bty="n")
+legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=2, title=title,bg="gray90", bty="n")
 graphics.off()
+
+#reset the plotting margins
+par(op)
 
 maxlength = max(sapply(output,length))
 output = lapply(output, function(x){length(x)=maxlength; print(x)})
