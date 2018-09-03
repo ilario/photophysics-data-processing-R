@@ -82,9 +82,12 @@ output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-CEs.csv",sep=""), row.names=FALSE, na="", sep=",")
 
 jpeg(quality=98, paste(filename,"-CEs-linlog.jpg",sep=""), width=image_width, height=image_height)
-par(mar=c(5.1,5,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"),  cex.lab=1.5, cex.axis=1.2, log="y", yaxt="n");#main=paste(name,"CEs"),
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1 
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="",ylab="",  cex.lab=2, cex.axis=1.5, log="y", yaxt="n");
+title(ylab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 5)
+title(xlab = "Voltage (V)", cex.lab = 2, line = 3)
+
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
 minor.tick(nx=10)
 lapply(dirs, function(x) {print(x);
  points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
@@ -95,16 +98,20 @@ lapply(dirs, function(x) {print(x);
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
-legend(x="bottomright",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90", bty="n")
+legend(x="bottomright",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90", bty="n")
 graphics.off()
+#reset the plotting margins
+par(op)
 
 i<-0
 jpeg(quality=98, paste(filename,"-CEs.jpg",sep=""), width=image_width, height=image_height)
-par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="Voltage (V)", ylab="", cex.lab=1.5, cex.axis=1.2, yaxt="n");#main=paste(name,"CEs"),
-eaxis(side=2, cex.axis=1.2)
+op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1 
+plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="", cex.lab=2, cex.axis=1.5, yaxt="n");
+title(ylab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 5)
+title(xlab = "Voltage (V)", cex.lab = 2, line = 3)
+
+eaxis(side=2, cex.axis=1.5)
 minor.tick(nx=10, ny=10)
-title(ylab=bquote("Extracted Charge Density (C/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
 lapply(dirs, function(x) {print(x);
  points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
  lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.5),lwd=3)
@@ -114,6 +121,7 @@ lapply(dirs, function(x) {print(x);
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
  i <<- i+1
 })
-legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=1.5, pt.lwd=2, lwd=4, title=title, bg="gray90",bty="n")
+legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90",bty="n")
 graphics.off()
-
+#reset the plotting margins
+par(op)
