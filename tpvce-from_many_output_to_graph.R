@@ -116,15 +116,16 @@ index_shown_charge = which(charge >= xlim[1] & charge <= xlim[2])
 shown_charge = charge[index_shown_charge]
 shown_T = tpv$T[index_shown_charge]
 weights= (1/(shown_T/min(shown_T)))^3
-j=0
+j=1
 while(!exists("powerlaw")){
-	j <- j + 1
+	j <- j + 0.1
 	start <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
 	tryCatch({
 		powerlaw <- nlsLM(shown_T~exp(y0)+exp(A)*shown_charge^alpha, start=start, weights=weights)
-		print(powerlaw)
+		if(!summary(powerlaw)$convInfo$isConv){rm(powerlaw)}
 	}, error=function(e) {print("FAILED POWERLAW FIT")});
 }
+print(powerlaw)
 
 lines(shown_charge, predict(powerlaw, shown_charge), lwd=3, col=change.lightness(colors[i+1],0.5))
 
