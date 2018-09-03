@@ -48,7 +48,7 @@ output=list()
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig.*","",sub("^0","",dirs))
+legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
 colors=gsub(".*-col_","",dirs)
@@ -57,7 +57,7 @@ if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","r
 
 data <- lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
- output[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- a$Voc
+ output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- a$Voc
  a <- a[with(a, order(a$Voc)),]
  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
  tryCatch({
@@ -69,10 +69,13 @@ data <- lapply(dirs, function(x) {print(x);
  tryCatch({
  exp <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)[[1]],C=coef(exp)[[2]],D=coef(exp)[[3]]), data=a)
  }, error=function(e) print("Failed robust fit"))
-# exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
+ 
+ print(exp)
  g <- predict(exp,a$Voc)
  a$g <- g
- output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(g,5)
+ output[[sub("_.*","",sub("^0","",x))]] <<- signif(g,5)
+ onlyexp <- exp(coef(exp)[2])*(exp(exp(coef(exp)[3])*a$Voc)-1)
+ a$onlyexp <- onlyexp
  a})
 names(data) <- dirs
 
@@ -81,27 +84,30 @@ output = lapply(output, function(x){length(x)=maxlength; print(x)})
 output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-CEs.csv",sep=""), row.names=FALSE, na="", sep=",")
 
-jpeg(quality=98, paste(filename,"-CEs-linlog.jpg",sep=""), width=image_width, height=image_height)
-op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1 
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="",ylab="",  cex.lab=2, cex.axis=1.5, log="y", yaxt="n");
-title(ylab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 5)
-title(xlab = "Voltage (V)", cex.lab = 2, line = 3)
-
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
-minor.tick(nx=10)
-lapply(dirs, function(x) {print(x);
- points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
- lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.5),lwd=3)
-# mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
-#	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
-# mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
-#	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
- i <<- i+1
-})
-legend(x="bottomright",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90", bty="n")
-graphics.off()
-#reset the plotting margins
-par(op)
+#jpeg(quality=98, paste(filename,"-CEs-onlyexp.jpg",sep=""), width=image_width, height=image_height)
+#op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1 
+#plot(NULL,xlim=xlim,ylim=c(1e-10,2.5e-8),cex.main=1.5,xlab="",ylab="",  cex.lab=2, cex.axis=1.5);
+#title(ylab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 5)
+#title(xlab = "Voltage (V)", cex.lab = 2, line = 3)
+#
+##eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
+##minor.tick(nx=10)
+#lapply(dirs, function(x) {print(x);
+## points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
+##just the exponential part
+#lines(data[[x]]$Voc, data[[x]]$onlyexp, col=colors[i+1],lwd=3)
+#lines(data[[x]]$Voc, data[[x]]$onlylin, col=colors[i+1],lwd=3)
+#lines(data[[x]]$Voc, data[[x]]$explinsum, col=colors[i+1],lwd=3)
+## mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
+##	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
+## mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 
+##	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
+# i <<- i+1
+#})
+#legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90", bty="n")
+#graphics.off()
+##reset the plotting margins
+#par(op)
 
 i<-0
 jpeg(quality=98, paste(filename,"-CEs.jpg",sep=""), width=image_width, height=image_height)
@@ -114,7 +120,8 @@ eaxis(side=2, cex.axis=1.5)
 minor.tick(nx=10, ny=10)
 lapply(dirs, function(x) {print(x);
  points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
- lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.5),lwd=3)
+ lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.4),lwd=3)
+ lines(data[[x]]$Voc, data[[x]]$onlyexp, col=colors[i+1],lwd=3)
 # mtext(bquote(.(gsub("-outputChargeDensityCE.txt","",x))~": n" == .(signif(exp$coefficients["A"],3)) + 
 #	      .(signif(exp$coefficients["C"],3)) ~ "e" ^ {.(signif(exp$coefficients["D"],3))~V}),side=3,line=-(i*2+4),cex=1.5,col=colors[i+1])
 # mtext(bquote(.(x)~": n" == .(signif(exp$coefficients["A"],3)) + 

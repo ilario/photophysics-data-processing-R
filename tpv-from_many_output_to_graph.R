@@ -34,7 +34,7 @@ library(Hmisc)
 
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig.*","",sub("^0","",dirs))
+legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
 colors=gsub(".*-col_","",dirs)
@@ -56,9 +56,9 @@ lapply(dirs, function(x) {print(x);
 fulloutput <- read.table(paste(x,"/tpv/output-biexp.txt",sep=""), header=TRUE);#,stringsAsFactors=F);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 output <- read.table(paste(x,"/tpv/output-biexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
-output.biexp[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(output$Voc,5)
-output.biexp[[paste(sub("-ig.*","",sub("^0","",x)),"T1",sep="")]] <<- signif(output$T1,5)
-output.biexp[[paste(sub("-ig.*","",sub("^0","",x)),"T2",sep="")]] <<- signif(output$T2,5)
+output.biexp[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(output$Voc,5)
+output.biexp[[paste(sub("_.*","",sub("^0","",x)),"T1",sep="")]] <<- signif(output$T1,5)
+output.biexp[[paste(sub("_.*","",sub("^0","",x)),"T2",sep="")]] <<- signif(output$T2,5)
 points(output$Voc, output$T1, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
 points(output$Voc, output$T2, lwd=1, pch=21+(i%%5), col=colors[i+1], cex=2);
 i <<- i+1
@@ -84,8 +84,8 @@ lapply(dirs, function(x) {print(x);
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 output <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
-output.monoexp[[paste("Voc",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(output$Voc,5)
-output.monoexp[[sub("-ig.*","",sub("^0","",x))]] <<- signif(output$T,5)
+output.monoexp[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(output$Voc,5)
+output.monoexp[[sub("_.*","",sub("^0","",x))]] <<- signif(output$T,5)
 points(output$Voc, output$T, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
 i <<- i+1
 })

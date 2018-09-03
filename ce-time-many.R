@@ -30,7 +30,7 @@ ce.max = 0
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig.*","",sub("^0","",dirs))
+legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
 colors=gsub(".*-col_","",dirs)

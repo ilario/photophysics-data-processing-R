@@ -48,7 +48,7 @@ change.lightness <- function(col, lightness=1){
 
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("-ig.*","",sub("^0","",dirs))
+legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
 colors=gsub(".*-col_","",dirs)
@@ -107,8 +107,8 @@ new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo, tpv$Voc) + predict(exp, new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
-output[[paste("Charge",sub("nm","",sub("-ig.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
-output[[sub("-ig.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
+output[[paste("Charge",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
+output[[sub("_.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
 points(charge, tpv$T, lwd=0.2, bg=add.alpha(colors[i+1],0.5), cex=2, pch=21+(i%%5));
 #lo2<-loess(tpv$T~charge,span=0.3)
 #lines(charge, predict(lo2), lwd=3, col=change.lightness(colors[i+1],0.5))
