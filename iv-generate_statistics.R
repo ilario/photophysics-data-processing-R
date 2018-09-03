@@ -57,6 +57,9 @@ add.alpha <- function(col, alpha=1){
 signif.mean <- function(values, digits){
 	signif(mean(values), digits=digits)
 }
+signif.stdev <- function(values, digits){
+	signif(sd(values), digits=digits)
+}
 
 single <- function(x,mar,mgp.y,mgp.x){
 	print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=length))
@@ -67,7 +70,10 @@ single <- function(x,mar,mgp.y,mgp.x){
 	stripchart(PCE ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
 	title(ylab="PCE (%)", mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.5)
-	print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
+	print("PCE")
+	print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+	print("PCE-stdev")
+	print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
 	graphics.off()
 
 	png(paste(name, "-", x, "-Jsc.png", sep=""), width=1200, height=600);
@@ -76,7 +82,10 @@ single <- function(x,mar,mgp.y,mgp.x){
 	stripchart(Jsc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
 	title(ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.5)
-	print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
+	print("Jsc")
+	print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+	print("Jsc-stdev")
+	print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
 	graphics.off()
 
 	png(paste(name, "-", x, "-Voc.png", sep=""), width=1200, height=600);
@@ -85,7 +94,10 @@ single <- function(x,mar,mgp.y,mgp.x){
 	stripchart(Voc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
 	title(ylab=bquote("V"["oc"]~"(V)"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.5)
-	print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
+	print("Voc")
+	print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+	print("Voc-stdev")
+	print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
 	graphics.off()
 
 	png(paste(name, "-", x, "-FF.png", sep=""), width=1200, height=600);
@@ -94,7 +106,10 @@ single <- function(x,mar,mgp.y,mgp.x){
 	stripchart(FF ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(colors,0.3), cex=2)
 	title(ylab="FF", mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.5)
-	print(aggregate(d$FF, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=4))
+	print("FF")
+	print(aggregate(d$FF, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+	print("FF-stdev")
+	print(aggregate(d$FF, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
 	graphics.off()
 }
 
