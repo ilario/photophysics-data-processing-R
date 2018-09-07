@@ -15,7 +15,7 @@
 
 source("~/software/photophysics-data-processing-R/extractdata-curves-vi-separated_files.R")
 
-mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="^ig.*.txt$", list.excl="output.txt")
+mydata <- import.iv.separated(pattern.excl="\\.png$", pattern=".*forward.*.txt$|.*reverse.*.txt", list.excl="output.txt")
 #mydata <- import.iv.separated(pattern.excl="\\.pdf$")
 file.create("output.txt")
 results <- lapply(names(mydata), function(x){

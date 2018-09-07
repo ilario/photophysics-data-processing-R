@@ -1,29 +1,10 @@
-#name="ig"
-
-#var1=""
-#v1g1=c()
-#v1g2=c()
-#v1all=c(v1g1, v1g2)
-#list1=list(`` = v1g1, `` = v1g2)
-
-#var2=""
-#v2g1=c()
-#v2g2=c()#v1all[! v1all %in% v2g1]
-#v2all=c(v2g1, v2g2)
-#list2=list(`` = v2g1, `` = v2g2)
-
-#var3=""
-#v3g1=c()
-#v3g2=c()#v1all[! v1all %in% v3g1]
-#v3all=c(v3g1, v3g2)
-#list3=list(`` = v3g1, `` = v3g2)
-
-
 a <- read.table("table", col.names = c("device","diode","reverse","Jsc","Voc","FF","PCE","comments","notes"),fill = TRUE, na.strings=c("","NA"))
 levels(a$notes) <- c(levels(a$notes), "NANA")
 a[is.na(a)] <- "NANA"
 
+if(!exists("colors")){
 colors<-c("blue","blue","darkviolet","darkviolet","darkred","darkred", "darkgreen", "darkgreen")
+}
 
 a1 <- data.frame(a, temp1 = factor(a$device, v1all))
 colnames(a1)[ncol(a1)] <- var1
