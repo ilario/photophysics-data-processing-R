@@ -47,9 +47,12 @@ print("biexp")
 
 i <- 0
 jpeg(quality=98, paste(filename, "-TPVs-biexp.jpg",sep=""), width=image_width, height=image_height);
-par(mar=c(5.1,5,2,2.1))
-plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Charge carrier lifetime (s)", yaxt="n")#, main=paste(name, "TPV biexp"));
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
+plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.5,cex.lab=2, log="y", xlab="", ylab="", yaxt="n")#, main=paste(name, "TPV biexp"));
+title(ylab = "Charge carrier lifetime (s)", cex.lab = 2, line = 4)
+title(xlab = "Voltage (V)", cex.lab = 2, line = 4)
+
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
 minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
@@ -63,8 +66,10 @@ points(output$Voc, output$T1, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
 points(output$Voc, output$T2, lwd=1, pch=21+(i%%5), col=colors[i+1], cex=2);
 i <<- i+1
 })
-legend(x="topright",inset=0.05,legend,pt.cex=2, pt.lwd=2, cex=1.5, pch=seq(21,25), pt.bg=colors,title=title, bg="gray90", col=colors)
+legend(x="topright",inset=0.05,legend,pt.cex=2, pt.lwd=2, cex=2, pch=seq(21,25), pt.bg=colors,title=title, bty="n", col=colors)
 graphics.off()
+#reset the plotting margins
+par(op)
 
 maxlength.biexp = max(sapply(output.biexp,length))
 output.biexp = lapply(output.biexp, function(x){length(x)=maxlength.biexp; print(x)})
@@ -75,9 +80,12 @@ write.table(output.biexp, file=paste(filename,"-TPVs-biexp.csv",sep=""), row.nam
 print("monoexp")
 i <- 0
 jpeg(quality=98, paste(filename, "-TPVs-monoexp.jpg",sep=""), width=image_width, height=image_height);
-par(mar=c(5.1,5,2,2.1))
-plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.2,cex.lab=1.5, log="y", xlab="Voltage (V)", ylab="Charge carrier lifetime (s)", yaxt="n")#, main=paste(name, "TPV monoexp"));
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
+op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
+plot(NULL, ylim=ylim, xlim=xlim, cex.main=1.5,cex.axis=1.5,cex.lab=2, log="y", xlab="", ylab="", yaxt="n")#, main=paste(name, "TPV monoexp"));
+title(ylab = "Charge carrier lifetime (s)", cex.lab = 2, line = 4)
+title(xlab = "Voltage (V)", cex.lab = 2, line = 4)
+
+eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
 minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
@@ -89,9 +97,11 @@ output.monoexp[[sub("_.*","",sub("^0","",x))]] <<- signif(output$T,5)
 points(output$Voc, output$T, lwd=1, pch=21+(i%%5), bg=colors[i+1], cex=2);
 i <<- i+1
 })
-legend(x="topright",inset=0.05,legend,pt.cex=2, pt.lwd=2,cex=1.5, pch=seq(21,25), pt.bg=colors, col=colors, title=title, bg="gray90")
+legend(x="topright",inset=0.05,legend,pt.cex=2, pt.lwd=2,cex=2, pch=seq(21,25), pt.bg=colors, col=colors, title=title, bty="n")
 
 graphics.off()
+#reset the plotting margins
+par(op)
 
 maxlength.monoexp = max(sapply(output.monoexp,length))
 output.monoexp = lapply(output.monoexp, function(x){length(x)=maxlength.monoexp})
