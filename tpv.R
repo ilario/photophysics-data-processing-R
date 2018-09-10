@@ -136,7 +136,7 @@ if(logy){			print("Biexp/Plot/Log: Performing");
 		tryCatch({
 			temp_logy_biexp = subset(temp, time <= slowdecay*5)
 			png(file.path(tpvdir,paste(x, "-biexp-log.png", sep="")), width = image_width, height = image_height);
-			plot(temp_logy_biexp$time, temp_logy_biexp$voltage - A2, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=".", log="y", ylim=c(mean(tail(temp_logy_biexp$voltage, 10))-A2, deltavoltage));
+			plot(temp_logy_biexp$time, temp_logy_biexp$voltage - A2, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy_biexp$voltage, 10))-A2, deltavoltage/1e6), deltavoltage));
 #			points(tempsubset$time, tempsubset$voltage - A2, pch=".", col="yellow");
 			lines(tempsubset2$time, predict(lo2) - A2, col='black', lwd=2);
 			lines(temp$time,predict(fit2) - A2, col="aquamarine4", lwd=3);
@@ -219,7 +219,7 @@ if(logy){
 		temp_logy <- subset(temp, time <= C*5); 
 		print("Monoexp/Plot/Log: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp-log.png", sep="")), width = image_width, height = image_height);
-		plot(temp_logy$time, temp_logy$voltage - A, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", signif(A,digits=4), "V)"), pch=".", log="y", ylim=c(mean(tail(temp_logy$voltage, 10))-A, deltavoltage) );
+		plot(temp_logy$time, temp_logy$voltage - A, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", signif(A,digits=4), "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy$voltage, 10))-A, deltavoltage/1e6), deltavoltage) );
 #		points(tempsubset$time, tempsubset$voltage - A, pch=".", col="yellow");
 		lines(tempsubset2$time, predict(lo2) - A, col='black', lwd=2);
 		lines(temp$time,predict(fit) - A, col="red", lwd=3);
@@ -255,7 +255,7 @@ tryCatch({
 			capture.output(anova(fit,fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 }, error=function(e) print("Anova comparison: Error"));
 		break;
-}, error=function(e) print("Monoexp: Error"));
+}, error=function(e) cat("Monoexp: Error ", e$message));
 		}
 
 if(robust){
