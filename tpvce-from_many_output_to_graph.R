@@ -122,8 +122,15 @@ while(!exists("powerlaw")){
 	start <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
 	tryCatch({
 		powerlaw <- nlsLM(shown_T~exp(y0)+exp(A)*shown_charge^alpha, start=start, weights=weights)
-		if(!summary(powerlaw)$convInfo$isConv){rm(powerlaw)}
-	}, error=function(e) {print("FAILED POWERLAW FIT")});
+	}, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n")});
+		#check convergence and sum the p-values
+		if(exists("powerlaw")){
+			print("Checking powerlaw result")
+			if(!summary(powerlaw)$convInfo$isConv || sum(coef(summary(powerlaw))[,"Pr(>|t|)"]) > 1){
+				rm(powerlaw)
+			}
+		}
+
 }
 print(powerlaw)
 
