@@ -17,11 +17,12 @@ tpv <- function(tpvdir="tpv")
 {
 print("TPV: FITTING")
 library(robustbase)
+library(sfsmisc)
 
 if(!exists("image_width")){stop("image_width and image_height variables must be set")}
 
 robust=0
-logy=1
+logy=0
 logx=0
 residuals=0
 thresholdBiexp=10
@@ -127,16 +128,16 @@ tryCatch({
 			lines(temp$time, predict(fit2), col="aquamarine4", lwd=2);
 			segments(starttime, A2, 0, A2, col="aquamarine4")
 			lines(temp$time+header[3]/10*header[1], A2 + slowampl*exp(-temp$time/slowdecay)+deltavoltage/10, col="green");
-			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
+			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			lines(temp$time+header[3]/10*header[1], A2 + fastampl*exp(-temp$time/fastdecay)+deltavoltage/10, col="blue");
-			mtext(paste("Tau2 =", signif(fastdecay,digits=4), "\u00b1", signif(fastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
+			mtext(paste("Tau2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
 			graphics.off();
 		}, error=function(e) print("Biexp/Plot/Linear: Error"));
 if(logy){			print("Biexp/Plot/Log: Performing");
 		tryCatch({
 			temp_logy_biexp = subset(temp, time <= slowdecay*5)
 			png(file.path(tpvdir,paste(x, "-biexp-log.png", sep="")), width = image_width, height = image_height);
-			plot(temp_logy_biexp$time, temp_logy_biexp$voltage - A2, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy_biexp$voltage, 10))-A2, deltavoltage/1e6), deltavoltage));
+			plot(temp_logy_biexp$time, temp_logy_biexp$voltage - A2, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy_biexp$voltage, 10))-A2, deltavoltage/1e5), deltavoltage));
 #			points(tempsubset$time, tempsubset$voltage - A2, pch=".", col="yellow");
 			lines(tempsubset2$time, predict(lo2) - A2, col='black', lwd=2);
 			lines(temp$time,predict(fit2) - A2, col="aquamarine4", lwd=3);
@@ -206,20 +207,28 @@ tryCatch({
 
 		
 		print("Monoexp/Plot/Linear: Performing");
-		png(file.path(tpvdir,paste(x, "-monoexp.png", sep="")), width = 640, height = 640);
+		png(file.path(tpvdir,paste(x, "-monoexp.png", sep="")), width = image_width, height = image_height);
 		par(mar=c(5.1, 4.1+1, 4.1, 2.1))
-		plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow", cex.lab=2, cex.axis=2);
+		op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
+		plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "", ylab = "", pch=".", col="yellow", cex.lab=2, cex.axis=2, xaxt="n", yaxt="n");
+		eaxis(side=1, cex.axis=1.5)
+		eaxis(side=2, cex.axis=1.5)
+		#line is for introducing more space between label and axis
+		title(ylab = "Voltage (V)", cex.lab = 2, line = 4.5)
+		title(xlab = "Time (s)", cex.lab = 2, line = 3.5)
 		points(temp, pch=".");
 		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time, predict(fit), col="red", lwd=2);
 		segments(starttime, A, 0, A, col="red", lwd=2)
-		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
+		mtext(paste("T =", signif(C,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
+		#reset the plotting margins
+		par(op)
 if(logy){
 		temp_logy <- subset(temp, time <= C*5); 
 		print("Monoexp/Plot/Log: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp-log.png", sep="")), width = image_width, height = image_height);
-		plot(temp_logy$time, temp_logy$voltage - A, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", signif(A,digits=4), "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy$voltage, 10))-A, deltavoltage/1e6), deltavoltage) );
+		plot(temp_logy$time, temp_logy$voltage - A, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", signif(A,digits=4), "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy$voltage, 10))-A, deltavoltage/1e5), deltavoltage) );
 #		points(tempsubset$time, tempsubset$voltage - A, pch=".", col="yellow");
 		lines(tempsubset2$time, predict(lo2) - A, col='black', lwd=2);
 		lines(temp$time,predict(fit) - A, col="red", lwd=3);
@@ -232,7 +241,7 @@ if(logx){
 		plot(temp$time, temp$voltage, xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x");
 		#lines(temp$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time,predict(fit), col="red", lwd=2);
-		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
+		mtext(paste("T =", signif(C,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
 }
 if(residuals){
@@ -241,7 +250,7 @@ if(residuals){
 		yresidualfit <- temp$voltage-predict(fit,newdata=data.frame(time=temp$time))
                 plot(temp$time, yresidualfit, ylim=c(quantile(yresidualfit,0.001),quantile(yresidualfit,0.999)), xlab = "Time (s)", ylab = "Voltage (V)", pch=".", log="x", col=rgb(0,0,0, 0.5));
 		abline(h=0, col="red");
-		mtext(paste("Tau =", signif(C,digits=4), "\u00b1", signif(C.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
+		mtext(paste("T =", signif(C,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
 }	
                 outputmonoexp <- t(c(x, A, B, C, C.err));
@@ -280,7 +289,7 @@ if(robust){
 		points(temp, pch=".");
 		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time, predict(fitR), col="red", lwd=2);
-		mtext(paste("Tau =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
+		mtext(paste("T =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
 if(logy){
 		print("RobustMonoexp/Plot/Log: Performing");
@@ -289,7 +298,7 @@ if(logy){
 		points(temp$time, temp$voltage - AR, pch=".");
 		lines(tempsubset2$time, predict(lo2) - AR, col='black', lwd=3);
 		lines(temp$time,predict(fitR) - AR, col="red", lwd=2);
-		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
+		mtext(paste("T =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
 }
 if(logx){
@@ -298,7 +307,7 @@ if(logx){
 		plot(temp$time, temp$voltage, xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x");
 		#lines(temp$time, predict(lo2), col='black', lwd=3);
 		lines(temp$time,predict(fitR), col="red", lwd=2);
-		mtext(paste("Tau =", signif(CR,digits=4), "\u00b1", signif(CR.err,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
+		mtext(paste("Tau =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
 		graphics.off();
 }
 if(residuals){
