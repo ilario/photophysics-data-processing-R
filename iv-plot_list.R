@@ -16,43 +16,47 @@
 library(sfsmisc)
 library(Hmisc)
 
-name=""
-title=gsub("_"," ",tail(unlist(strsplit(name,"-")),1))
+#name=""
+#title=""
 filename=gsub(",","",gsub(":","",name))
 
-fileslist=list.files(pattern="*-forward.txt|*-reverse.txt")
-fileslist=sub("-forward.txt|-reverse.txt","",fileslist)
-fileslist=fileslist[!duplicated(fileslist)]
-#fileslist = c("", "", "")
-legendlist=sub("-ig..-.{2,3}-.*","",sub("^0","",fileslist))
-#legendlist = c("", "", "")
-#colors = c("red","green", "blue")
-colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(fileslist),3))
+change.lightness <- function(col, lightness=1){
+	if(missing(col))
+		stop("Please provide a vector of colours.")
+	apply(sapply(col, col2rgb, alpha=TRUE)/255, 2,
+		function(x)
+			rgb(x[1]*lightness, x[2]*lightness, x[3]*lightness, alpha=x[4]))
+}
 
-i = 0
-jpeg(quality=98, paste(filename,"-IVs.jpg",sep=""), width=640, height=480);
+#fileslist=list.files(pattern="*-forward.*.txt|*-reverse.*.txt")
+fileslist=names(mydata)
+reverselist=fileslist[!grepl("forward", fileslist) & !grepl("dark", fileslist)]
+cellslist=sub("-reverse","",sub(".txt","",reverselist))
+cellslist=cellslist[!duplicated(cellslist)]
+legendlist=sub("_.*","",sub("^0","",cellslist))
+colors=gsub(".*-col_","",cellslist)
+#colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(fileslist),3))
+
+jpeg(quality=98, paste(filename,"-revIVs.jpg",sep=""), width=image_width, height=image_height);
 par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=c(-0.1,1),ylim=c(-16,5),cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Current Density (mA/cm"^"2"*")"), cex.lab=1.5,cex.axis=1.2, yaxt="n", xaxt="n")#, main=name);
-eaxis(side=2, cex.axis=1.2)
-eaxis(side=1, cex.axis=1.2)
+plot(NULL,xlim=lim.IV.voltage,ylim=lim.IV.current,cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Current Density (mA/cm"^"2"*")"), cex.lab=2,cex.axis=1.5, yaxt="n", xaxt="n");
+eaxis(side=2, cex.axis=1.5)
+eaxis(side=1, cex.axis=1.5)
 minor.tick(nx=10, ny=10)
 
 abline(h=0, col="gray50");abline(v=0, col="gray50")
-lapply(fileslist, function(x){print(x); fwd=paste(x, "-forward.txt", sep=""); rev=paste( x, "-reverse.txt", sep="");
-#fwdV=mydata[[fwd]]$Voltage_V
-#fwdJ=mydata[[fwd]]$Current_mA/0.09
-revV=mydata[[rev]]$Voltage_V
-revJ=mydata[[rev]]$Current_mA/0.09
-##lines(fwdV, fwdJ, lwd=3, col=colors[i+1])
-lines(revV, revJ, lwd=3, col=colors[i+1])
-#fwdV=fwdV[c(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)]
-#fwdJ=fwdJ[c(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)]
-revJ=revJ[revV*10 == floor(revV*10)]
-revV=revV[revV*10 == floor(revV*10)]
-##points(fwdV, fwdJ, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
-points(revV, revJ, bg=colors[i+1], cex=2, pch=21+(i%%5))
+
+i = 1
+lapply(reverselist, function(x){ 
+V=mydata[[x]]$Voltage_V
+J=mydata[[x]]$Current_mA/0.09
+lines(V, J, lwd=4, col=colors[i])
+Jmarkers=J[V*10 == floor(V*10)]
+Vmarkers=V[V*10 == floor(V*10)]
+points(Vmarkers, Jmarkers, col=change.lightness(colors[i],0.5), bg=colors[i], cex=2, pch=20+(i%%5))
 i <<- i+1
 })
-legend(x="topleft",inset=c(0.15,0.05),legendlist, lty=c(1,1,1,1), pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=title,bg="gray90")
+
+legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist)),1,2), lwd=6, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=2, col=colors, bty="n", pch=seq(21,25))
 graphics.off()
 
