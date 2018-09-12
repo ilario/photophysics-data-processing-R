@@ -42,26 +42,30 @@ trashfornullmessages <- lapply(files, function(x) {
 
 
 	png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
-	par(mar=c(5,4,4,5)+.1)
-	plot(mydata[[x]],type="l", ylab="", xlab="Time (s)", xlim=c(0,0.8e-5), xaxt="n", yaxt="n")
+	op <- par(mar = c(5,7,4,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
+
+	xlim=c(0,0.8e-5)
+	plot(mydata[[x]],type="l", ylab="", xlab="", xlim=xlim, xaxt="n", yaxt="n")
 	title(ylab="Voltage (V)", cex.lab=2, line=4)
-	title(xlab="Time (s)", cex.lab=2, line=4)
-	mtext("Collected Charge Density (C/cm2)", cex=2, side=4,line=4,col="red")
+	title(xlab="Time (s)", cex.lab=2, line=3.5)
+	mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=2, side=4,line=7,col="red")
 	eaxis(side=1, cex.axis=1.5)
 	eaxis(side=2, cex.axis=1.5)
 	
 	lines(mydata[[x]]$time, baseline, col="green")
 	par(new=TRUE)
-	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="")
+	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim)
 	abline(h=0,col="red")
-	abline(h=totalchargedensity,col="red")
-	axis(4,col.ticks="red",col.axis="red", col="red")
-	text(tail(mydata[[x]]$time,1)*0.9,totalchargedensity*0.95,labels=paste(signif(totalchargedensity,4), "C/cm2"),cex=2,col="red")
+	#abline(h=totalchargedensity,col="red")
+	eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
+	text(xlim[2]*0.75,totalchargedensity*0.9,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="red")
 	
-	par(new=TRUE)
-	plot(mydata[[x]]$time,chargezero/0.09, type="l", col="orange", xaxt="n",yaxt="n",xlab="",ylab="")
+	#par(new=TRUE)
+	#plot(mydata[[x]]$time,chargezero/0.09, type="l", col="orange", xaxt="n",yaxt="n",xlab="",ylab="")
 	
 	graphics.off()
+#reset the plotting margins
+par(op)
 
 
 write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
