@@ -71,33 +71,20 @@ eaxis(side=1,at=seq(xtick, xlim[2], xtick), cex.axis=1.5)
 lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityCE~a$Voc,span=0.9)
-#exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
-#expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=coef(exp)["A"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
  expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=9), data=a[round(length(a$Voc)/2):length(a$Voc),])
  tryCatch({
-	  exp <- lm(ChargeDensityCE ~ Voc, data=a)
- }, error=function(e) {print("FAILED LINEAR FIT")});
+	  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
+	  exp <- lin;
+ }, error=function(e) {cat("FAILED LINEAR FIT ", e$message, "\n")});
  tryCatch({
-	  exp <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
- }, error=function(e) {print("FAILED non-robust FIT")});
+	  exp <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
+ }, error=function(e) {cat("FAILED non-robust FIT ", e$message, "\n")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
- }, error=function(e) {print("FAILED ZEROTH FIT")});
+	  exp <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
+ }, error=function(e) {cat("FAILED second non-robust FIT ", e$message, "\n")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
- }, error=function(e) {print("FAILED FIRST FIT")});
- tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=2e-8,C=1e-8,D=0.1), data=a)
- }, error=function(e) {print("FAILED SECOND FIT")});
- tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
- }, error=function(e) {print("FAILED THIRD FIT")});
- tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ A+B*Voc+C*exp(D*Voc), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
- }, error=function(e) {print("FAILED FOURTH FIT")});
- tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
- }, error=function(e) {print("FAILED FIFTH FIT")});
+	  exp <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
+ }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
 
 fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
@@ -117,8 +104,8 @@ shown_charge = charge[index_shown_charge]
 shown_T = tpv$T[index_shown_charge]
 weights= (1/(shown_T/min(shown_T)))^3
 j=1
-while(!exists("powerlaw")){
-	j <- j + 0.1
+while(!exists("powerlaw") && is.finite(j)){
+	j <- j + 0.1*j
 	start <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
 	tryCatch({
 		powerlaw <- nlsLM(shown_T~exp(y0)+exp(A)*shown_charge^alpha, start=start, weights=weights)
@@ -132,9 +119,10 @@ while(!exists("powerlaw")){
 		}
 
 }
-print(powerlaw)
-
-lines(shown_charge, predict(powerlaw, shown_charge), lwd=3, col=change.lightness(colors[i+1],0.5))
+if(exists("powerlaw")){
+	print(powerlaw)
+	lines(shown_charge, predict(powerlaw, shown_charge), lwd=3, col=change.lightness(colors[i+1],0.5))
+}
 
 i <<- i+1
 })
