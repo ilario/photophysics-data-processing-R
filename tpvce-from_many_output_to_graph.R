@@ -58,7 +58,7 @@ if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","r
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
 op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
-plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="",cex.lab=2,cex.axis=1.5,log="xy", yaxt="n", xaxt="n")
+plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="",cex.lab=2,cex.axis=1.5,log="y", yaxt="n", xaxt="n")
 #line is for introducing more space between label and axis
 title(ylab = "Charge carrier lifetime (s)", cex.lab = 2, line = 4)
 title(xlab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 4)
