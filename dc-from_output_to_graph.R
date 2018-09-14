@@ -132,11 +132,8 @@ plot(integral,range(f$Voc)[1], range(f$Voc)[2], ylab=bquote("Charge Density (C/c
 graphics.off()
 
 dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
-dataframe1 <- subset(dataframe, Voc < max(Voc)/2)
-dataframe2 <- dataframe[1:2,]
-dataframe <- unique(rbind(dataframe1, dataframe2))
 
-geometrical <- mean(c(min(dataframe$capacitance),median(dataframe$capacitance)))
+geometrical <- quantile(dataframe$capacitance, 0.05)
 g$capacitance <- g$capacitance - geometrical
 
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)

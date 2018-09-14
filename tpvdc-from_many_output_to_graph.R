@@ -91,8 +91,8 @@ new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 output[[paste("Charge",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output[[sub("_.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
-lo<-loess(tpv$T~charge,span=0.3)
-lines(charge, predict(lo), lwd=2, col=colors[i+1])
+#lo<-loess(tpv$T~charge,span=0.3)
+#lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
  i <<- i+1
 })
@@ -146,8 +146,8 @@ new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
 charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
 output.nogeom[[paste("Charge",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
-lo<-loess(tpv$T~charge,span=0.3)
-lines(charge, predict(lo), lwd=2, col=colors[i+1])
+#lo<-loess(tpv$T~charge,span=0.3)
+#lines(charge, predict(lo), lwd=2, col=colors[i+1])
 points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
 i <<- i+1
 })

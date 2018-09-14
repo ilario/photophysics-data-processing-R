@@ -58,14 +58,16 @@ if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","r
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
 op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
-plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="",cex.lab=2,cex.axis=1.5,log="y", yaxt="n", xaxt="n")
+plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="",cex.lab=2,cex.axis=1.5,log="xy", yaxt="n", xaxt="n")
 #line is for introducing more space between label and axis
 title(ylab = "Charge carrier lifetime (s)", cex.lab = 2, line = 4)
 title(xlab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 4)
 
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
 xtick = 10^(floor(log10(xlim[2])))
-eaxis(side=1,at=seq(xtick, xlim[2], xtick), cex.axis=1.5)
+eaxis(side=1,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
+#for x linear
+#eaxis(side=1,at=seq(0, xlim[2], xtick), cex.axis=1.5)
 #minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
@@ -86,9 +88,9 @@ lapply(dirs, function(x) {print(x);
 	  exp <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
  }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
 
-fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
+fulloutput <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo, tpv$Voc) + predict(exp, new))/2
@@ -103,20 +105,29 @@ index_shown_charge = which(charge >= xlim[1] & charge <= xlim[2])
 shown_charge = charge[index_shown_charge]
 shown_T = tpv$T[index_shown_charge]
 weights= (1/(shown_T/min(shown_T)))^3
+
+#just in case...
+rm(powerlaw)
+
+if(length(shown_T) < 4 || length(shown_charge) < 4){stop("you need wider plot limits!")}
+
 j=1
-while(!exists("powerlaw") && is.finite(j)){
-	j <- j + 0.1*j
+while(!exists("powerlaw") && j < 1000){
+	j <- j + 0.1
 	start <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
 	tryCatch({
 		powerlaw <- nlsLM(shown_T~exp(y0)+exp(A)*shown_charge^alpha, start=start, weights=weights)
-	}, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n")});
 		#check convergence and sum the p-values
+	}, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n");
+	})
+		#summary fails if the fit was done on no data, with some chol2inv error
 		if(exists("powerlaw")){
 			print("Checking powerlaw result")
 			if(!summary(powerlaw)$convInfo$isConv || sum(coef(summary(powerlaw))[,"Pr(>|t|)"]) > 1){
 				rm(powerlaw)
 			}
 		}
+
 
 }
 if(exists("powerlaw")){
