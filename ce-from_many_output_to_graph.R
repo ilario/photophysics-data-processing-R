@@ -122,6 +122,7 @@ minor.tick(nx=10, ny=10)
 lapply(dirs, function(x) {print(x);
  points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
  lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.4),lwd=3)
+ lines(data[[x]]$Voc, data[[x]]$onlyexp, col=colors[i+1],lwd=3)
  i <<- i+1
 })
 legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90",bty="n")
