@@ -54,7 +54,6 @@ legend=sub("_.*","",sub("^0","",dirs))
 colors=gsub(".*-col_","",dirs)
 # if the color is not set, use the default one
 if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
-
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
 op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
@@ -63,9 +62,9 @@ plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="",cex.lab=2,cex.axis=1.5,
 title(ylab = "Charge carrier lifetime (s)", cex.lab = 2, line = 4)
 title(xlab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 4)
 
-eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
+eaxis(side=2,at=c(1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
 xtick = 10^(floor(log10(xlim[2])))
-eaxis(side=1,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
+eaxis(side=1,at=c(1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
 #for x linear
 #eaxis(side=1,at=seq(0, xlim[2], xtick), cex.axis=1.5)
 #minor.tick(nx=10)
@@ -76,16 +75,16 @@ lapply(dirs, function(x) {print(x);
  expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=9), data=a[round(length(a$Voc)/2):length(a$Voc),])
  tryCatch({
 	  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
-	  exp <- lin;
+	  expfit <- lin;
  }, error=function(e) {cat("FAILED LINEAR FIT ", e$message, "\n")});
  tryCatch({
-	  exp <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
+	  expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
  }, error=function(e) {cat("FAILED non-robust FIT ", e$message, "\n")});
  tryCatch({
-	  exp <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
+	  expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
  }, error=function(e) {cat("FAILED second non-robust FIT ", e$message, "\n")});
  tryCatch({
-	  exp <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
+	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
  }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
 
 fulloutput <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE);
@@ -93,18 +92,16 @@ n<-tail(grep("file",fulloutput[,1]),n=1)
 tpv <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
-charge <- (predict(lo, tpv$Voc) + predict(exp, new))/2
+charge <- (predict(lo, tpv$Voc) + predict(expfit, new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
-charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+charge[is.na(charge)] <- (predict(expfit,new2) + predict(expend,new2))/2
 output[[paste("Charge",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output[[sub("_.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
 points(charge, tpv$T, lwd=0.2, bg=add.alpha(colors[i+1],0.5), cex=2, pch=21+(i%%5));
-#lo2<-loess(tpv$T~charge,span=0.3)
-#lines(charge, predict(lo2), lwd=3, col=change.lightness(colors[i+1],0.5))
 index_shown_charge = which(charge >= xlim[1] & charge <= xlim[2])
 shown_charge = charge[index_shown_charge]
 shown_T = tpv$T[index_shown_charge]
-weights= (1/(shown_T/min(shown_T)))^3
+weights= (min(shown_T)/shown_T)^3
 
 #just in case...
 rm(powerlaw)
@@ -127,12 +124,10 @@ while(!exists("powerlaw") && j < 1000){
 				rm(powerlaw)
 			}
 		}
-
-
 }
 if(exists("powerlaw")){
-	print(powerlaw)
 	lines(shown_charge, predict(powerlaw, shown_charge), lwd=3, col=change.lightness(colors[i+1],0.5))
+	capture.output(summary(powerlaw), file=paste(x, "-tpvce-fit", sep=""),  append=TRUE);
 }
 
 i <<- i+1
@@ -147,3 +142,85 @@ maxlength = max(sapply(output,length))
 output = lapply(output, function(x){length(x)=maxlength; print(x)})
 output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-TPVCEs.csv",sep=""), row.names=FALSE, na="", sep=",")
+
+
+
+
+xlim_nogeom=lim.TPVCE.nogeom.charge
+
+
+jpeg(quality=98, paste(filename,"-TPVCEs_nogeom.jpg",sep=""), width=image_width, height=image_height)
+op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
+plot(1,xlim=xlim_nogeom,ylim=ylim,cex.main=1.5,xlab="", ylab="",cex.lab=2,cex.axis=1.5,log="xy", yaxt="n", xaxt="n")
+#line is for introducing more space between label and axis
+title(ylab = "Charge carrier lifetime (s)", cex.lab = 2, line = 4)
+title(xlab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 4)
+
+eaxis(side=2,at=c(1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
+xtick = 10^(floor(log10(xlim_nogeom[2])))
+eaxis(side=1,at=c(1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.5)
+i <- 0
+lapply(dirs, function(x) {print(x);
+
+ a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
+ lo <- loess(a$ChargeDensityCE~a$Voc,span=0.9)
+ tryCatch({
+	  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
+	  expfit <- lin;
+ }, error=function(e) {cat("FAILED LINEAR FIT ", e$message, "\n")});
+ tryCatch({
+	  expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(max(a$ChargeDensityCE)/max(a$Voc)),C=log(1e-10),D=2), data=a)
+ }, error=function(e) {cat("FAILED non-robust FIT ", e$message, "\n")});
+ tryCatch({
+	  expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
+ }, error=function(e) {cat("FAILED second non-robust FIT ", e$message, "\n")});
+ tryCatch({
+	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
+ }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
+
+fulloutput <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE);
+n<-tail(grep("file",fulloutput[,1]),n=1)
+tpv <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
+
+charge_nogeom <- exp(coef(expfit)[2])*(exp(exp(coef(expfit)[3])*tpv$Voc)-1)
+points(charge_nogeom, tpv$T, lwd=0.2, bg=add.alpha(colors[i+1],0.5), cex=2, pch=21+(i%%5));
+index_shown_charge_nogeom = which(charge_nogeom >= xlim_nogeom[1] & charge_nogeom <= xlim_nogeom[2])
+shown_charge_nogeom = charge_nogeom[index_shown_charge_nogeom]
+shown_T_nogeom = tpv$T[index_shown_charge_nogeom]
+weights_nogeom = (1/(shown_T_nogeom/min(shown_T_nogeom)))^3
+
+#just in case...
+rm(powerlaw_nogeom)
+
+if(length(shown_T_nogeom) < 4 || length(shown_charge_nogeom) < 4){stop("you need wider plot limits!")}
+
+j=1
+while(!exists("powerlaw_nogeom") && j < 1000){
+	j <- j + 0.1
+	start_nogeom <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
+	tryCatch({
+		powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(y0)+exp(A)*shown_charge_nogeom^alpha, start=start_nogeom, weights=weights_nogeom)
+		#check convergence and sum the p-values
+	}, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n");
+	})
+		#summary fails if the fit was done on no data, with some chol2inv error
+		if(exists("powerlaw_nogeom")){
+			print("Checking powerlaw result")
+			if(!summary(powerlaw_nogeom)$convInfo$isConv || sum(coef(summary(powerlaw_nogeom))[,"Pr(>|t|)"]) > 1){
+				rm(powerlaw_nogeom)
+			}
+		}
+}
+if(exists("powerlaw_nogeom")){
+	lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=3, col=change.lightness(colors[i+1],0.5))
+	capture.output(summary(powerlaw_nogeom), file=paste(x, "-tpvce-nogeom-fit", sep=""),  append=TRUE);
+}
+
+i <<- i+1
+})
+legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=2, title=title,bg="gray90", bty="n")
+graphics.off()
+
+#reset the plotting margins
+par(op)
+

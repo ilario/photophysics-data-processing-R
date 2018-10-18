@@ -13,14 +13,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#name=""
 directory=tail(strsplit(getwd(), "/")[[1]], n=1)
 name=directory
 
-
 library(robustbase)
 a <- read.table("output.txt",header=F,stringsAsFactors=F)
-#file <- strsplit(a$V1,"/")
 
 illumination <- function(names){
 values <- lapply(names, function(name){
@@ -35,36 +32,41 @@ return(unlist(values))
 a$suns <- illumination(a$V2)
 a<-a[with(a, order(a$suns)), ]
 
-#suns <- as.numeric(gsub("sun","",unlist(splittedfilename)[grepl("sun",unlist(splittedfilename))]))
-
-#if(length(a$V1) != length(suns))
-#{ suns[length(suns)+1] <- 1; suns[length(suns)+1] <- 1}
-
-#suns <- suns * 100
-
-#a$suns <- suns
-
 fitJsc<-nlrob(V4 ~ B*suns^C, start=list(B=20, C=1), data=a)
 alfa=signif(fitJsc$coefficients["C"],3)
 
 png(paste(name,"-Jsc_vs_LI.png",sep=""), width=640, height=640)
 par(mar=c(7,7,4.1,2.1))
-plot(a$suns,a$V4,cex.main=2,ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5)#, main=paste(name,"Jsc vs LI"))
+plot(a$suns,a$V4,cex.main=2,ylab=bquote("J"["sc"]~"(mA/cm"^"2"*")"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5)
 lines(a$suns, predict(fitJsc))
-mtext(bquote("Jsc" == .(signif(fitJsc$coefficients["B"],3)) * " LI" ^ .(alfa)),side=3,line=-3,cex=2)
+mtext(bquote("Jsc" == .(signif(fitJsc$coefficients["B"],3)) * " LI%" ^ .(alfa)),side=3,line=-3,cex=2)
 mtext(bquote(alpha == .(alfa)),side=3,line=-5,cex=2)
 graphics.off()
 
 b=a[a$suns != 0,]
-fitVoc<-lmrob(b$V5 ~ log(b$suns)) #log = ln; log10 = Log
+print(b)
+fitVoc<-lmrob(b$V5 ~ log(b$suns))
 
-nid <- signif(fitVoc$coefficients[2],3)
+nid <- fitVoc$coefficients[2]
 
 png(paste(name,"-Voc_vs_LI.png",sep=""), width=640, height=640)
 par(mar=c(5.5,5,4.1,2.1))
-plot(b$suns,b$V5,cex.main=2,ylab=bquote("V"["oc"]~"(V)"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5, log="x")#, main=paste(name,"Voc vs LI"))
+plot(b$suns,b$V5,cex.main=2,ylab=bquote("V"["oc"]~"(V)"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5, log="x")
 lines(b$suns, predict(fitVoc))
-mtext(bquote("Voc" == .(signif(fitVoc$coefficients[1],3)) + .(signif(nid,3)) ~ "ln(LI)"),side=3,line=-3,cex=2)
+mtext(bquote("Voc" == .(signif(fitVoc$coefficients[1],3)) + .(signif(nid,3)) ~ "ln(LI%)"),side=3,line=-3,cex=2)
 mtext(bquote("n"["id"] == .(signif(nid/0.02585,3))),side=3,line=-5,cex=2)
+graphics.off()
+
+bReverse = b[grepl("reverse",b$V2),]
+print(bReverse)
+fitVocReverse<-lmrob(bReverse$V5 ~ log(bReverse$suns))
+nidReverse <- fitVocReverse$coefficients[2]
+
+png(paste(name,"-VocReverse_vs_LI.png",sep=""), width=640, height=640)
+par(mar=c(5.5,5,4.1,2.1))
+plot(bReverse$suns,bReverse$V5,cex.main=2,ylab=bquote("V"["oc"]~"(V)"),xlab="Light Intensity (%sun)", cex.lab=2,cex.axis=1.5, log="x")
+lines(bReverse$suns, predict(fitVocReverse))
+mtext(bquote("Voc" == .(signif(fitVocReverse$coefficients[1],3)) + .(signif(nidReverse,3)) ~ "ln(LI%)"),side=3,line=-3,cex=2)
+mtext(bquote("n"["id"] == .(signif(nidReverse/0.02585,3))),side=3,line=-5,cex=2)
 graphics.off()
 

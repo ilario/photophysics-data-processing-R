@@ -15,6 +15,7 @@ lim.DCcharge.charge=lim.CE.charge
 lim.DCcharge.nogeom.voltage=lim.DCcharge.voltage
 lim.DCcharge.nogeom.charge=c(1e-10,2e-8)
 lim.TPVCE.charge=lim.CE.charge
+lim.TPVCE.nogeom.charge=lim.TPVCE.charge
 lim.TPVCE.lifetime=lim.TPV.lifetime
 lim.TPVDC.charge=lim.DCcharge.charge
 lim.TPVDC.lifetime=lim.TPV.lifetime
