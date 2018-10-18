@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+library(RColorBrewer)
 library(sfsmisc)
 library(Hmisc)
 
@@ -34,14 +35,18 @@ reverselist=fileslist[!grepl("forward", fileslist) & !grepl("dark", fileslist)]
 cellslist=sub("-reverse","",sub(".txt","",reverselist))
 cellslist=cellslist[!duplicated(cellslist)]
 legendlist=sub("_.*","",sub("^0","",cellslist))
-colors=gsub(".*-col_","",cellslist)
-#colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(fileslist),3))
+mycolors=gsub(".*-col_","",cellslist[grepl("-col_", cellslist)])
 
-jpeg(quality=98, paste(filename,"-revIVs.jpg",sep=""), width=image_width, height=image_height);
-par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=lim.IV.voltage,ylim=lim.IV.current,cex.main=1.5,xlab="Voltage (V)",ylab=bquote("Current Density (mA/cm"^"2"*")"), cex.lab=2,cex.axis=1.5, yaxt="n", xaxt="n");
-eaxis(side=2, cex.axis=1.5)
-eaxis(side=1, cex.axis=1.5)
+if(!length(mycolors)){
+mycolors<-brewer.pal(8,"Dark2")
+}
+
+#jpeg(quality=98, paste(filename,"-revIVs.jpg",sep=""), width=image_width, height=image_height);
+pdf(paste(filename,"-revIVs.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7);
+par(mar=c(5.1,6,1,1))
+plot(NULL,xlim=lim.IV.voltage,ylim=lim.IV.current,xlab="Voltage (V)",ylab=bquote("Current Density (mA/cm"^"2"*")"), cex.lab=1.7, yaxt="n", xaxt="n");
+eaxis(side=2, cex.axis=1.4)
+eaxis(side=1, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
 
 abline(h=0, col="gray50");abline(v=0, col="gray50")
@@ -50,13 +55,13 @@ i = 1
 lapply(reverselist, function(x){ 
 V=mydata[[x]]$Voltage_V
 J=mydata[[x]]$Current_mA/0.09
-lines(V, J, lwd=4, col=colors[i])
+lines(V, J, lwd=2, col=mycolors[i])
 Jmarkers=J[V*10 == floor(V*10)]
 Vmarkers=V[V*10 == floor(V*10)]
-points(Vmarkers, Jmarkers, col=change.lightness(colors[i],0.5), bg=colors[i], cex=2, pch=20+(i%%5))
+points(Vmarkers, Jmarkers, col=change.lightness(mycolors[i],0.5), bg=mycolors[i], cex=1.5, pch=20+(i%%5))
 i <<- i+1
 })
 
-legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist)),1,2), lwd=6, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=2, col=colors, bty="n", pch=seq(21,25))
+legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist))), lwd=2, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bty="n", pch=seq(21,25))
 graphics.off()
 

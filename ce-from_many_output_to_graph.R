@@ -51,9 +51,9 @@ dirs <- sub("./","",dirs)
 legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
-colors=gsub(".*-col_","",dirs)
+mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 # if the color is not set, use the default one
-if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
+if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 data <- lapply(dirs, function(x) {print(x);
  a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
@@ -91,41 +91,42 @@ output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-CEs.csv",sep=""), row.names=FALSE, na="", sep=",")
 
 i<-0
-jpeg(quality=98, paste(filename,"-CEs.jpg",sep=""), width=image_width, height=image_height)
-op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1 
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="", cex.lab=2, cex.axis=1.5, yaxt="n");
-title(ylab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 5)
-title(xlab = "Voltage (V)", cex.lab = 2, line = 3)
+#jpeg(quality=98, paste(filename,"-CEs.jpg",sep=""), width=image_width, height=image_height)
+pdf(paste(filename,"-CEs.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
+op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
+plot(NULL,xlim=xlim,ylim=ylim,xlab="", ylab="", cex.axis=1.4, yaxt="n");
+title(ylab = bquote("Charge (C/cm"^"2"*")"), cex.lab = 1.7, line = 5.5)
+title(xlab = bquote("V"["OC"]~"(V)"), cex.lab = 1.7, line = 3)
 
-eaxis(side=2, cex.axis=1.5)
+eaxis(side=2, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
 lapply(dirs, function(x) {print(x);
- points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
- lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.4),lwd=3)
- lines(data[[x]]$Voc, data[[x]]$onlyexp, col=colors[i+1],lwd=3)
+ points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, col=change.lightness(mycolors[i+1],0.5), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
+ lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(mycolors[i+1],0.5),lwd=2)
+ lines(data[[x]]$Voc, data[[x]]$onlyexp, col=mycolors[i+1],lwd=2)
  i <<- i+1
 })
-legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90",bty="n")
+legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=mycolors, col=change.lightness(mycolors,0.5), pt.cex=2, cex=1.5, pt.lwd=1.5, lwd=3, title=title, bg="gray90",bty="n")
 graphics.off()
 #reset the plotting margins
 par(op)
 
-i<-0
-jpeg(quality=98, paste(filename,"-CEs-linlog.jpg",sep=""), width=image_width, height=image_height)
-op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1 
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="", cex.lab=2, cex.axis=1.5, yaxt="n", log="y");
-title(ylab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 5)
-title(xlab = "Voltage (V)", cex.lab = 2, line = 3)
-
-eaxis(side=2, cex.axis=1.5)
-minor.tick(nx=10, ny=10)
-lapply(dirs, function(x) {print(x);
- points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(colors[i+1],0.5), pch=21+(i%%5), cex=2)
- lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(colors[i+1],0.4),lwd=3)
- lines(data[[x]]$Voc, data[[x]]$onlyexp, col=colors[i+1],lwd=3)
- i <<- i+1
-})
-legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=colors, col=colors, pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90",bty="n")
-graphics.off()
-#reset the plotting margins
-par(op)
+#i<-0
+#jpeg(quality=98, paste(filename,"-CEs-linlog.jpg",sep=""), width=image_width, height=image_height)
+#op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1 
+#plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,xlab="", ylab="", cex.lab=2, cex.axis=1.5, yaxt="n", log="y");
+#title(ylab = bquote("Charge density (C/cm"^"2"*")"), cex.lab = 2, line = 5)
+#title(xlab = "Voltage (V)", cex.lab = 2, line = 3)
+#
+#eaxis(side=2, cex.axis=1.5)
+#minor.tick(nx=10, ny=10)
+#lapply(dirs, function(x) {print(x);
+# points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, lwd=0.2, bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=2)
+# lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(mycolors[i+1],0.5),lwd=3)
+# lines(data[[x]]$Voc, data[[x]]$onlyexp, col=mycolors[i+1],lwd=3)
+# i <<- i+1
+#})
+#legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=mycolors, col=change.lightness(mycolors,0.5), pt.cex=2, cex=2, pt.lwd=2, lwd=4, title=title, bg="gray90",bty="n")
+#graphics.off()
+##reset the plotting margins
+#par(op)

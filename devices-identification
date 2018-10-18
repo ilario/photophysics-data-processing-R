@@ -1,5 +1,9 @@
 name="ig"
-colors=c()
+image_smallpdf_width=3.5
+image_smallpdf_height=3.5
+image_bigpdf_width=7.2
+image_bigpdf_height=5
+mycolors=c()
 var1=""
 v1g1=c()
 v1g2=c()
