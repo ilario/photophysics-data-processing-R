@@ -96,7 +96,7 @@ pdf(paste(filename,"-CEs.pdf",sep=""), width=image_smallpdf_width, height=image_
 op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
 plot(NULL,xlim=xlim,ylim=ylim,xlab="", ylab="", cex.axis=1.4, yaxt="n");
 title(ylab = bquote("Charge (C/cm"^"2"*")"), cex.lab = 1.7, line = 5.5)
-title(xlab = bquote("V"["OC"]~"(V)"), cex.lab = 1.7, line = 3)
+title(xlab = "Light bias (V)", cex.lab = 1.7, line = 3)
 
 eaxis(side=2, cex.axis=1.4)
 minor.tick(nx=10, ny=10)

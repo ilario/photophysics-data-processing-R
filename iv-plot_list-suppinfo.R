@@ -61,7 +61,7 @@ J=mydata[[x]]$Current_mA/0.09
 lines(V, J, lwd=2, col=mycolors[i], lty=2)
 Jmarkers=J[V*10 == floor(V*10)]
 Vmarkers=V[V*10 == floor(V*10)]
-#points(Vmarkers, Jmarkers, col=change.lightness(colors[i],0.5), cex=2, pch=">")#21+(i%%5))
+points(Vmarkers, Jmarkers, col=mycolors[i], cex=1.5, pch=20+(i%%5), lwd=2, bg="white")
 i <<- i+1
 })
 i = 1
@@ -71,7 +71,7 @@ J=mydata[[x]]$Current_mA/0.09
 lines(V, J, lwd=2, col=mycolors[i])
 Jmarkers=J[V*10 == floor(V*10)]
 Vmarkers=V[V*10 == floor(V*10)]
-#points(Vmarkers, Jmarkers, col=change.lightness(colors[i],0.5), cex=2, pch="<")#21+(i%%5))
+points(Vmarkers, Jmarkers, col=change.lightness(mycolors[i],0.5), bg=mycolors[i], cex=1.5, pch=20+(i%%5))
 i <<- i+1
 })
 i = 1
@@ -81,7 +81,7 @@ J=mydata[[x]]$Current_mA/0.09
 lines(V, J, lwd=2, col=mycolors[i], lty=2)
 Jmarkers=J[V*10 == floor(V*10)]
 Vmarkers=V[V*10 == floor(V*10)]
-#points(Vmarkers, Jmarkers, col=change.lightness(colors[i],0.5), cex=2, pch=">")#21+(i%%5))
+points(Vmarkers, Jmarkers, col=mycolors[i], cex=1.5, pch=20+(i%%5), lwd=2, bg="white")
 i <<- i+1
 })
 i = 1
@@ -91,10 +91,10 @@ J=mydata[[x]]$Current_mA/0.09
 lines(V, J, lwd=2, col=mycolors[i])
 Jmarkers=J[V*10 == floor(V*10)]
 Vmarkers=V[V*10 == floor(V*10)]
-#points(Vmarkers, Jmarkers, col=change.lightness(colors[i],0.5), cex=2, pch="<")#21+(i%%5))
+points(Vmarkers, Jmarkers, col=change.lightness(mycolors[i],0.5), bg=mycolors[i], cex=1.5, pch=20+(i%%5))
 i <<- i+1
 })
 
-legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist)),1,2), lwd=3, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=mycolors, bty="n")
+legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist))), lwd=3, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bty="n", pch=seq(21,25))
 graphics.off()
 

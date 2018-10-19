@@ -52,7 +52,7 @@ single <- function(x,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-PCE.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(PCE~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$PCE),max(d$PCE)))
-	stripchart(PCE ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(PCE ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch =rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text="PCE (%)", side=2, line=3, cex=1.7, las=1);
 #	title(ylab="PCE (%)", mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
@@ -66,7 +66,7 @@ single <- function(x,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-Jsc.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(Jsc~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$Jsc),max(d$Jsc)))
-	stripchart(Jsc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(Jsc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch =rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text=bquote("J"["SC"]~"(mA/cm"^"2"*")"), side=2, line=2, cex=1.7, las=1);
 #	title(ylab=bquote("J"["SC"]~"(mA/cm"^"2"*")"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
@@ -80,7 +80,7 @@ single <- function(x,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-Voc.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(Voc~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$Voc),max(d$Voc)))
-	stripchart(Voc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(Voc ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch =rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text=bquote("V"["OC"]~"(V)"), side=2, line=4, cex=1.7, las=1);
 #	title(ylab=bquote("V"["OC"]~"(V)"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
@@ -94,7 +94,7 @@ single <- function(x,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-FF.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(FF~droplevels(interaction(rev,get(x),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$FF),max(d$FF)))
-	stripchart(FF ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(FF ~ droplevels(interaction(rev,get(x))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch = rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text="FF", side=2, line=5, cex=1.7, las=1);
 #	title(ylab="FF", mgp=mgp.y, cex.lab=1.5)
 	title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
@@ -114,7 +114,7 @@ double <- function(x,y,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-", y, "-PCE.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(PCE~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$PCE),max(d$PCE)))
-	stripchart(PCE ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(PCE ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch = rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text="PCE (%)", side=2, line=3, cex=1.7, las=1);
 #	title(ylab="PCE (%)", mgp=mgp.y, cex.lab=1.5)
 	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.7)
@@ -124,7 +124,7 @@ double <- function(x,y,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-", y, "-Jsc.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(Jsc~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$Jsc),max(d$Jsc)))
-	stripchart(Jsc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(Jsc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch = rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text=bquote("J"["SC"]~"(mA/cm"^"2"*")"), side=2, line=2, cex=1.7, las=1);
 #	title(ylab=bquote("J"["SC"]~"(mA/cm"^"2"*")"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.7)
@@ -134,7 +134,7 @@ double <- function(x,y,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-", y, "-Voc.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(Voc~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$Voc),max(d$Voc)))
-	stripchart(Voc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(Voc ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch =  rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text=bquote("V"["OC"]~"(V)"), side=2, line=4, cex=1.7, las=1);
 #	title(ylab=bquote("V"["OC"]~"(V)"), mgp=mgp.y, cex.lab=1.5)
 	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.7)
@@ -144,7 +144,7 @@ double <- function(x,y,mar,mgp.y,mgp.x){
 	pdf(paste(name, "-", x, "-", y, "-FF.pdf", sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
 	par(mar=mar)
 	boxplot(FF~droplevels(interaction(rev,get(x),get(y),sep="  ")), d, cex.axis=1.4, border=mycolors, las=2, outline=FALSE, ylim=c(min(d$FF),max(d$FF)))
-	stripchart(FF ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", add = TRUE, pch = 20, col = add.alpha(mycolors,0.3), cex=1.5)
+	stripchart(FF ~ droplevels(interaction(rev,get(x),get(y))), vertical = TRUE, data = d, method = "jitter", jitter=0.2, add = TRUE, pch = rep(seq(21,25),each=2), col = add.alpha(mycolors,0.3), cex=1.5)
 	mtext(text="FF", side=2, line=5, cex=1.7, las=1);
 #	title(ylab="FF", mgp=mgp.y, cex.lab=1.5)
 	title(xlab=paste(x,y), mgp=mgp.x, cex.lab=1.7)
