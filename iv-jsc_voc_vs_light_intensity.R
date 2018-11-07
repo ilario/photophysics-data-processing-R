@@ -23,8 +23,8 @@ illumination <- function(names){
 values <- lapply(names, function(name){
 splittedname <- strsplit(name, "-")
 value=100
-if(grepl("dark",name)){value=0}
-if(grepl("sun",name)){value=100*as.numeric(gsub("sun","",unlist(splittedname)[grepl("sun",unlist(splittedname))]))}
+if(grepl("dark",name, ignore.case=T)){value=0}
+if(grepl("sun",name, ignore.case=T)){value=100*as.numeric(gsub("sun","",unlist(splittedname)[grepl("sun",unlist(splittedname), ignore.case=T)]))}
 return(value)})
 return(unlist(values))
 }

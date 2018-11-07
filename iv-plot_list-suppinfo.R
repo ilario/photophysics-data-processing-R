@@ -32,10 +32,10 @@ change.lightness <- function(col, lightness=1){
 
 #fileslist=list.files(pattern="*-forward.*.txt|*-reverse.*.txt")
 fileslist=names(mydata)
-forwardlist=fileslist[grepl("forward", fileslist) & !grepl("dark", fileslist)]
-reverselist=fileslist[!grepl("forward", fileslist) & !grepl("dark", fileslist)]
-forwarddarklist=fileslist[grepl("forward", fileslist) & grepl("dark", fileslist)]
-reversedarklist=fileslist[!grepl("forward", fileslist) & grepl("dark", fileslist)]
+forwardlist=fileslist[grepl("forward", fileslist) & !grepl("dark", fileslist, ignore.case=T)]
+reverselist=fileslist[!grepl("forward", fileslist) & !grepl("dark", fileslist, ignore.case=T)]
+forwarddarklist=fileslist[grepl("forward", fileslist) & grepl("dark", fileslist, ignore.case=T)]
+reversedarklist=fileslist[!grepl("forward", fileslist) & grepl("dark", fileslist, ignore.case=T)]
 cellslist=sub("-forward|-reverse","",sub(".txt","",fileslist))
 cellslist=cellslist[!duplicated(cellslist)]
 legendlist=sub("_.*","",sub("^0","",cellslist))

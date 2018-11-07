@@ -24,8 +24,8 @@ write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge.txt", append=FAL
 write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge-nogeom.txt", append=FALSE, col.names=F, row.names=F);
 
 a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
-chargeDark <- mean(a[grep("dark", a$file),]$ChargeDensityTPC)
-chargeSun <- mean(a[grep("sun", a$file),]$ChargeDensityTPC)
+chargeDark <- mean(a[grep("dark", a$file, ignore.case=T),]$ChargeDensityTPC)
+chargeSun <- mean(a[grep("sun", a$file, ignore.case=T),]$ChargeDensityTPC)
 
 if(file.exists(file.path(tpvdir, "outputDeltaVloess.txt"))){
 	print("DC: using DeltaV from LOESS")

@@ -20,8 +20,9 @@ require(sfsmisc)
 print("TPV vs CE vs TPC dark vs TPC sun: PLOTTING")
 ce.files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
 tpv.files  <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
-tpc.sun.files <- list.files(path=tpcdir, pattern="^TPC.*sun.*\\.txt.table$");
-tpc.dark.files <- list.files(path=tpcdir, pattern="^TPC.*dark.*\\.txt.table$");
+tpc.files <- list.files(path=tpcdir, pattern="^TPC.*\\.txt.table$");
+tpc.sun.files <- tpc.files[grep("sun", tpc.files, ignore.case=T)]
+tpc.dark.files <- tpc.files[grep("dark", tpc.files, ignore.case=T)]
 
 ce.file <- tail(ce.files, n=1)
 tpv.file <- tail(tpv.files, n=1)
