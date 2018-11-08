@@ -65,9 +65,11 @@ tryCatch({
 	minor.tick(nx=10)
 	
 	lapply(dirs, function(x) {print(x);
-	fulloutput <- read.table(paste(x,"/tpv/output-biexp.txt",sep=""), header=TRUE);
+	       subdirs <- list.dirs(path=x, recursive=F)
+	       subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+	fulloutput <- read.table(paste(subdirs.tpv,"/output-biexp.txt",sep=""), header=TRUE);
 	n<-tail(grep("file",fulloutput[,1]),n=1)
-	output <- read.table(paste(x,"/tpv/output-biexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
+	output <- read.table(paste(subdirs.tpv,"/output-biexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
 	output.biexp[[paste("Voc",sub("_.*","",sub("^0","",x)),sep="")]] <<- signif(output$Voc,5)
 	output.biexp[[paste(sub("_.*","",sub("^0","",x)),"T1",sep="")]] <<- signif(output$T1,5)
 	output.biexp[[paste(sub("_.*","",sub("^0","",x)),"T2",sep="")]] <<- signif(output$T2,5)
@@ -100,9 +102,9 @@ tryCatch({
 	minor.tick(nx=10)
 	
 	lapply(dirs, function(x) {print(x);
-	fulloutput <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE);
+	fulloutput <- read.table(paste(subdirs.tpv,"/output-monoexp.txt",sep=""), header=TRUE);
 	n<-tail(grep("file",fulloutput[,1]),n=1)
-	output <- read.table(paste(x,"/tpv/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
+	output <- read.table(paste(subdirs.tpv,"/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
 	output.monoexp[[paste("Voc",sub("_.*","",sub("^0","",x)),sep="")]] <<- signif(output$Voc,5)
 	output.monoexp[[sub("_.*","",sub("^0","",x))]] <<- signif(output$T,5)
 	points(output$Voc, output$T, lwd=1, pch=21+(i%%5), col=change.lightness(mycolors[i+1],0.5), bg=mycolors[i+1], cex=1.5);
@@ -133,9 +135,9 @@ tryCatch({
 	minor.tick(nx=10)
 	
 	lapply(dirs, function(x) {print(x);
-	fulloutput <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE);
+	fulloutput <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE);
 	n<-tail(grep("file",fulloutput[,1]),n=1)
-	output <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
+	output <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
 	output.robustmonoexp[[paste("Voc",sub("_.*","",sub("^0","",x)),sep="")]] <<- signif(output$Voc,5)
 	output.robustmonoexp[[sub("_.*","",sub("^0","",x))]] <<- signif(output$T,5)
 	points(output$Voc, output$T, pch=21+(i%%5), col=change.lightness(mycolors[i+1],0.5), bg=mycolors[i+1], cex=1.5);

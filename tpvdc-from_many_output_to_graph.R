@@ -51,6 +51,8 @@ eaxis(side=1, cex.axis=1.2)
 minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
+ subdirs <- list.dirs(path=x, recursive=F)
+ subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
  expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
@@ -79,7 +81,7 @@ tryCatch({
  exp <- nlrob(ChargeDensityDC~ A+B*Voc+C*exp(D*Voc), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
 }, error=function(e) {print("FAILED FOURTH FIT")});
 
-filex <- file.path(x, "tpv", "output-monoexp.txt")
+filex <- file.path(subdirs.tpv, "output-monoexp.txt")
 
 fulloutput <- read.table(filex, header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
@@ -116,6 +118,8 @@ eaxis(side=1, cex.axis=1.2)
 minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
+ subdirs <- list.dirs(path=x, recursive=F)
+ subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
  a <- read.table(paste(x,"/outputDCcharge-nogeom.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
  expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
@@ -135,7 +139,7 @@ tryCatch({
  exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=8), data=a)
 }, error=function(e) {print("FAILED SECOND nogeom FIT")});
 
-filex <- file.path(x, "tpv", "output-monoexp.txt")
+filex <- file.path(subdirs.tpv, "output-monoexp.txt")
 fulloutput <- read.table(filex, header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 tpv <- read.table(filex, header=TRUE, skip=ifelse(length(n),n,0));

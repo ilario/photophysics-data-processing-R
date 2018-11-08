@@ -36,9 +36,9 @@ dirs <- sub("./","",dirs)
 legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
-colors=gsub(".*-col_","",dirs)
+mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 # if the color is not set, use the default one
-if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
+if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 jpeg(quality=98, paste(filename,"-DCs-capacitance.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
@@ -51,22 +51,25 @@ minor.tick(nx=10, ny=10)
 title(ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
 
 lapply(dirs, function(x) {print(x);
-a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
+	subdirs <- list.dirs(path=x, recursive=F)
+	subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
+	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
 charge <- mean(a$ChargeDensityTPC)
-if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
-	        b <- read.table(file.path(x, "tpv", "outputDeltaVmixed.txt"), header=T)
+if(file.exists(file.path(subdirs.tpv, "outputDeltaVmixed.txt"))){
+	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVmixed.txt"), header=T)
 }else{
-	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
+	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVloess.txt"), header=T)
 }
 output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
 output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
 
-points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=title, bg="gray90"# bty="n"
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=mycolors, title=title, bg="gray90"# bty="n"
 )
 graphics.off()
 
@@ -86,12 +89,15 @@ eaxis(side=1, cex.axis=1.2)
 minor.tick(nx=10, ny=10)
 
 lapply(dirs, function(x) {print(x);
-a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
+	subdirs <- list.dirs(path=x, recursive=F)
+	subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
+	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
 charge <- mean(a$ChargeDensityTPC)
-if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
-	        b <- read.table(file.path(x, "tpv", "outputDeltaVmixed.txt"), header=T)
+if(file.exists(file.path(subdirs.tpv, "outputDeltaVmixed.txt"))){
+	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVmixed.txt"), header=T)
 }else{
-	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
+	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVloess.txt"), header=T)
 }
 output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
@@ -101,11 +107,11 @@ geometrical <- quantile(dataframe$capacitance,0.05)
 capacitance <- capacitance - geometrical
 
 output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-points(b$Voc, capacitance, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
  i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=colors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=colors, title=#paste("DC capacitance\n","no geom. cap.\n",
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=mycolors, title=#paste("DC capacitance\n","no geom. cap.\n",
        title, bg="gray90"#bty="n"
 )
 graphics.off()

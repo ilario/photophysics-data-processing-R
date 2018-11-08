@@ -74,7 +74,10 @@ eaxis(side=1,at=seq(0, xlim[2], xtick), cex.axis=1.4)
 minor.tick(nx=10)
 
 lapply(dirs, function(x) {print(x);
- a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
+ subdirs <- list.dirs(path=x, recursive=F)
+ subdirs.ce <- subdirs[grep("ce", subdirs, ignore.case=T)]
+ subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+ a <- read.table(paste(subdirs.ce,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityCE~a$Voc,span=0.9)
  expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=9), data=a[round(length(a$Voc)/2):length(a$Voc),])
  tryCatch({
@@ -91,9 +94,9 @@ lapply(dirs, function(x) {print(x);
 	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
  }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
 
-fulloutput <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE);
+fulloutput <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo, tpv$Voc) + predict(expfit, new))/2
@@ -161,8 +164,10 @@ xtick = 10^(floor(log10(xlim_nogeom[2])))
 eaxis(side=1,at=c(1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
 i <- 0
 lapply(dirs, function(x) {print(x);
-
- a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
+ subdirs <- list.dirs(path=x, recursive=F)
+ subdirs.ce <- subdirs[grep("ce", subdirs, ignore.case=T)]
+ subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+ a <- read.table(paste(subdirs.ce,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityCE~a$Voc,span=0.9)
  tryCatch({
 	  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
@@ -178,9 +183,9 @@ lapply(dirs, function(x) {print(x);
 	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
  }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
 
-fulloutput <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE);
+fulloutput <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
-tpv <- read.table(paste(x,"/tpv/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
+tpv <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0));
 
 charge_nogeom <- exp(coef(expfit)[2])*(exp(exp(coef(expfit)[3])*tpv$Voc)-1)
 points(charge_nogeom, tpv$T, bg=add.alpha(mycolors[i+1],0.5), col=change.lightness(mycolors[i+1],0.5), cex=1.5, pch=21+(i%%5));

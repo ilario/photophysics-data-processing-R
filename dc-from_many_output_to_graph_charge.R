@@ -37,17 +37,20 @@ dirs <- sub("./","",dirs)
 legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
-colors=gsub(".*-col_","",dirs)
+mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 # if the color is not set, use the default one
-if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
+if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 data <- lapply(dirs, function(x) {print(x);
- a <- read.table(paste(x,"/tpc/outputChargeDensityTPC.txt",sep=""),header=T)
+ subdirs <- list.dirs(path=x, recursive=F)
+ subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
+ subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+ a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
  charge <- mean(a$ChargeDensityTPC)
-if(file.exists(file.path(x, "tpv", "outputDeltaVmixed.txt"))){
-               b <- read.table(file.path(x, "tpv", "outputDeltaVmixed.txt"), header=T)
+if(file.exists(file.path(subdirs.tpv, "outputDeltaVmixed.txt"))){
+               b <- read.table(file.path(subdirs.tpv, "outputDeltaVmixed.txt"), header=T)
 }else{
-	        b <- read.table(file.path(x, "tpv", "outputDeltaVloess.txt"), header=T)
+	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVloess.txt"), header=T)
 }
 capacitance <- charge/b$deltaV
  c<- data.frame(b$Voc,capacitance)
@@ -69,16 +72,16 @@ g <- data[[x]]
 g$capacitance[g$capacitance < 0] <- 0
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 w <- Vectorize(function(X)integrate(z,0,X)$value)
-curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
+curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=mycolors[i+1], add=T)
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
 output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
 www <- unlist(lapply(xx, ww))
 output[[sub("_.*","",sub("^0","",x))]] <<- signif(www,5)
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(xx, www, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
-legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n",
+legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=mycolors, cex=1.5, col=mycolors, title=#paste("DC charge\n",
 title,bg="gray90"#), bty="n"
 )
 graphics.off()
@@ -102,14 +105,14 @@ g <- data[[x]]
 g$capacitance[g$capacitance < 0] <- 0
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 w <- Vectorize(function(X)integrate(z,0,X)$value)
-curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
+curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=mycolors[i+1], add=T)
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
 www <- unlist(lapply(xx, ww))
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(xx, www, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","with geom. cap.\n",
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=mycolors, cex=1.5, col=mycolors, title=#paste("DC charge\n","with geom. cap.\n",
 title,bg="gray90"#), bty="n"
 )
 graphics.off()
@@ -131,16 +134,16 @@ g$capacitance <- g$capacitance - geometrical
 #g$capacitance <- g$capacitance - min(g$capacitance)#mean(sort(g$capacitance)[1:3])
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 w <- Vectorize(function(X)integrate(z,0,X)$value)
-curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
+curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=mycolors[i+1], add=T)
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
 output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(xx,5)
 www <- unlist(lapply(xx, ww))
 output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(www,5)
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(xx, www, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
-legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
+legend(x="bottomright",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=mycolors, cex=1.5, col=mycolors, title=#paste("DC charge\n","no geom. cap.\n",
        title,bg="gray90"#, bty="n"
 )
 graphics.off()
@@ -168,14 +171,14 @@ g$capacitance <- g$capacitance - geometrical
 #g$capacitance <- g$capacitance - min(g$capacitance) #mean(sort(g$capacitance)[1:3])
 z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
 w <- Vectorize(function(X)integrate(z,0,X)$value)
-curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=colors[i+1], add=T)
+curve(w,range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], lwd=2, col=mycolors[i+1], add=T)
 ww <- function(X)integrate(z,0,X)$value
 xx <- c(seq(range(data[[x]]$Voc)[1], range(data[[x]]$Voc)[2], 0.1), range(data[[x]]$Voc)[2])
 www <- unlist(lapply(xx, ww))
-points(xx, www, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5))
+points(xx, www, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
 i <<- i+1
 })
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=colors, cex=1.5, col=colors, title=#paste("DC charge\n","no geom. cap.\n",
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, pt.bg=mycolors, cex=1.5, col=mycolors, title=#paste("DC charge\n","no geom. cap.\n",
 title,bg="gray90"#, bty="n"
 )
 graphics.off()

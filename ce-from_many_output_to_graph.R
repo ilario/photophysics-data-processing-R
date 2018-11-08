@@ -56,7 +56,9 @@ mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 data <- lapply(dirs, function(x) {print(x);
- a <- read.table(paste(x,"/ce/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
+ subdirs <- list.dirs(path=x, recursive=F)
+ subdirs.ce <- subdirs[grep("ce", subdirs, ignore.case=T)]
+ a <- read.table(paste(subdirs.ce,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- a$Voc
  a <- a[with(a, order(a$Voc)),]
  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
