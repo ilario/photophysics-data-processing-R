@@ -93,8 +93,11 @@ output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-CEs.csv",sep=""), row.names=FALSE, na="", sep=",")
 
 i<-0
-#jpeg(quality=98, paste(filename,"-CEs.jpg",sep=""), width=image_width, height=image_height)
-pdf(paste(filename,"-CEs.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
+if(output_pdf){
+	pdf(paste(filename,"-CEs.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
+}else{
+	jpeg(quality=98, paste(filename,"-CEs.jpg",sep=""), width=image_width, height=image_height)
+}
 op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
 plot(NULL,xlim=xlim,ylim=ylim,xlab="", ylab="", cex.axis=1.4, yaxt="n");
 title(ylab = bquote("Charge (C/cm"^"2"*")"), cex.lab = 1.7, line = 5.5)

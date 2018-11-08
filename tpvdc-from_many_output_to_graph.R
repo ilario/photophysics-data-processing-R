@@ -28,7 +28,7 @@ output=list()
 output.nogeom=list()
 
 library(robustbase)
-#library(RColorBrewer)
+library(RColorBrewer)
 library(minpack.lm)
 library(sfsmisc)
 library(Hmisc)
@@ -38,9 +38,9 @@ dirs <- sub("./","",dirs)
 legend=sub("_.*","",sub("^0","",dirs))
 
 # try to obtain the color from the file name
-colors=gsub(".*-col_","",dirs)
+mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 # if the color is not set, use the default one
-if(!length(colors[1])){colors=colorRampPalette(c("red","orange","springgreen","royalblue"))(max(length(dirs),3))}
+if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 i <- 0
 jpeg(quality=98, paste(filename,"-TPVDCs.jpg",sep=""), width=image_width, height=image_height)
@@ -55,50 +55,38 @@ lapply(dirs, function(x) {print(x);
  subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
- expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ #just for the slope, no intercept
+ linearfit <- lm(ChargeDensityDC ~ 0 + Voc, data=a[1:round(length(a$Voc)/2),])
+ startlist=list(B=coef(linearfit),C=1e-10,D=8)
 tryCatch({
- exp <- lm(ChargeDensityDC ~ Voc, data=a)
-}, error=function(e) {print("FAILED LINEAR FIT")});
+ expfit <- nlsLM(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=startlist, data=a)
 tryCatch({
- exp <- nls(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
+ expfit <- nlrob(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=coef(expfit)[1], C=coef(expfit)[2], D=coef(expfit)[3]), data=a)
+}, error=function(e) {print("FAILED ROBUST FIT")});
 }, error=function(e) {print("FAILED non-robust FIT")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED ZEROTH FIT")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED FIRST FIT")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED SECOND FIT")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-9,C=1e-10,D=8), data=a)
-}, error=function(e) {print("FAILED THIRD FIT")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ B*Voc+C*(exp(D*Voc)-1), start=list(B=1e-8,C=1e-9,D=1), data=a)
-}, error=function(e) {print("FAILED THIRD FIT")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ A+B*Voc+C*exp(D*Voc), start=list(A=0,B=1e-9,C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED FOURTH FIT")});
+ 
+ # if things go bad, the linear fit should suffice
+ if(!exists("expfit")){
+	 print("USING LINEAR FIT FOR CHARGE EXTRACTION DATA")
+	 expfit <- linearfit
+ }
 
-filex <- file.path(subdirs.tpv, "output-monoexp.txt")
+ filex <- file.path(subdirs.tpv, "output-monoexp.txt")
 
 fulloutput <- read.table(filex, header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
 tpv <- read.table(filex, header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
-charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
+charge <- (predict(lo,tpv$Voc)+predict(expfit,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
-charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+charge[is.na(charge)] <- predict(expfit,new2)
 output[[paste("Charge",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output[[sub("_.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
-#lo<-loess(tpv$T~charge,span=0.3)
-#lines(charge, predict(lo), lwd=2, col=colors[i+1])
-points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
+points(charge, tpv$T, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5));
  i <<- i+1
 })
-legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs DC\n","with geom. cap.\n",
+legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors, lwd=4, pt.lwd=2, pt.cex=2, col=mycolors,cex=1.5, title=#paste("TPV vs DC\n","with geom. cap.\n",
 title,bg="gray90"#), bty="n"
 )
 graphics.off()
@@ -122,22 +110,13 @@ lapply(dirs, function(x) {print(x);
  subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
  a <- read.table(paste(x,"/outputDCcharge-nogeom.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
- expend <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=8), data=a[round(length(a$Voc)/2):length(a$Voc),])
+ startlist=list(C=1e-10,D=8)
 tryCatch({
- exp <- nlsLM(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED ZEROTH nogeom FIT non-robust")});
+ expfit <- nlsLM(ChargeDensityDC~ C*(exp(D*Voc)-1), start=startlist, data=a)
 tryCatch({
- exp <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED ZEROTH nogeom FIT")});
-tryCatch({
- exp <- nlsLM(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED FIRST nogeom FIT non-robust")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=coef(expend)["A"],C=coef(expend)["C"],D=coef(expend)["D"]), data=a)
-}, error=function(e) {print("FAILED FIRST nogeom FIT")});
-tryCatch({
- exp <- nlrob(ChargeDensityDC~ A+C*exp(D*Voc), start=list(A=0,C=1e-10,D=8), data=a)
-}, error=function(e) {print("FAILED SECOND nogeom FIT")});
+ expfit <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expfit)[1],D=coef(expfit)[2]), data=a)
+}, error=function(e) {print("FAILED nogeom FIT ROBUST")});
+}, error=function(e) {print("FAILED nogeom FIT non-robust")});
 
 filex <- file.path(subdirs.tpv, "output-monoexp.txt")
 fulloutput <- read.table(filex, header=TRUE);
@@ -145,17 +124,15 @@ n<-tail(grep("file",fulloutput[,1]),n=1)
 tpv <- read.table(filex, header=TRUE, skip=ifelse(length(n),n,0));
 #importante che la variabile in new abbia lo stesso nome di quella fittata
 new <- data.frame(Voc = tpv$Voc)
-charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
+charge <- (predict(lo,tpv$Voc)+predict(expfit,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
-charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+charge[is.na(charge)] <- predict(expfit,new2)
 output.nogeom[[paste("Charge",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
-#lo<-loess(tpv$T~charge,span=0.3)
-#lines(charge, predict(lo), lwd=2, col=colors[i+1])
-points(charge, tpv$T, lwd=1, bg=colors[i+1], cex=2, pch=21+(i%%5));
+points(charge, tpv$T, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5));
 i <<- i+1
 })
-legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=colors, lwd=4, pt.lwd=2, pt.cex=2, col=colors,cex=1.5, title=#paste("TPV vs DC\n","no geom. cap.\n",
+legend(x="topright",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors, lwd=4, pt.lwd=2, pt.cex=2, col=mycolors,cex=1.5, title=#paste("TPV vs DC\n","no geom. cap.\n",
 title, bg="gray90"#, bty="n"
 )
 graphics.off()

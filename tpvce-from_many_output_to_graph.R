@@ -58,8 +58,11 @@ mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 i <- 0
-#jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
-pdf(paste(filename,"-TPVCEs.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+if(output_pdf){
+	pdf(paste(filename,"-TPVCEs.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+}else{
+	jpeg(quality=98, paste(filename,"-TPVCEs.jpg",sep=""), width=image_width, height=image_height)
+}
 op <- par(mar = c(5,6,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 plot(1,xlim=xlim,ylim=ylim,xlab="", ylab="",log="y", yaxt="n", xaxt="n")
 #line is for introducing more space between label and axis
@@ -79,7 +82,6 @@ lapply(dirs, function(x) {print(x);
  subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
  a <- read.table(paste(subdirs.ce,"/outputChargeDensityCE.txt",sep=""),header=T,stringsAsFactors=F)
  lo <- loess(a$ChargeDensityCE~a$Voc,span=0.9)
- expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=-1e-10,C=1e-10,D=9), data=a[round(length(a$Voc)/2):length(a$Voc),])
  tryCatch({
 	  lin <- lm(ChargeDensityCE ~ 0 + Voc, data=a)
 	  expfit <- lin;
@@ -101,7 +103,7 @@ tpv <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo, tpv$Voc) + predict(expfit, new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
-charge[is.na(charge)] <- (predict(expfit,new2) + predict(expend,new2))/2
+charge[is.na(charge)] <- predict(expfit,new2)
 output[[paste("Charge",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(charge,5)
 output[[sub("_.*","",sub("^0","",x))]] <<- signif(tpv$T,5)
 points(charge, tpv$T, bg=add.alpha(mycolors[i+1],0.5), col=change.lightness(mycolors[i+1],0.5), cex=1.5, pch=21+(i%%5));
@@ -109,7 +111,6 @@ index_shown_charge = which(charge >= xlim[1] & charge <= xlim[2])
 shown_charge = charge[index_shown_charge]
 shown_T = tpv$T[index_shown_charge]
 weights= (min(shown_T)/shown_T)^3
-
 #just in case...
 rm(powerlaw)
 
@@ -150,9 +151,12 @@ output = lapply(output, function(x){length(x)=maxlength; print(x)})
 output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-TPVCEs.csv",sep=""), row.names=FALSE, na="", sep=",")
 
+if(output_pdf){
+	pdf(paste(filename,"-TPVCEs_nogeom.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
+}else{
+	jpeg(quality=98, paste(filename,"-TPVCEs_nogeom.jpg",sep=""), width=image_width, height=image_height)
+}
 
-#jpeg(quality=98, paste(filename,"-TPVCEs_nogeom.jpg",sep=""), width=image_width, height=image_height)
-pdf(paste(filename,"-TPVCEs_nogeom.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
 op <- par(mar = c(5,6,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 plot(1,xlim=xlim_nogeom,ylim=ylim_nogeom,xlab="", ylab="",log="xy", yaxt="n", xaxt="n")
 #line is for introducing more space between label and axis

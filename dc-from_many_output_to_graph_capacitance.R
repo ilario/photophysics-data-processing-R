@@ -56,11 +56,8 @@ lapply(dirs, function(x) {print(x);
 	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
 a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
 charge <- mean(a$ChargeDensityTPC)
-if(file.exists(file.path(subdirs.tpv, "outputDeltaVmixed.txt"))){
-	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVmixed.txt"), header=T)
-}else{
-	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVloess.txt"), header=T)
-}
+b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
+
 output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
 output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
@@ -94,11 +91,7 @@ lapply(dirs, function(x) {print(x);
 	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
 a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
 charge <- mean(a$ChargeDensityTPC)
-if(file.exists(file.path(subdirs.tpv, "outputDeltaVmixed.txt"))){
-	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVmixed.txt"), header=T)
-}else{
-	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVloess.txt"), header=T)
-}
+b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
 output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV
 dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)

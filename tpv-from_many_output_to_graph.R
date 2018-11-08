@@ -54,8 +54,11 @@ tryCatch({
 	print("biexp")
 	
 	i <- 0
-	#jpeg(quality=98, paste(filename, "-TPVs-biexp.jpg",sep=""), width=image_width, height=image_height);
-	pdf(paste(filename, "-TPVs-biexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+	if(output_pdf){
+		pdf(paste(filename, "-TPVs-biexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+	}else{
+		jpeg(quality=98, paste(filename, "-TPVs-biexp.jpg",sep=""), width=image_width, height=image_height);
+	}
 	op <- par(mar = c(5,7,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 	plot(NULL, ylim=ylim, xlim=xlim, cex.axis=1.4, log="y", xlab="", ylab="", yaxt="n")
 	title(ylab = "Charge carrier lifetime (s)", cex.lab = 1.7, line = 4)
@@ -91,8 +94,11 @@ tryCatch({
 tryCatch({
 	print("monoexp")
 	i <- 0
-	#jpeg(quality=98, paste(filename, "-TPVs-monoexp.jpg",sep=""), width=image_width, height=image_height);
-	pdf(paste(filename, "-TPVs-monoexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+	if(output_pdf){
+		pdf(paste(filename, "-TPVs-monoexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+	}else{
+		jpeg(quality=98, paste(filename, "-TPVs-monoexp.jpg",sep=""), width=image_width, height=image_height);
+	}
 	op <- par(mar = c(5,7,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 	plot(NULL, ylim=ylim, xlim=xlim,cex.axis=1.4, log="y", xlab="", ylab="", yaxt="n")
 	title(ylab = "Charge carrier lifetime (s)", cex.lab = 1.7, line = 4)
@@ -102,6 +108,8 @@ tryCatch({
 	minor.tick(nx=10)
 	
 	lapply(dirs, function(x) {print(x);
+	       subdirs <- list.dirs(path=x, recursive=F)
+	       subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
 	fulloutput <- read.table(paste(subdirs.tpv,"/output-monoexp.txt",sep=""), header=TRUE);
 	n<-tail(grep("file",fulloutput[,1]),n=1)
 	output <- read.table(paste(subdirs.tpv,"/output-monoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 
@@ -124,8 +132,11 @@ tryCatch({
 tryCatch({
 	print("robust monoexp")
 	i <- 0
-	#jpeg(quality=98, paste(filename, "-TPVs-robustmonoexp.jpg",sep=""), width=image_width, height=image_height);
-	pdf(paste(filename, "-TPVs-robustmonoexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+	if(output_pdf){
+		pdf(paste(filename, "-TPVs-robustmonoexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+	}else{
+		jpeg(quality=98, paste(filename, "-TPVs-robustmonoexp.jpg",sep=""), width=image_width, height=image_height);
+	}
 	op <- par(mar = c(5,7,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 	plot(NULL, ylim=ylim, xlim=xlim,cex.axis=1.4, log="y", xlab="", ylab="", yaxt="n")
 	title(ylab = "Charge carrier lifetime (s)", cex.lab = 1.7, line = 4)
@@ -135,6 +146,8 @@ tryCatch({
 	minor.tick(nx=10)
 	
 	lapply(dirs, function(x) {print(x);
+	       subdirs <- list.dirs(path=x, recursive=F)
+	       subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
 	fulloutput <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE);
 	n<-tail(grep("file",fulloutput[,1]),n=1)
 	output <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE, skip=ifelse(length(n),n,0)); 

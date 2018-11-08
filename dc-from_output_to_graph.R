@@ -27,36 +27,33 @@ a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
 chargeDark <- mean(a[grep("dark", a$file, ignore.case=T),]$ChargeDensityTPC)
 chargeSun <- mean(a[grep("sun", a$file, ignore.case=T),]$ChargeDensityTPC)
 
-if(file.exists(file.path(tpvdir, "outputDeltaVloess.txt"))){
-	print("DC: using DeltaV from LOESS")
-	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
-	bLoess <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
-	names(b) <- c("file", "Voc", "deltaV")
-	names(bLoess) <- c("file", "Voc", "deltaV")
-	b <- b[with(b, order(b$Voc)), ]
-	bLoess <- bLoess[with(bLoess, order(bLoess$Voc)), ]
-	len <- length(b$file)
-	b$deltaV <- (seq(len,1)*b$deltaV + seq(1,len)*bLoess$deltaV) / (len+1)
-}else if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
+if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
 	print("DC: using DeltaV from mixed monoexp and biexp")
 	b <- read.table(file.path(tpvdir, "outputDeltaVmixed.txt"), header=T)
 	names(b) <- c("file", "Voc", "deltaV")
 	b <- b[with(b, order(b$Voc)), ]
 }else{
-	print("DC: using DeltaV from maximum voltage point")
 	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+	bLoess <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
+	bMonoexp <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
 	names(b) <- c("file", "Voc", "deltaV")
+	names(bLoess) <- c("file", "Voc", "deltaV")
+	names(bMonoexp) <- c("file", "Voc", "deltaV")
 	b <- b[with(b, order(b$Voc)), ]
-	if(file.exists(file.path(tpvdir, "outputDeltaVmonoexp.txt"))){
-		bMonoexp <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
-		names(bMonoexp) <- c("file", "Voc", "deltaV")
-		bMonoexp <- bMonoexp[bMonoexp$deltaV > 0,]
-		bMonoexp <- bMonoexp[with(bMonoexp, order(bMonoexp$Voc)), ]
-		matchIndex <- match(bMonoexp$file, b$file)
-		# uses the Monoexp close to Voc and the plain deltaV close to dark, with a linear mixing between the two
-		lenMatch <- length(matchIndex)
-		b$deltaV[matchIndex] <- (seq(lenMatch,1)*b$deltaV[matchIndex] + seq(1,lenMatch)*bMonoexp$deltaV) / (lenMatch+1)
-	}
+	bLoess <- bLoess[with(bLoess, order(bLoess$Voc)), ]
+	bMonoexp <- bMonoexp[with(bMonoexp, order(bMonoexp$Voc)), ]
+
+	#remove lines where monoexp fit failed
+	matchIndexMonoexp <- match(bMonoexp$file, b$file)
+	b <- b[matchIndexMonoexp,]
+	bLoess <- bLoess[matchIndexMonoexp,]
+
+	#element wise maximum
+	bMonoexpLoess <- bMonoexp
+	bMonoexpLoess$deltaV <- pmax(bMonoexp$deltaV, bLoess$deltaV)
+	# uses the maximum between Monoexp and Loess close to 1 sun and the plain deltaV close to dark, with a linear mixing between the two
+	lenMatch <- length(matchIndexMonoexp)
+	b$deltaV <- (seq(lenMatch,1)*b$deltaV + seq(1,lenMatch)*bMonoexpLoess$deltaV) / (lenMatch+1)
 }
 
 write.table(b, file=file.path(tpvdir, "outputDeltaVprocessedForDC.txt"), append=FALSE, row.names=FALSE)

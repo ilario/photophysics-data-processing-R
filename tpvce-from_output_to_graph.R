@@ -57,15 +57,12 @@ tryCatch({
 	 exp <- nlrob(ChargeDensityCE~ A+B*Voc+C*exp(D*Voc), start=list(A=0,C=1e-10,D=9), data=a)
          }, error=function(e) {print("FAILED FIFTH FIT")});
 
- expend <- nlsLM(ChargeDensityCE~ A+C*exp(D*Voc), start=list(A=0,C=coef(exp)["C"],D=coef(exp)["D"]), data=a[round(length(a$Voc)/2):length(a$Voc),])
-
 if(printcefit)
 {
  png(paste(name,"-CE-fit.png",sep=""), width=800, height=640)
  plot(a$Voc, a$ChargeDensityCE, cex.main=1.5,xlab="Voltage (V)",ylab="Extracted Charge Density (C/cm2)", main=paste(name,"CEs"), lwd=2)
  lines(a$Voc,predict(exp))
  lines(a$Voc,predict(lo),col="green")
- lines(a$Voc[round(length(a$Voc)/2):length(a$Voc)],predict(expend),col="red")
  graphics.off()
 }
 
@@ -76,7 +73,7 @@ tpv <- read.table(file.path(tpvdir, "output-monoexp.txt"), header=TRUE, skip=ife
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
-charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+charge[is.na(charge)] <- predict(exp,new2)
 
 outputTPVCEmonoexp <- data.frame(charge, tpv$T)
 write.table(outputTPVCEmonoexp, file="outputTPVCE-monoexp.txt", append=TRUE, col.names=F, row.names=F, quote=F);
@@ -94,7 +91,7 @@ tpv <- read.table(file.path(tpvdir, "output-biexp.txt"), header=TRUE, skip=ifels
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
-charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+charge[is.na(charge)] <- predict(exp,new2)
 
 outputTPVCEbiexp <- data.frame(charge, tpv$T1, tpv$T2)
 write.table(outputTPVCEbiexp, file="outputTPVCE-biexp.txt", append=TRUE, col.names=F, row.names=F, quote=F);
@@ -121,7 +118,7 @@ tpv <- read.table(file.path(tpvdir, "output-mixedbimono.txt"), header=TRUE, skip
 new <- data.frame(Voc = tpv$Voc)
 charge <- (predict(lo,tpv$Voc)+predict(exp,new))/2
 new2 <- data.frame(Voc = tpv$Voc[is.na(charge)])
-charge[is.na(charge)] <- (predict(exp,new2) + predict(expend,new2))/2
+charge[is.na(charge)] <- predict(exp,new2)
 
 outputTPVCEmixedbimono <- data.frame(charge, tpv$T1, tpv$T2)
 write.table(outputTPVCEmixedbimono, file="outputTPVCE-mixedbimono.txt", append=TRUE, col.names=F, row.names=F, quote=F, na="");

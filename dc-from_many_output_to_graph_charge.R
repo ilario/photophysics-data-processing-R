@@ -47,11 +47,8 @@ data <- lapply(dirs, function(x) {print(x);
  subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
  a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
  charge <- mean(a$ChargeDensityTPC)
-if(file.exists(file.path(subdirs.tpv, "outputDeltaVmixed.txt"))){
-               b <- read.table(file.path(subdirs.tpv, "outputDeltaVmixed.txt"), header=T)
-}else{
-	        b <- read.table(file.path(subdirs.tpv, "outputDeltaVloess.txt"), header=T)
-}
+ b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
+
 capacitance <- charge/b$deltaV
  c<- data.frame(b$Voc,capacitance)
  d <- c[with(c, order(b.Voc)), ]

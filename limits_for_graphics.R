@@ -28,3 +28,4 @@ lim.TPVDC.nogeom.charge=lim.DCcharge.nogeom.charge
 lim.TPVDC.nogeom.lifetime=lim.TPV.lifetime
 lim.IV.voltage=c(-0.1,1.1)
 lim.IV.current=c(-24,5)
+output_pdf=FALSE
