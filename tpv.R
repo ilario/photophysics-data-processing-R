@@ -21,13 +21,16 @@ library(sfsmisc)
 
 if(!exists("image_width")){stop("image_width and image_height variables must be set")}
 
-robust=1
-logy=0
-logx=0
-residuals=0
+robust=T
+logy=F
+logx=T
+residuals=F
 thresholdBiexp=10
 thresholdRobustBiexp=100
-forbidNegativeDecays=0
+forbidNegativeDecays=T
+noiseTime=5e-8
+#debugDeltaV info will appear in biexp logx graphics
+debugDeltaV=T
 
 files <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
 mydata <- lapply(file.path(tpvdir,files), read.table, header=FALSE, col.names=c("time","voltage"));
@@ -38,6 +41,7 @@ write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=f
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-monoexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaV.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVloess.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVfirstPoints.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-robustmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
@@ -47,17 +51,10 @@ write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=f
 
 
 trashfornullmessages <- lapply(files, function(x) {
-	message(x);
-#	if(!file.exists(file.path(tpvdir,paste(x, "-biexp.png", sep=""))) | !file.exists(file.path(tpvdir,paste(x, "-monoexp.png", sep="")))){
-		#names(mydata[[x]]) <- c("time","voltage")
-	
-		#workaround
+	message(x);	
 		header =  read.table(file.path(tpvdir,paste(x,".txt",sep="")), skip=3, header=FALSE, nrows=3)$V2
-#		header = as.numeric(system(paste("head -6 '", file.path(tpvdir,paste(x,".txt",sep="")), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
 
-#		indexpeaktime <- which.max(mydata[[x]]$voltage);
-#		peaktime <- mydata[[x]]$time[indexpeaktime];
-		peaktime <- 0;
+		peaktime <- mydata[[x]]$time[which.max(mydata[[x]]$voltage)];
 		starttime <- head(mydata[[x]]$time, n=1)
 		voltage2 <- subset(mydata[[x]], time >= peaktime, select=voltage); 
 		time2 <- subset(mydata[[x]], time >= peaktime, select=time);
@@ -66,19 +63,29 @@ trashfornullmessages <- lapply(files, function(x) {
 		time_nonfit <- subset(mydata[[x]], time < peaktime, select=time);
 		temp_nonfit <- data.frame(time_nonfit, voltage_nonfit);
 		endtime = tail(temp$time, n=1)
-		#names(temp) <- c("time","voltage")
-		startingvoltage <- mean(mydata[[x]]$voltage[0:10]);
-		outputDeltaV <- t(c(x, startingvoltage, max(temp$voltage)-startingvoltage));
+		startingvoltage <- mean(mydata[[x]]$voltage[0:200]);
+		maxVoltageIndex <- which.max(mydata[[x]]$voltage)
+		deltavoltage <- mydata[[x]]$voltage[maxVoltageIndex] - startingvoltage;
+		outputDeltaV <- t(c(x, startingvoltage, deltavoltage));
 		write.table(outputDeltaV, file=file.path(tpvdir,"outputDeltaV.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
-		deltavoltage <- max(mydata[[x]]$voltage) - startingvoltage;
+
 		expectedresult <- 0.00002;
 		A=startingvoltage; B=deltavoltage; 
 		C=expectedresult; slowdecay <- C; fastdecay <- C; #in caso non venisse effettuato il monoexp esplorativo
 		tempsubset <- subset(mydata[[x]], time >= peaktime & time < endtime/20, select=c(time,voltage));
 		tempsubset2 <- subset(mydata[[x]], time > endtime/120, select=c(time,voltage));
 		lo2 <- loess(tempsubset2$voltage~tempsubset2$time, span=0.02);
-		outputDeltaVloess <- t(c(x, startingvoltage, max(predict(lo2))-startingvoltage));
+		deltaVloess <- max(predict(lo2))-startingvoltage
+		outputDeltaVloess <- t(c(x, startingvoltage, deltaVloess));
 		write.table(outputDeltaVloess, file=file.path(tpvdir,"outputDeltaVloess.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
+
+		afterPeakNoiseTimePoints = time2 < peaktime + noiseTime
+		afterPeakNoiseVoltagePoints = voltage2[afterPeakNoiseTimePoints]
+		print(paste("DeltaVfirstPoints averaging on", length(afterPeakNoiseVoltagePoints), "points"))
+		deltaVfirstPoints <- mean(afterPeakNoiseVoltagePoints) - startingvoltage
+		outputDeltaVfirstPoints <- t(c(x, startingvoltage, deltaVfirstPoints));
+		write.table(outputDeltaVfirstPoints, file=file.path(tpvdir,"outputDeltaVfirstPoints.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
+
 		tryCatch({
 		print("EvaluationMonoexp/Fit: Performing");
 		fit <- nls(voltage ~ cbind(1, exp(-time/C)), start=list(C=expectedresult*runif(1,0.5,2)),trace=F,data=temp,alg="plinear");
@@ -159,6 +166,13 @@ if(logx){
 			lines(temp$time,predict(fit2), col="aquamarine4", lwd=2);
 			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
 			mtext(paste("Tau2 =", signif(fastdecay,digits=4), "\u00b1", signif(fastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
+
+			if(debugDeltaV){
+				abline(h=startingvoltage + deltaVfirstPoints, lwd=5)
+				abline(h=startingvoltage + deltaVloess, col="red")
+				abline(h=startingvoltage + deltavoltage, col="green")
+			}
+
 			graphics.off();	
 		}, error=function(e) print("Biexp/Plot/LogX: Error"));
 }

@@ -54,7 +54,7 @@ trashfornullmessages <- lapply(files, function(x) {
 	
 	lines(mydata[[x]]$time, baseline, col="green")
 
-	ylim_charge=c(0, max(chargezero)/0.09)
+	ylim_charge=c(0, max(chargezero, charge)/0.09)
 	par(new=TRUE)
 	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge)
 	abline(h=0,col="red")

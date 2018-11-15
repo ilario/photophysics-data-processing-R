@@ -55,7 +55,8 @@ lapply(dirs, function(x) {print(x);
 	subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
 	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
 a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
-charge <- mean(a$ChargeDensityTPC)
+# in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
+charge <- quantile(a$ChargeDensityTPC, 0.75)
 b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
 
 output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
@@ -90,7 +91,8 @@ lapply(dirs, function(x) {print(x);
 	subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
 	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
 a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
-charge <- mean(a$ChargeDensityTPC)
+# in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
+charge <- quantile(a$ChargeDensityTPC, 0.75)
 b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
 output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
 capacitance <- charge/b$deltaV

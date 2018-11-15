@@ -24,8 +24,11 @@ write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge.txt", append=FAL
 write.table(t(c("Voc","ChargeDensityDC")), file="outputDCcharge-nogeom.txt", append=FALSE, col.names=F, row.names=F);
 
 a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
-chargeDark <- mean(a[grep("dark", a$file, ignore.case=T),]$ChargeDensityTPC)
-chargeSun <- mean(a[grep("sun", a$file, ignore.case=T),]$ChargeDensityTPC)
+#chargeDark <- mean(a[grep("dark", a$file, ignore.case=T),]$ChargeDensityTPC)
+#chargeSun <- mean(a[grep("sun", a$file, ignore.case=T),]$ChargeDensityTPC)
+#chargeArray = seq(chargeDark, chargeSun, length.out=len)
+# in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
+charge <- quantile(a$ChargeDensityTPC, 0.75)
 
 if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
 	print("DC: using DeltaV from mixed monoexp and biexp")
@@ -33,35 +36,36 @@ if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
 	names(b) <- c("file", "Voc", "deltaV")
 	b <- b[with(b, order(b$Voc)), ]
 }else{
-	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
-	bLoess <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
-	bMonoexp <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
-	names(b) <- c("file", "Voc", "deltaV")
-	names(bLoess) <- c("file", "Voc", "deltaV")
-	names(bMonoexp) <- c("file", "Voc", "deltaV")
-	b <- b[with(b, order(b$Voc)), ]
-	bLoess <- bLoess[with(bLoess, order(bLoess$Voc)), ]
-	bMonoexp <- bMonoexp[with(bMonoexp, order(bMonoexp$Voc)), ]
+	b <- read.table(file.path(tpvdir, "outputDeltaVfirstPoints.txt"), header=T)
 
-	#remove lines where monoexp fit failed
-	matchIndexMonoexp <- match(bMonoexp$file, b$file)
-	b <- b[matchIndexMonoexp,]
-	bLoess <- bLoess[matchIndexMonoexp,]
-
-	#element wise maximum
-	bMonoexpLoess <- bMonoexp
-	bMonoexpLoess$deltaV <- pmax(bMonoexp$deltaV, bLoess$deltaV)
-	# uses the maximum between Monoexp and Loess close to 1 sun and the plain deltaV close to dark, with a linear mixing between the two
-	lenMatch <- length(matchIndexMonoexp)
-	b$deltaV <- (seq(lenMatch,1)*b$deltaV + seq(1,lenMatch)*bMonoexpLoess$deltaV) / (lenMatch+1)
+#	b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+#	bLoess <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
+#	bMonoexp <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
+#	names(b) <- c("file", "Voc", "deltaV")
+#	names(bLoess) <- c("file", "Voc", "deltaV")
+#	names(bMonoexp) <- c("file", "Voc", "deltaV")
+#	b <- b[with(b, order(b$Voc)), ]
+#	bLoess <- bLoess[with(bLoess, order(bLoess$Voc)), ]
+#	bMonoexp <- bMonoexp[with(bMonoexp, order(bMonoexp$Voc)), ]
+#
+#	#remove lines where monoexp fit failed
+#	matchIndexMonoexp <- match(bMonoexp$file, b$file)
+#	b <- b[matchIndexMonoexp,]
+#	bLoess <- bLoess[matchIndexMonoexp,]
+#
+#	#element wise maximum
+#	bMonoexpLoess <- bMonoexp
+#	bMonoexpLoess$deltaV <- rowMeans(cbind(bMonoexp$deltaV, bLoess$deltaV))
+#	# uses the maximum between Monoexp and Loess close to 1 sun and the plain deltaV close to dark, with a linear mixing between the two
+#	lenMatch <- length(matchIndexMonoexp)
+#	b$deltaV <- (seq(lenMatch,1)*b$deltaV + seq(1,lenMatch)*bMonoexpLoess$deltaV) / (lenMatch+1)
 }
 
 write.table(b, file=file.path(tpvdir, "outputDeltaVprocessedForDC.txt"), append=FALSE, row.names=FALSE)
 
 len <- length(b$deltaV)
 
-# this is completely arbitrary and likely wrong, but the difference between chargeDark and chargeSun should be small
-chargeArray = seq(chargeDark, chargeSun, length.out=len)
+chargeArray = rep(charge, len)
 
 getExpFit <- function(){
 	capacitance <<- chargeArray/b$deltaV
@@ -83,11 +87,6 @@ getExpFit <- function(){
 
 
 getExpFit()
-if(!exists("expfit")){
-	print("Linearly changing from TPC dark to TPC sun value failed, trying with an AVERAGED value as TPC value")
-	chargeArray = rep(mean(c(chargeDark, chargeSun)), len)
-	getExpFit()
-}
 
 write.table(outputDCcapacitance, file="outputDCcapacitance.txt", append=TRUE, col.names=F, row.names=F, quote=F);
 
