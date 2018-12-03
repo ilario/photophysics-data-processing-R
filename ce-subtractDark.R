@@ -107,7 +107,7 @@ tryCatch({
 		result = sum(differences)
 
 		plot(darkCEtimeDecayHead, voltageDecayNoiseHead, col="green", pty="+")
-		lines(output$time, output$noise)
+		lines(darkCEtimeDecayHead, output$noise)
 		return(result)
 	}
 	if(!exists("startList")){
@@ -125,7 +125,7 @@ tryCatch({
 		result = sum(differences)
 
 		plot(darkCEtimeDecayHead, voltageDecayNoiseHead, col="green", pty="+")
-		lines(output$time, output$noise)
+		lines(darkCEtimeDecayHead, output$noise)
 		return(result)
 	}
 
@@ -140,7 +140,7 @@ tryCatch({
 		result = sum(differences)
 
 		plot(darkCEtimeDecayHead, voltageDecayNoiseHead, col="green", pty="+")
-		lines(output$time, output$noise)
+		lines(darkCEtimeDecayHead, output$noise)
 		return(result)
 	}
 
@@ -156,7 +156,7 @@ tryCatch({
 	message("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
 	fitOutput = fitfunfun(fitNoise$par[1], fitNoise$par[2], fitNoise$par[3], fitNoise$par[4], fitNoise$par[5], fitNoise$par[6]);
-	noiseProfileFun = approxfun(fitOutput$time, fitOutput$noise, method="linear", 0, 0)
+	noiseProfileFun = approxfun(darkCEtimeDecayHead, fitOutput$noise, method="linear", 0, 0)
 	#noiseProfileExtended = fitOutput$noise
 	#length(noiseProfileExtended) <- length(voltageDecay)
 	#noiseProfileExtended[is.na(noiseProfileExtended)] <- 0
