@@ -97,6 +97,8 @@ tryCatch({
 
 	lines(decay$time, predict(expfitCE), lwd=2, col="magenta")
 
+	print(coef(expfitCE))
+
 	b<-strsplit(x, "_")
 	c<-unlist(b)
 	c2 <- c[grepl("mV",c)]

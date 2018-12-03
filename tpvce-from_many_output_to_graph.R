@@ -201,8 +201,7 @@ weights_nogeom = (1/(shown_T_nogeom/min(shown_T_nogeom)))^3
 #just in case...
 rm(powerlaw_nogeom)
 
-if(length(shown_T_nogeom) < 4 || length(shown_charge_nogeom) < 4){stop("you need wider plot limits!")}
-
+if(length(shown_T_nogeom) < 4 || length(shown_charge_nogeom) < 4){graphics.off(); stop("you need wider plot limits!")}
 j=1
 while(!exists("powerlaw_nogeom") && j < 1000){
 	j <- j + 0.1

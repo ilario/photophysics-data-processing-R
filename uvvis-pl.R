@@ -13,9 +13,10 @@ colorIndex = ************FILL ME HERE***********
 uvvis_wavelength_lim=c(250, 800)
 pl_wavelength_lim=c(600, 850)
 
-mylegend= c(paste(filename, ", experimental", sep=""), paste(filename, ", simulated", sep=""))
-
-mylegend_pl= c(paste(filename, "Tauc plot"), paste(filename, "photoluminescence"))
+mylegend = c(paste(filename, ", experimental absorbance", sep=""), paste(filename, ", simulated absorbance", sep=""))
+mylegend_Tauc = c(paste(filename, ", experimental Tauc plot", sep=""), paste(filename, ", simulated Tauc plot", sep=""))
+mylegend_pl = c(paste(filename, ", experimental absorbance", sep=""), paste(filename, ", simulated absorbance", sep=""), paste(filename, ", photoluminescence", sep=""))
+mylegend_Tauc_pl = c(paste(filename, "experimental Tauc plot"), paste(filename, "simulated Tauc plot"), paste(filename, "photoluminescence"))
 
 mycolors=brewer.pal(8,"Dark2")
 
@@ -32,54 +33,35 @@ simulated = subset(simulated_full, Wavelength > uvvis_wavelength_lim[1] & Wavele
 experimental$Abs = experimental$Abs - quantile(experimental$Abs, 0.05)
 experimental$Epsilon = experimental$Epsilon - quantile(experimental$Epsilon, 0.05)
 
-experimental$Norm <- experimental$Abs/max(experimental$Abs)
-simulated$Norm <- simulated$Epsilon/max(simulated$Epsilon)
+maxUVvisExpAbs = max(experimental$Abs)
+experimental$Norm <- experimental$Abs/maxUVvisExpAbs
+maxUVvisSim = max(simulated$Epsilon)
+simulated$Norm <- simulated$Epsilon/maxUVvisSim
+maxUVvisExpEpsilon = max(experimental$Epsilon)
+maxUVvisEpsilon = max(maxUVvisExpEpsilon, maxUVvisExpEpsilon)
 
-############################# UVvis
+############################# General data photoluminescence
 
-if(output_pdf){
-	pdf(paste(filename,"-UVvis.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
-}else{
-	png(paste(filename,"-UVvis.png",sep=""), width=image_width, height=image_height)
-}
-op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
-plot(NULL,xlim=uvvis_wavelength_lim,ylim=c(0,1), xlab="", ylab="", cex.axis=1.4, yaxt="n");
-title(ylab = "Normalized Absorption", cex.lab = 1.7, line = 5.5)
-title(xlab = "Wavelength (nm)", cex.lab = 1.7, line = 3)
+pl_full <- read.table(list.files(path=pl_dir, pattern=paste(filename, ".*\\.dat$", sep=""), full.names=T), header=T)[-1, ]
+pl_full$Wavelength = as.numeric(as.character(pl_full$Wavelength))
+pl_full$S1 = as.numeric(as.character(pl_full$S1))
+#pl_full$S1c = as.numeric(as.character(pl_full$S1c))
 
-eaxis(side=2, cex.axis=1.4)
-minor.tick(nx=10, ny=10)
+print(pl_full)
 
-lines(experimental$Wavelength, experimental$Norm, col=mycolors[colorIndex],lwd=2)
-lines(simulated$Wavelength, simulated$Norm, col=mycolors[colorIndex],lwd=2, lty=2)
+pl = subset(pl_full, Wavelength > pl_wavelength_lim[1] & Wavelength < pl_wavelength_lim[2])
 
-legend(x="topright", inset=0.05, mylegend, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
-graphics.off()
-#reset the plotting margins
-par(op)
+pl$Norm <- pl$S1/max(pl$S1)
 
-############################# UVvis epsilon
+pl$eV = 1240/pl$Wavelength
 
-if(output_pdf){
-	pdf(paste(filename,"-UVvis_epsilon.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
-}else{
-	png(paste(filename,"-UVvis_epsilon.png",sep=""), width=image_width, height=image_height)
-}
-op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
-plot(NULL,xlim=uvvis_wavelength_lim,ylim=c(0,max(simulated$Epsilon, experimental$Epsilon)), xlab="", ylab="", cex.axis=1.4, yaxt="n");
-title(ylab = bquote("Molar attenuation coefficient (L mol"^"-1"~" cm"^"-1"~")"), cex.lab = 1.7, line = 5.5)
-title(xlab = "Wavelength (nm)", cex.lab = 1.7, line = 3)
+eV_pl_lim=c(1240/pl_wavelength_lim[2], 1240/pl_wavelength_lim[1])
 
-eaxis(side=2, cex.axis=1.4)
-minor.tick(nx=10, ny=10)
+pl_peak_eV = 1240/pl$Wavelength[which.max(pl$S1)]
 
-lines(experimental$Wavelength, experimental$Epsilon, col=mycolors[colorIndex],lwd=2)
-lines(simulated$Wavelength, simulated$Epsilon, col=mycolors[colorIndex],lwd=2, lty=2)
+############################# UVvis with photoluminescence data
 
-legend(x="topright", inset=0.05, mylegend, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
-graphics.off()
-#reset the plotting margins
-par(op)
+pl$NormToEpsilon <- pl$Norm*maxUVvisEpsilon*0.7
 
 ############################# General data Tauc
 
@@ -111,6 +93,91 @@ fitSimDirectData = subset(fitSimDirectData2, eV<fitSimDirectLim2)
 fitSimDirect=lmrob(taucDirect ~ eV, fitSimDirectData, control=lmrob.control(tuning.psi=1));
 gapSimDirect <- -coef(fitSimDirect)[1]/coef(fitSimDirect)[2]
 maxSimTaucDirect = max(fitSimDirectData$taucDirect)
+
+############################# Tauc direct with photoluminescence data
+
+pl$NormToTaucDirect <- pl$Norm*max(maxTaucDirect, maxSimTaucDirect)*0.7
+
+############################# Tauc indirect data
+
+# could have some NaN
+experimental$taucIndirect = (experimental$eV*experimental$Epsilon)^0.5
+simulated$taucIndirect = (simulated$eV*simulated$Epsilon)^0.5
+
+# remove NaN due to neg values
+fitIndirectData1 = experimental[!is.nan(experimental$taucIndirect),]
+
+fitIndirectLim <- (max(fitIndirectData1$eV)-min(fitIndirectData1$eV))*0.5 + min(fitIndirectData1$eV)
+fitIndirectData2 = subset(fitIndirectData1, eV<fitIndirectLim & taucIndirect<max(taucIndirect)/2.5)
+fitIndirectData3 = subset(fitIndirectData2, taucIndirect>max(taucIndirect)/4)
+fitIndirectLim2 = fitIndirectData3$eV[which.max(fitIndirectData3$taucIndirect)]
+fitIndirectData = subset(fitIndirectData3, eV<fitIndirectLim2)
+
+fitIndirect=lmrob(taucIndirect ~ eV, fitIndirectData, control=lmrob.control(tuning.psi=1));
+gapIndirect <- -coef(fitIndirect)[1]/coef(fitIndirect)[2]
+maxTaucIndirect = max(fitIndirectData$taucIndirect)
+
+fitSimIndirectLim <- (max(simulated$eV)-min(simulated$eV))*0.5 + min(simulated$eV)
+fitSimIndirectData1 = subset(simulated, eV<fitSimIndirectLim & taucIndirect<max(taucIndirect)/2.5)
+fitSimIndirectData2 = subset(fitSimIndirectData1, taucIndirect>max(taucIndirect)/4)
+fitSimIndirectLim2 = fitSimIndirectData2$eV[which.max(fitSimIndirectData2$taucIndirect)]
+fitSimIndirectData = subset(fitSimIndirectData2, eV<fitSimIndirectLim2)
+
+fitSimIndirect=lmrob(taucIndirect ~ eV, fitSimIndirectData, control=lmrob.control(tuning.psi=1));
+gapSimIndirect <- -coef(fitSimIndirect)[1]/coef(fitSimIndirect)[2]
+maxSimTaucIndirect = max(fitSimIndirectData$taucIndirect)
+
+############################# UVvis
+
+if(output_pdf){
+	pdf(paste(filename,"-UVvis.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+}else{
+	png(paste(filename,"-UVvis.png",sep=""), width=image_width, height=image_height)
+}
+op <- par(mar = c(5,7.5,1,4) + 0.1) ## default is c(5,4,4,2) + 0.1 
+plot(NULL,xlim=uvvis_wavelength_lim,ylim=c(0,1), xlab="", ylab="", cex.axis=1.4, yaxt="n");
+title(ylab = "Normalized Absorption", cex.lab = 1.7, line = 5.5)
+title(xlab = "Wavelength (nm)", cex.lab = 1.7, line = 3)
+mtext("Photoluminescence (a.u.)", cex=1.7, side=4, line=2)
+
+eaxis(side=2, cex.axis=1.4)
+minor.tick(nx=10, ny=10)
+
+lines(experimental$Wavelength, experimental$Norm, col=mycolors[colorIndex],lwd=2)
+lines(simulated$Wavelength, simulated$Norm, col=mycolors[colorIndex],lwd=2, lty=2)
+lines(pl$Wavelength, pl$Norm*0.7, col=mycolors[colorIndex],lwd=2, lty=3)
+
+legend(x="topright", inset=0.05, mylegend_pl, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2,3), bty="n")
+graphics.off()
+#reset the plotting margins
+par(op)
+
+############################# UVvis epsilon
+
+if(output_pdf){
+	pdf(paste(filename,"-UVvis_epsilon.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+}else{
+	png(paste(filename,"-UVvis_epsilon.png",sep=""), width=image_width, height=image_height)
+}
+op <- par(mar = c(5,7.5,1,4) + 0.1) ## default is c(5,4,4,2) + 0.1 
+plot(NULL,xlim=uvvis_wavelength_lim,ylim=c(0,max(simulated$Epsilon, experimental$Epsilon)), xlab="", ylab="", cex.axis=1.4, yaxt="n");
+title(ylab = bquote("Molar attenuation coefficient (L mol"^"-1"~" cm"^"-1"~")"), cex.lab = 1.7, line = 5.5)
+title(xlab = "Wavelength (nm)", cex.lab = 1.7, line = 3)
+mtext("Photoluminescence (a.u.)", cex=1.7, side=4, line=2)
+
+eaxis(side=2, cex.axis=1.4)
+minor.tick(nx=10, ny=10)
+
+lines(experimental$Wavelength, experimental$Epsilon, col=mycolors[colorIndex],lwd=2)
+lines(simulated$Wavelength, simulated$Epsilon, col=mycolors[colorIndex],lwd=2, lty=2)
+lines(pl$Wavelength, pl$NormToEpsilon, col=mycolors[colorIndex],lwd=2, lty=3)
+
+legend(x="topright", inset=0.05, mylegend_pl, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2,3), bty="n")
+graphics.off()
+#reset the plotting margins
+par(op)
+
+
 
 ############################# Tauc direct
 
@@ -144,39 +211,12 @@ abline(h=0);
 mtext(paste("Direct BG", signif(gapDirect,4), "eV"), side=3, line=-7, cex=1.5, adj=0.05)
 mtext(paste("Sim Direct BG", signif(gapSimDirect,4), "eV"), side=3, line=-8.5, cex=1.5, adj=0.05)
 
-legend(x="topleft", inset=0.05, mylegend, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
+legend(x="topleft", inset=0.05, mylegend_Tauc, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
 graphics.off()
 #reset the plotting margins
 par(op)
 
-############################# Tauc indirect data
 
-# could have some NaN
-experimental$taucIndirect = (experimental$eV*experimental$Epsilon)^0.5
-simulated$taucIndirect = (simulated$eV*simulated$Epsilon)^0.5
-
-# remove NaN due to neg values
-fitIndirectData1 = experimental[!is.nan(experimental$taucIndirect),]
-
-fitIndirectLim <- (max(fitIndirectData1$eV)-min(fitIndirectData1$eV))*0.5 + min(fitIndirectData1$eV)
-fitIndirectData2 = subset(fitIndirectData1, eV<fitIndirectLim & taucIndirect<max(taucIndirect)/2.5)
-fitIndirectData3 = subset(fitIndirectData2, taucIndirect>max(taucIndirect)/4)
-fitIndirectLim2 = fitIndirectData3$eV[which.max(fitIndirectData3$taucIndirect)]
-fitIndirectData = subset(fitIndirectData3, eV<fitIndirectLim2)
-
-fitIndirect=lmrob(taucIndirect ~ eV, fitIndirectData, control=lmrob.control(tuning.psi=1));
-gapIndirect <- -coef(fitIndirect)[1]/coef(fitIndirect)[2]
-maxTaucIndirect = max(fitIndirectData$taucIndirect)
-
-fitSimIndirectLim <- (max(simulated$eV)-min(simulated$eV))*0.5 + min(simulated$eV)
-fitSimIndirectData1 = subset(simulated, eV<fitSimIndirectLim & taucIndirect<max(taucIndirect)/2.5)
-fitSimIndirectData2 = subset(fitSimIndirectData1, taucIndirect>max(taucIndirect)/4)
-fitSimIndirectLim2 = fitSimIndirectData2$eV[which.max(fitSimIndirectData2$taucIndirect)]
-fitSimIndirectData = subset(fitSimIndirectData2, eV<fitSimIndirectLim2)
-
-fitSimIndirect=lmrob(taucIndirect ~ eV, fitSimIndirectData, control=lmrob.control(tuning.psi=1));
-gapSimIndirect <- -coef(fitSimIndirect)[1]/coef(fitSimIndirect)[2]
-maxSimTaucIndirect = max(fitSimIndirectData$taucIndirect)
 
 ############################# Tauc indirect
 
@@ -210,33 +250,11 @@ abline(h=0);
 mtext(paste("Indirect BG", signif(gapIndirect,4), "eV"), side=3, line=-7.5, cex=1.5, adj=0.1)
 mtext(paste("Sim Indirect BG", signif(gapSimIndirect,4), "eV"), side=3, line=-9, cex=1.5, adj=0.1)
 
-legend(x="topleft", inset=0.05, mylegend, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
+legend(x="topleft", inset=0.05, mylegend_Tauc, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
 graphics.off()
 #reset the plotting margins
 par(op)
 
-############################# General data photoluminescence
-
-pl_full <- read.table(list.files(path=pl_dir, pattern=paste(filename, ".*\\.dat$", sep=""), full.names=T), header=T)[-1, ]
-pl_full$Wavelength = as.numeric(as.character(pl_full$Wavelength))
-pl_full$S1 = as.numeric(as.character(pl_full$S1))
-#pl_full$S1c = as.numeric(as.character(pl_full$S1c))
-
-print(pl_full)
-
-pl = subset(pl_full, Wavelength > pl_wavelength_lim[1] & Wavelength < pl_wavelength_lim[2])
-
-pl$Norm <- pl$S1/max(pl$S1)
-
-pl$eV = 1240/pl$Wavelength
-
-eV_pl_lim=c(1240/pl_wavelength_lim[2], 1240/pl_wavelength_lim[1])
-
-pl_peak_eV = 1240/pl$Wavelength[which.max(pl$S1)]
-
-############################# Tauc direct with photoluminescence data
-
-pl$NormToTaucDirect <- pl$Norm*maxTaucDirect*0.7
 
 ############################# Tauc direct with photoluminescence
 
@@ -246,8 +264,8 @@ if(output_pdf){
 	png(paste(filename,"-UVvis_tauc_direct_with_PL.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,3,1,7.5) + 0.1) ## default is c(5,4,4,2) + 0.1
-xlimDirectPL=c(eV_pl_lim[1], fitDirectLim2)
-ylimDirectPL=c(0,maxTaucDirect)
+xlimDirectPL=c(eV_pl_lim[1], max(fitDirectLim2, fitSimDirectLim2))
+ylimDirectPL=c(0,max(maxTaucDirect, maxSimTaucDirect))
 plot(NULL,xlim=xlimDirectPL, ylim=ylimDirectPL, xlab="", ylab="", cex.axis=1.4, yaxt="n");
 title(ylab = "Photoluminescence (a.u.)", cex.lab = 1.7, line = 1)
 title(xlab = "Photon energy (eV)", cex.lab = 1.7, line = 3)
@@ -257,24 +275,24 @@ eaxis(side=4, cex.axis=1.4)
 minor.tick(nx=10, ny=0)
 
 lines(experimental$eV, experimental$taucDirect, col=mycolors[colorIndex],lwd=2)
-lines(pl$eV, pl$NormToTaucDirect, col=mycolors[colorIndex],lwd=2, lty=2)
+lines(simulated$eV, simulated$taucDirect, col=mycolors[colorIndex],lwd=2, lty=2)
 
 abline(fitDirect, col="gray")
+abline(fitSimDirect, col="gray")
+
+lines(pl$eV, pl$NormToTaucDirect, col=mycolors[colorIndex],lwd=2, lty=3)
 
 abline(v=pl_peak_eV, col="gray")
 
 abline(h=0);
-mtext(paste("Direct BG", signif(gapDirect,4), "eV"), side=3, line=-7.5, cex=1.5, adj=0.05)
-mtext(paste("PL peak", signif(pl_peak_eV,4), "eV"), side=3, line=-9, cex=1.5, adj=0.05)
+mtext(paste("Exp. Direct Optical BG", signif(gapDirect,4), "eV"), side=3, line=-7.5, cex=1.5, adj=0.05)
+mtext(paste("Sim. Direct Optical BG", signif(gapSimDirect,4), "eV"), side=3, line=-9, cex=1.5, adj=0.05)
+mtext(paste("PL peak", signif(pl_peak_eV,4), "eV"), side=3, line=-10.5, cex=1.5, adj=0.05)
 
-legend(x="topleft", inset=0, mylegend_pl, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
+legend(x="topleft", inset=0, mylegend_Tauc_pl, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2,3), bty="n")
 graphics.off()
 #reset the plotting margins
 par(op)
-
-############################# Tauc direct with photoluminescence data
-
-pl$NormToTaucIndirect <- pl$Norm*maxTaucIndirect*0.7
 
 ############################# Tauc indirect with photoluminescence
 
@@ -295,17 +313,21 @@ eaxis(side=4, cex.axis=1.4)
 minor.tick(nx=10, ny=0)
 
 lines(experimental$eV, experimental$taucIndirect, col=mycolors[colorIndex],lwd=2)
-lines(pl$eV, pl$NormToTaucIndirect, col=mycolors[colorIndex],lwd=2, lty=2)
+lines(simulated$eV, simulated$taucIndirect, col=mycolors[colorIndex],lwd=2, lty=2)
 
 abline(fitIndirect, col="gray")
+abline(fitSimIndirect, col="gray")
+
+lines(pl$eV, pl$NormToTaucIndirect, col=mycolors[colorIndex],lwd=2, lty=3)
 
 abline(v=pl_peak_eV, col="gray")
 
 abline(h=0);
-mtext(paste("Indirect BG", signif(gapIndirect,4), "eV"), side=3, line=-7.5, cex=1.5, adj=0.05)
-mtext(paste("PL peak", signif(pl_peak_eV,4), "eV"), side=3, line=-9, cex=1.5, adj=0.05)
+mtext(paste("Exp. Indirect Optical BG", signif(gapIndirect,4), "eV"), side=3, line=-7.5, cex=1.5, adj=0.05)
+mtext(paste("Sim. Indirect Optical BG", signif(gapSimIndirect,4), "eV"), side=3, line=-9, cex=1.5, adj=0.05)
+mtext(paste("PL peak", signif(pl_peak_eV,4), "eV"), side=3, line=-10.5, cex=1.5, adj=0.05)
 
-legend(x="topleft", inset=0, mylegend_pl, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2), bty="n")
+legend(x="topleft", inset=0, mylegend_Tauc_pl, col=mycolors[colorIndex], cex=1.5, lwd=2, lty=c(1,2,3), bty="n")
 graphics.off()
 #reset the plotting margins
 par(op)
