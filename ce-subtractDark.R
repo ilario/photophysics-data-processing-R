@@ -48,14 +48,14 @@ tryCatch({
 	plot(darkCEtimeDecay, darkCEvoltageDecay, log="x")
 	darkCEvoltageDecay = darkCEvoltageDecay - predict(expfitDarkCE)
 	lines(darkCEtimeDecay,predict(expfitDarkCE),col="red")
-Sys.sleep(1)
+Sys.sleep(5)
 }, error=function(e) cat("Failed monoexponential fit", e$message, "\n"))
 
-darkLOESS = loess(darkCEvoltage~darkCEtime, span=0.002);
+darkLOESS = loess(darkCEvoltageDecay~darkCEtimeDecay, span=0.002);
 darkCEvoltageDecayLOESS = predict(darkLOESS)
 #darkCEvoltageDecayLOESShead = head(darkCEvoltageDecayLOESS, timeEndNoiseDecayIndex)
 
-darkCEvoltageDecayLOESSfun = approxfun(darkCEtime, darkCEvoltageDecayLOESS, method="linear", 0, 0)
+darkCEvoltageDecayLOESSfun = approxfun(darkCEtimeDecay, darkCEvoltageDecayLOESS, method="linear", 0, 0)
 #lines(darkCEtimeDecay, darkCEvoltageDecayLOESSfun(darkCEtimeDecay), col="green")
 
 trashfornullmessages <- lapply(files, function(x) {
@@ -82,6 +82,9 @@ trashfornullmessages <- lapply(files, function(x) {
 	currentNoBaseline <- voltageNoBaseline/50
 	chargeNoBaseline <- cumsum(currentNoBaseline)*deltaT
 	chargeNoBaseline=chargeNoBaseline-chargeNoBaseline[timeZeroIndex]
+	totalchargeNoBaseline=mean(chargeNoBaseline[round(length(chargeNoBaseline)*0.9):round(length(chargeNoBaseline)*0.95)])
+	totalchargedensityNoBaseline=totalchargeNoBaseline/0.09
+
 
 	voltageDecay = tail(voltage2, -timeStartIndex)
 
@@ -110,8 +113,8 @@ tryCatch({
 		differences = abs(output$noise - voltageDecayLOESShead)
 		result = sum(differences)
 
-		plot(darkCEtimeDecayHead, voltageDecayHead, col="green", pty="+")
-		lines(darkCEtimeDecayHead, output$noise)
+		#plot(darkCEtimeDecayHead, voltageDecayHead, col="green", pty="+")
+		#lines(darkCEtimeDecayHead, output$noise)
 		return(result)
 	}
 	if(!exists("startList")){
@@ -128,8 +131,8 @@ tryCatch({
 		differences = abs(output$noise - voltageDecayLOESShead)
 		result = sum(differences)
 
-		plot(darkCEtimeDecayHead, voltageDecayHead, col="red", pty="+")
-		lines(darkCEtimeDecayHead, output$noise)
+		#plot(darkCEtimeDecayHead, voltageDecayHead, col="red", pty="+")
+		#lines(darkCEtimeDecayHead, output$noise)
 		return(result)
 	}
 
@@ -143,8 +146,8 @@ tryCatch({
 		differences = abs(output$noise - voltageDecayLOESShead)
 		result = sum(differences)
 
-		plot(darkCEtimeDecayHead, voltageDecayHead, col="orange", pty="+")
-		lines(darkCEtimeDecayHead, output$noise)
+		#plot(darkCEtimeDecayHead, voltageDecayHead, col="orange", pty="+")
+		#lines(darkCEtimeDecayHead, output$noise)
 		return(result)
 	}
 
@@ -159,7 +162,7 @@ tryCatch({
 	startList <<- fitNoise$par
 	message("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
-	fitOutput = fitfunfun(fitNoise$par[1], 0, Inf, fitNoise$par[4], fitNoise$par[5], fitNoise$par[6], fitNoise$par[7]);
+	fitOutput = fitfunfun(fitNoise$par[1], -Inf, Inf, fitNoise$par[4], fitNoise$par[5], fitNoise$par[6], fitNoise$par[7]);
 	noiseProfileFun = approxfun(darkCEtimeDecayHead, fitOutput$noise, method="linear", 0, 0)
 	#noiseProfileExtended = fitOutput$noise
 	#length(noiseProfileExtended) <- length(voltageDecay)
@@ -167,28 +170,28 @@ tryCatch({
 	noiseProfile = noiseProfileFun(darkCEtimeDecay)
 	voltageMinusNoise = voltageDecay - noiseProfile
 
-	#plot(darkCEtimeDecay, voltageDecay, xlim=c(timeStart,noiseEndTime), log="x")
-	#lines(darkCEtimeDecay,predict(expfitCE),col="red")
-	#lines(darkCEtimeDecay,voltageDecayNoiseLOESS,col="green")
-	#lines(darkCEtime,darkCEvoltageDecayLOESS,col="blue")
-	#lines(darkCEtimeDecay,noiseProfile,col="red")
-	#Sys.sleep(1)
+	#plot(darkCEtimeDecay, noiseProfile, xlim=c(timeStart,noiseEndTime), log="x",col="red", type="l")
+	#lines(darkCEtimeDecay,voltageDecay, pch="+")
+	#Sys.sleep(3)
 
 	currentMinusNoise <- voltageMinusNoise/50
 	chargeMinusNoise <- cumsum(currentMinusNoise)*deltaT
+	totalchargeMinusNoise=mean(chargeMinusNoise[round(length(chargeMinusNoise)*0.9):round(length(chargeMinusNoise)*0.95)])
+	totalchargedensityMinusNoise=totalchargeMinusNoise/0.09
+
 
 	b<-strsplit(x, "_")
 	c<-unlist(b)
 	c2 <- c[grepl("mV",c)]
 	d<-as.numeric(sub("mV.*", "", c2))
-        outputChargeDensityCE <- t(c(d, totalchargedensity));
+        outputChargeDensityCE <- t(c(d, totalchargedensityMinusNoise));
 	write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
 	png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
 	op <- par(mar = c(5,7,4,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
 	
 	xlim=c(1e-9,tail(mydata[[x]]$time,1))
-	plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x")
+	plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", col="red")
 	title(ylab="Voltage (V)", cex.lab=2, line=4)
 	title(xlab="Time (s)", cex.lab=2, line=3.5)
 	mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=2, side=4,line=7,col="red")
@@ -198,15 +201,17 @@ tryCatch({
 	lines(mydata[[x]]$time, baseline, col="blue")
 	lines(darkCEtimeDecay, voltageMinusNoise, col="green")
 
-	ylim_charge=c(min(chargeNoBaseline, charge)/0.09, max(chargeNoBaseline, charge)/0.09)
+	ylim_charge=c(min(chargeNoBaseline, charge)/0.09, max(chargeMinusNoise, charge)/0.09)
 	par(new=TRUE)
-	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
+	plot(darkCEtimeDecay,chargeMinusNoise/0.09, type="l", col="green", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
 	abline(h=0,col="red")
 	eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
-	text(xlim[2]*0.75,totalchargedensity*0.9,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="red")
+	text(xlim[2]*0.75,ylim_charge[2]*0.9,labels=bquote(.(signif(totalchargedensityMinusNoise,3))~"C/cm"^"2"),cex=2,col="green")
+	text(xlim[2]*0.75,ylim_charge[2]*0.8,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="orange")
+	text(xlim[2]*0.75,ylim_charge[2]*0.7,labels=bquote(.(signif(totalchargedensityNoBaseline,3))~"C/cm"^"2"),cex=2,col="red")
 
 	lines(mydata[[x]]$time,chargeNoBaseline/0.09, type="l", col="orange")
-	lines(darkCEtimeDecay, chargeMinusNoise/0.09, type="l", col="green")
+	lines(mydata[[x]]$time, charge/0.09, type="l", col="red")
 
 	graphics.off()
 #reset the plotting margins
