@@ -4,10 +4,10 @@ library(sfsmisc)
 library(robustbase)
 library(minpack.lm)
 
-timeStart = 3e-8
-noiseEndTime = 3e-7
+timeStartMinimum = 3e-8
+noiseEndTime = 7e-7
 
-rm("startList3")
+rm("startList")
 options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
 
 print("CE: INTEGRATING")
@@ -21,49 +21,56 @@ write.table(t(c("Voc","CEmonoexpTime")), file=file.path(cedir,"outputMonoexpCE.t
 print(files[1])
 darkCEvoltageNoBaseline = mydata[[files[1]]]$voltage;
 len<-length(darkCEvoltageNoBaseline)
-darkStartVoltage <- mean(darkCEvoltageNoBaseline[1:600])
-darkEndVoltage <- mean(tail(darkCEvoltageNoBaseline,-600))
+darkStartVoltage <- mean(head(darkCEvoltageNoBaseline,600))
+darkEndVoltage <- mean(tail(darkCEvoltageNoBaseline,600))
 darkBaseline <- seq(darkStartVoltage, darkEndVoltage, length.out=len)
 darkCEvoltage <- darkCEvoltageNoBaseline - darkBaseline
 darkCEtime = mydata[[files[1]]]$time;
-deltaT = darkCEtime[2] - darkCEtime[1]
 
-timeZeroIndex = match(0,darkCEtime);
+timeStartMinimumIndex = which.min(abs(darkCEtime - timeStartMinimum))
+maxDarkVoltageAfterStartMinimumIndex = which.max(tail(darkCEvoltage, -timeStartMinimumIndex))
+timeDarkPeak = darkCEtime[timeStartMinimumIndex + maxDarkVoltageAfterStartMinimumIndex]
+timeStart = darkCEtime[timeStartMinimumIndex + maxDarkVoltageAfterStartMinimumIndex] / 2
 
-timeStartIndex = which.min(abs(darkCEtime-timeStart))
-darkCEtimeDecay = tail(darkCEtime, -timeStartIndex)
-darkCEvoltageDecay = tail(darkCEvoltage, -timeStartIndex)
+timeDarkStartIndex = which.min(abs(darkCEtime-timeStart))
+darkCEtimeDecay = tail(darkCEtime, -timeDarkStartIndex)
+darkCEvoltageDecay = tail(darkCEvoltage, -timeDarkStartIndex)
 
-timeEndNoiseDecayIndex = which.min(abs(darkCEtimeDecay-noiseEndTime))
-darkCEtimeDecayHead = head(darkCEtimeDecay, timeEndNoiseDecayIndex)
+timeDarkEndNoiseDecayIndex = which.min(abs(darkCEtimeDecay-noiseEndTime))
+darkCEtimeDecayHead = head(darkCEtimeDecay, timeDarkEndNoiseDecayIndex)
 
 tryCatch({
-	expfitDarkCE <- nlsLM(darkCEvoltageDecay ~ exp(C)*exp(-darkCEtimeDecay/D), start=list(C=log(max(darkCEvoltageDecay)),D=0.01*tail(darkCEtimeDecay, n=1)))
+	#plot(darkCEtimeDecay, darkCEvoltageDecay)
+	#lines(darkCEtimeDecay, exp(log(quantile(darkCEvoltageDecay,0.999)))*exp(-darkCEtimeDecay/2e-7), col="green")
+	expfitDarkCE <- nlsLM(darkCEvoltageDecay ~ exp(C)*exp(-darkCEtimeDecay/D), start=list(C=log(quantile(darkCEvoltageDecay,0.999)),D=2e-7))
+	#lines(darkCEtimeDecay, predict(expfitDarkCE), col="red")
+	#Sys.sleep(2)
 	tryCatch({
-		previousC = coef(expfitDarkCE)["C"]
-		previousD = coef(expfitDarkCE)["D"]
-		expfitDarkCE <- nlrob(darkCEvoltageDecay ~ exp(C) * exp(-darkCEtimeDecay / D), start=list(C=previousC,D=previousD), data=data.frame(darkCEvoltageDecay =darkCEvoltageDecay, darkCEtimeDecay=darkCEtimeDecay))
-	}, error=function(e) cat("Failed monoexponential robust fit", e$message, "\n"))
+		#previousC = coef(expfitDarkCE)["C"]
+		#previousD = coef(expfitDarkCE)["D"]
+		expfitDarkCE <- nlrob(darkCEvoltageDecay ~ exp(C) * exp(-darkCEtimeDecay / D), start=list(C=log(quantile(darkCEvoltageDecay,0.999)),D=2e-7), data=data.frame(darkCEvoltageDecay =darkCEvoltageDecay, darkCEtimeDecay=darkCEtimeDecay))
+	#lines(darkCEtimeDecay, predict(expfitDarkCE), col="orange")
+	#Sys.sleep(2)
+}, error=function(e) cat("Failed monoexponential robust fit", e$message, "\n"))
 
 	plot(darkCEtimeDecay, darkCEvoltageDecay, log="x")
 	darkCEvoltageDecay = darkCEvoltageDecay - predict(expfitDarkCE)
 	lines(darkCEtimeDecay,predict(expfitDarkCE),col="red")
-Sys.sleep(5)
+Sys.sleep(1)
 }, error=function(e) cat("Failed monoexponential fit", e$message, "\n"))
 
-darkLOESS = loess(darkCEvoltageDecay~darkCEtimeDecay, span=0.002);
+darkLOESS = loess(darkCEvoltageDecay~darkCEtimeDecay, span=0.001);
 darkCEvoltageDecayLOESS = predict(darkLOESS)
-#darkCEvoltageDecayLOESShead = head(darkCEvoltageDecayLOESS, timeEndNoiseDecayIndex)
 
 darkCEvoltageDecayLOESSfun = approxfun(darkCEtimeDecay, darkCEvoltageDecayLOESS, method="linear", 0, 0)
-#lines(darkCEtimeDecay, darkCEvoltageDecayLOESSfun(darkCEtimeDecay), col="green")
+lines(darkCEtimeDecay, darkCEvoltageDecayLOESSfun(darkCEtimeDecay), col="green")
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
-	if(mydata[[x]]$time[2] - mydata[[x]]$time[1] != deltaT){
-		even_not_considering_different_time_windows_it_is_too_complex..._please_remove_this_file
-	}
-
+	#if(mydata[[x]]$time[2] - mydata[[x]]$time[1] != deltaT){
+	#	even_not_considering_different_time_windows_it_is_too_complex..._please_remove_this_file
+	#}
+	deltaT = mydata[[x]]$time[2] - mydata[[x]]$time[1]
 	startVoltage <- mean(mydata[[x]]$voltage[1:600])
 	endVoltage <- mean(tail(mydata[[x]]$voltage,600))
 	baseline <- seq(startVoltage, endVoltage, length.out=len)
@@ -77,34 +84,34 @@ trashfornullmessages <- lapply(files, function(x) {
 	totalchargedensity=totalcharge/0.09
 
 	voltageNoBaseline <- mydata[[x]]$voltage
-#	voltagezeroDecay = tail(voltagezero, -timeZeroIndex)
-#	timeDecay = tail(mydata[[x]]$time, -timeZeroIndex)
 	currentNoBaseline <- voltageNoBaseline/50
 	chargeNoBaseline <- cumsum(currentNoBaseline)*deltaT
-	chargeNoBaseline=chargeNoBaseline-chargeNoBaseline[timeZeroIndex]
+
+	chargeNoBaseline=chargeNoBaseline-chargeNoBaseline[mydata[[x]]$time == 0]
 	totalchargeNoBaseline=mean(chargeNoBaseline[round(length(chargeNoBaseline)*0.9):round(length(chargeNoBaseline)*0.95)])
 	totalchargedensityNoBaseline=totalchargeNoBaseline/0.09
 
-
+	timeStartIndex = which.min(abs(mydata[[x]]$time-timeStart))
+	timeDecay = tail(mydata[[x]]$time, -timeStartIndex)
 	voltageDecay = tail(voltage2, -timeStartIndex)
 
-	expfitCE <- nlsLM(voltageDecay~ exp(C)*exp(-darkCEtimeDecay/D), start=list(C=log(max(voltageDecay)),D=0.01*tail(darkCEtimeDecay, n=1)))
+	expfitCE <- nlsLM(voltageDecay~ exp(C)*exp(-timeDecay/D), start=list(C=log(max(voltageDecay)),D=0.01*tail(timeDecay, n=1)))
 tryCatch({
 	expfitCE <- nlrob(voltageDecay~ exp(C)*exp(-darkCEtimeDecay/D), start=list(C=coef(expfitCE)["C"],D=coef(expfitCE)["D"]), data=data.frame(voltageDecay =voltageDecay, darkCEtimeDecay=darkCEtimeDecay))
 }, error=function(e) cat("Failed monoexponential fit", e$message, "\n"))
-	#voltageDecayNoise = voltageDecay - predict(expfitCE)
-	#for plotting debug graphs
-	#voltageDecayNoiseHead = head(voltageDecayNoise, timeEndNoiseDecayIndex)
+
+	timeEndNoiseDecayIndex = which.min(abs(timeDecay-noiseEndTime))
+	timeDecayHead = head(timeDecay, timeEndNoiseDecayIndex)
 	voltageDecayHead = head(voltageDecay, timeEndNoiseDecayIndex)
-	#noiseLOESS = loess(voltageDecayNoise~darkCEtimeDecay, span=0.002);
-	#voltageDecayNoiseLOESS = predict(noiseLOESS)
-	#voltageDecayNoiseLOESShead = head(voltageDecayNoiseLOESS, timeEndNoiseDecayIndex)
-	decayLOESS = loess(voltageDecay~darkCEtimeDecay, span=0.002);
+
+	decayLOESS = loess(voltageDecay~timeDecay, span=0.001);
 	voltageDecayLOESS = predict(decayLOESS)
 	voltageDecayLOESShead = head(voltageDecayLOESS, timeEndNoiseDecayIndex)
 
+	maxTimeShift = abs(timeDecayHead[which.max(voltageDecayHead)] - timeDarkPeak)
+
 	fitfunfun = function(cLinear, cBias, cDecay, cDelay, cSlow, cSlow2, cSlow3) {
-		time = cDelay + cSlow*darkCEtimeDecayHead + cSlow2*darkCEtimeDecayHead^2 + cSlow3*darkCEtimeDecayHead^3
+		time = maxTimeShift*2*sin(cDelay) + cSlow*timeDecayHead + cSlow2*timeDecayHead^2 + cSlow3*timeDecayHead^3
 		noise = cLinear * darkCEvoltageDecayLOESSfun(time) + exp(cBias) * exp(-time/cDecay)
 		return(list(noise=noise, time=time))
 	}
@@ -113,14 +120,22 @@ tryCatch({
 		differences = abs(output$noise - voltageDecayLOESShead)
 		result = sum(differences)
 
-		#plot(darkCEtimeDecayHead, voltageDecayHead, col="green", pty="+")
-		#lines(darkCEtimeDecayHead, output$noise)
+		#plot(timeDecayHead, voltageDecayHead, col="green", pch="+")
+		#lines(timeDecayHead, output$noise)
+		#if(first){
+		#	Sys.sleep(3)
+		#	first <<- FALSE
+		#}
 		return(result)
 	}
 	if(!exists("startList")){
 		startList = c(1, coef(expfitCE)["C"], coef(expfitCE)["D"], 0, 1, 0, 0);
 	}
-	fitNoise = optim(startList, fitfun)
+	first <<- TRUE
+	startList[2] = coef(expfitCE)["C"]
+	startList[3] = coef(expfitCE)["D"]
+
+	fitNoise = optim(startList, fitfun)#lower = c(0, -Inf, 0, -Inf, 0, -Inf, -Inf), upper = c(10, 10, 1, Inf, 10, Inf, Inf))
 	message("*****************fitNoise*****************")
 	print(fitNoise)
 	# convergence is good when convergence = 0
@@ -131,8 +146,8 @@ tryCatch({
 		differences = abs(output$noise - voltageDecayLOESShead)
 		result = sum(differences)
 
-		#plot(darkCEtimeDecayHead, voltageDecayHead, col="red", pty="+")
-		#lines(darkCEtimeDecayHead, output$noise)
+		#plot(timeDecayHead, voltageDecayHead, col="red", pch="+")
+		#lines(timeDecayHead, output$noise)
 		return(result)
 	}
 
@@ -146,12 +161,12 @@ tryCatch({
 		differences = abs(output$noise - voltageDecayLOESShead)
 		result = sum(differences)
 
-		#plot(darkCEtimeDecayHead, voltageDecayHead, col="orange", pty="+")
-		#lines(darkCEtimeDecayHead, output$noise)
+		#plot(timeDecayHead, voltageDecayHead, col="orange", pch="+")
+		#lines(timeDecayHead, output$noise)
 		return(result)
 	}
 
-		fitNoise1 = optim(tail(startList,-3), fitfun1)
+		fitNoise1 = optim(tail(startList,-3), fitfun1, lower = c(-Inf, -Inf, -Inf, -Inf))
 		message("*****************fitNoise1*****************")
 		print(fitNoise1)
 		startList <- c(fitNoise0$par, fitNoise1$par)
@@ -163,16 +178,14 @@ tryCatch({
 	message("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
 	fitOutput = fitfunfun(fitNoise$par[1], -Inf, Inf, fitNoise$par[4], fitNoise$par[5], fitNoise$par[6], fitNoise$par[7]);
-	noiseProfileFun = approxfun(darkCEtimeDecayHead, fitOutput$noise, method="linear", 0, 0)
-	#noiseProfileExtended = fitOutput$noise
-	#length(noiseProfileExtended) <- length(voltageDecay)
-	#noiseProfileExtended[is.na(noiseProfileExtended)] <- 0
-	noiseProfile = noiseProfileFun(darkCEtimeDecay)
+	noiseProfileFun = approxfun(timeDecayHead, fitOutput$noise, method="linear", 0, 0)
+
+	noiseProfile = noiseProfileFun(timeDecay)
 	voltageMinusNoise = voltageDecay - noiseProfile
 
-	#plot(darkCEtimeDecay, noiseProfile, xlim=c(timeStart,noiseEndTime), log="x",col="red", type="l")
-	#lines(darkCEtimeDecay,voltageDecay, pch="+")
-	#Sys.sleep(3)
+	#plot(timeDecay, noiseProfile, xlim=c(timeStart,noiseEndTime), log="x",col="red", type="l")
+	#lines(timeDecay,voltageDecay, pch="+")
+	#Sys.sleep(1)
 
 	currentMinusNoise <- voltageMinusNoise/50
 	chargeMinusNoise <- cumsum(currentMinusNoise)*deltaT
@@ -199,11 +212,13 @@ tryCatch({
 	eaxis(side=2, cex.axis=1.5)
 	
 	lines(mydata[[x]]$time, baseline, col="blue")
-	lines(darkCEtimeDecay, voltageMinusNoise, col="green")
+	lines(timeDecay, voltageMinusNoise, col="green")
+	lines(timeDecay, noiseProfile, col="red")
+	lines(darkCEtimeDecay, darkCEvoltageDecay, col="orange")
 
 	ylim_charge=c(min(chargeNoBaseline, charge)/0.09, max(chargeMinusNoise, charge)/0.09)
 	par(new=TRUE)
-	plot(darkCEtimeDecay,chargeMinusNoise/0.09, type="l", col="green", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
+	plot(timeDecay,chargeMinusNoise/0.09, type="l", col="green", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
 	abline(h=0,col="red")
 	eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
 	text(xlim[2]*0.75,ylim_charge[2]*0.9,labels=bquote(.(signif(totalchargedensityMinusNoise,3))~"C/cm"^"2"),cex=2,col="green")
