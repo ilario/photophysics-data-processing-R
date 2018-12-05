@@ -11,7 +11,7 @@ tpcdir="tpc"#tk_choose.dir(dirname(cedir),"== Select T.P.Current Dir ==\n")
 
 scriptsdir = "~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
 source(file.path(scriptsdir,"from_ce_to_table.R"))
-source(file.path(scriptsdir,"ce.R"))
+source(file.path(scriptsdir,"ce-integrateExp.R"))
 source(file.path(scriptsdir,"ce-from_output_to_graph.R"))
 source(file.path(scriptsdir,"from_tpv_tpc_to_table.R"))
 source(file.path(scriptsdir,"tpv.R"))
@@ -27,7 +27,7 @@ source(file.path(scriptsdir,"jrec-dc.R"))
 source(file.path(scriptsdir,"tpv-from_output_to_graph-with_limits.R"))
 
 fromCeToTable(cedir=cedir)
-ce(cedir=cedir)
+ceIntegrateExp(cedir=cedir)
 ceFromOutputToGraph(cedir=cedir)
 fromTpvTpcToTable(dir=tpvdir)
 tpv(tpvdir=tpvdir)
