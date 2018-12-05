@@ -16,7 +16,6 @@ mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
 write.table(t(c("Voc","ChargeDensityCE")), file=file.path(cedir,"outputChargeDensityCE.txt"), append=FALSE, col.names=F, row.names=F);
-write.table(t(c("Voc","CEmonoexpTime")), file=file.path(cedir,"outputMonoexpCE.txt"), append=FALSE, col.names=F, row.names=F);
 
 print(files[1])
 darkCEvoltageNoBaseline = mydata[[files[1]]]$voltage;
@@ -46,8 +45,6 @@ tryCatch({
 	#lines(darkCEtimeDecay, predict(expfitDarkCE), col="red")
 	#Sys.sleep(2)
 	tryCatch({
-		#previousC = coef(expfitDarkCE)["C"]
-		#previousD = coef(expfitDarkCE)["D"]
 		expfitDarkCE <- nlrob(darkCEvoltageDecay ~ exp(C) * exp(-darkCEtimeDecay / D), start=list(C=log(quantile(darkCEvoltageDecay,0.999)),D=2e-7), data=data.frame(darkCEvoltageDecay =darkCEvoltageDecay, darkCEtimeDecay=darkCEtimeDecay))
 	#lines(darkCEtimeDecay, predict(expfitDarkCE), col="orange")
 	#Sys.sleep(2)
@@ -67,9 +64,6 @@ lines(darkCEtimeDecay, darkCEvoltageDecayLOESSfun(darkCEtimeDecay), col="green")
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
-	#if(mydata[[x]]$time[2] - mydata[[x]]$time[1] != deltaT){
-	#	even_not_considering_different_time_windows_it_is_too_complex..._please_remove_this_file
-	#}
 	deltaT = mydata[[x]]$time[2] - mydata[[x]]$time[1]
 	startVoltage <- mean(mydata[[x]]$voltage[1:600])
 	endVoltage <- mean(tail(mydata[[x]]$voltage,600))
@@ -113,7 +107,6 @@ tryCatch({
 
 	fitfunfun = function(cLinear, cBias, cDecay, cSlow, cSlow2, cNoiseDecay) {
 		timeCenteredOnPeak = timeDecayHead - maxTime
-		#time = maxTimeShift - maxTimeShift*2*(sin(cDelay)^2) + 1.3*(sin(cSlow)^2)*timeCenteredOnPeak + cSlow2*timeCenteredOnPeak^2 + cSlow3*timeCenteredOnPeak^3
 		time = timeShift + maxTime + (1+0.5*sin(cSlow)^2)*timeCenteredOnPeak + cSlow2*timeCenteredOnPeak^2
 		timeTransformedDarkNoise = darkCEvoltageDecayLOESSfun(time)
 		noise = cLinear * timeTransformedDarkNoise + cNoiseDecay * time * timeTransformedDarkNoise + exp(cBias) * exp(-time/cDecay)
@@ -171,7 +164,7 @@ tryCatch({
 		return(result)
 	}
 
-		fitNoise1 = optim(c(fitNoise$par[4], fitNoise$par[5]), fitfun1)
+		fitNoise1 = optim(c(0,0), fitfun1)#c(fitNoise$par[4], fitNoise$par[5]), fitfun1)
 		message("*****************fitNoise1*****************")
 		print(fitNoise1)
 		#startList <- c(fitNoise0$par, fitNoise1$par, )
