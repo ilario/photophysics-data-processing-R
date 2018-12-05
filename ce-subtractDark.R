@@ -5,7 +5,7 @@ library(robustbase)
 library(minpack.lm)
 
 timeStartMinimum = 3e-8
-noiseEndTime = 7e-7
+noiseEndTime = 4e-7
 
 rm("startList")
 options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
@@ -30,7 +30,7 @@ darkCEtime = mydata[[files[1]]]$time;
 timeStartMinimumIndex = which.min(abs(darkCEtime - timeStartMinimum))
 maxDarkVoltageAfterStartMinimumIndex = which.max(tail(darkCEvoltage, -timeStartMinimumIndex))
 timeDarkPeak = darkCEtime[timeStartMinimumIndex + maxDarkVoltageAfterStartMinimumIndex]
-timeStart = darkCEtime[timeStartMinimumIndex + maxDarkVoltageAfterStartMinimumIndex] / 2
+timeStart = darkCEtime[timeStartMinimumIndex + maxDarkVoltageAfterStartMinimumIndex] * 0.9
 
 timeDarkStartIndex = which.min(abs(darkCEtime-timeStart))
 darkCEtimeDecay = tail(darkCEtime, -timeDarkStartIndex)
@@ -108,16 +108,21 @@ tryCatch({
 	voltageDecayLOESS = predict(decayLOESS)
 	voltageDecayLOESShead = head(voltageDecayLOESS, timeEndNoiseDecayIndex)
 
-	maxTimeShift = abs(timeDecayHead[which.max(voltageDecayHead)] - timeDarkPeak)
+	maxTime = timeDecayHead[which.max(voltageDecayHead)]
+	timeShift = timeDarkPeak - maxTime
 
-	fitfunfun = function(cLinear, cBias, cDecay, cDelay, cSlow, cSlow2, cSlow3) {
-		time = maxTimeShift*2*sin(cDelay) + cSlow*timeDecayHead + cSlow2*timeDecayHead^2 + cSlow3*timeDecayHead^3
-		noise = cLinear * darkCEvoltageDecayLOESSfun(time) + exp(cBias) * exp(-time/cDecay)
-		return(list(noise=noise, time=time))
+	fitfunfun = function(cLinear, cBias, cDecay, cSlow, cSlow2, cNoiseDecay) {
+		timeCenteredOnPeak = timeDecayHead - maxTime
+		#time = maxTimeShift - maxTimeShift*2*(sin(cDelay)^2) + 1.3*(sin(cSlow)^2)*timeCenteredOnPeak + cSlow2*timeCenteredOnPeak^2 + cSlow3*timeCenteredOnPeak^3
+		time = timeShift + maxTime + (1+0.5*sin(cSlow)^2)*timeCenteredOnPeak + cSlow2*timeCenteredOnPeak^2
+		timeTransformedDarkNoise = darkCEvoltageDecayLOESSfun(time)
+		noise = cLinear * timeTransformedDarkNoise + cNoiseDecay * time * timeTransformedDarkNoise + exp(cBias) * exp(-time/cDecay)
+		nonZeros = as.logical(timeTransformedDarkNoise)
+		return(list(noise=noise, time=time, nonZeros=nonZeros))
 	}
 	fitfun = function(params){
-		output = fitfunfun(params[1], params[2], params[3], params[4], params[5], params[6], params[7])
-		differences = abs(output$noise - voltageDecayLOESShead)
+		output = fitfunfun(params[1], params[2], params[3], params[4], params[5], params[6])
+		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
 		result = sum(differences)
 
 		#plot(timeDecayHead, voltageDecayHead, col="green", pch="+")
@@ -129,21 +134,21 @@ tryCatch({
 		return(result)
 	}
 	if(!exists("startList")){
-		startList = c(1, coef(expfitCE)["C"], coef(expfitCE)["D"], 0, 1, 0, 0);
+		startList = c(1, coef(expfitCE)["C"], coef(expfitCE)["D"], pi/2, 0, 0);
 	}
 	first <<- TRUE
 	startList[2] = coef(expfitCE)["C"]
 	startList[3] = coef(expfitCE)["D"]
 
-	fitNoise = optim(startList, fitfun)#lower = c(0, -Inf, 0, -Inf, 0, -Inf, -Inf), upper = c(10, 10, 1, Inf, 10, Inf, Inf))
+	fitNoise = optim(startList, fitfun)#lower = c(0, -Inf, 0, 0, -Inf, -Inf), upper = c(10, 10, 1, 10, Inf, Inf))
 	message("*****************fitNoise*****************")
 	print(fitNoise)
 	# convergence is good when convergence = 0
 	if(fitNoise$convergence){
 
 	fitfun0 = function(params){
-		output = fitfunfun(params[1], params[2], params[3], fitNoise$par[4], fitNoise$par[5], fitNoise$par[6], fitNoise$par[7])
-		differences = abs(output$noise - voltageDecayLOESShead)
+		output = fitfunfun(params[1], params[2], params[3], fitNoise$par[4], fitNoise$par[5], fitNoise$par[6])
+		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
 		result = sum(differences)
 
 		#plot(timeDecayHead, voltageDecayHead, col="red", pch="+")
@@ -154,11 +159,11 @@ tryCatch({
 		fitNoise0 = optim(head(startList,3), fitfun0)
 		message("*****************fitNoise0*****************")
 		print(fitNoise0)
-		startList <- c(fitNoise0$par, tail(startList,-3))
+		#startList <- c(fitNoise0$par, c(startList[4], startList[], startList[]))
 
 	fitfun1 = function(params){
-		output = fitfunfun(fitNoise$par[1], fitNoise$par[2], fitNoise$par[3], params[1], params[2], params[3], params[4])
-		differences = abs(output$noise - voltageDecayLOESShead)
+		output = fitfunfun(fitNoise$par[1], fitNoise$par[2], fitNoise$par[3], params[1], params[2], fitNoise$par[6])
+		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
 		result = sum(differences)
 
 		#plot(timeDecayHead, voltageDecayHead, col="orange", pch="+")
@@ -166,10 +171,24 @@ tryCatch({
 		return(result)
 	}
 
-		fitNoise1 = optim(tail(startList,-3), fitfun1, lower = c(-Inf, -Inf, -Inf, -Inf))
+		fitNoise1 = optim(c(fitNoise$par[4], fitNoise$par[5]), fitfun1)
 		message("*****************fitNoise1*****************")
 		print(fitNoise1)
-		startList <- c(fitNoise0$par, fitNoise1$par)
+		#startList <- c(fitNoise0$par, fitNoise1$par, )
+	fitfun2 = function(params){
+		output = fitfunfun(params[1], params[2], params[3], fitNoise$par[4], fitNoise$par[5], params[4])
+		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
+		result = sum(differences)
+
+		#plot(timeDecayHead, voltageDecayHead, col="orange", pch="+")
+		#lines(timeDecayHead, output$noise)
+		return(result)
+	}
+
+		fitNoise2 = optim(c(fitNoise0$par[1], fitNoise0$par[2], fitNoise0$par[3], fitNoise$par[6]), fitfun2)
+		message("*****************fitNoise2*****************")
+		print(fitNoise2)
+		startList <- c(fitNoise2$par[1], fitNoise2$par[2], fitNoise2$par[3], fitNoise1$par[1], fitNoise1$par[2], fitNoise2$par[4])
 		fitNoise = optim(startList, fitfun)
 		message("*****************fitNoise*****************")
 		print(fitNoise)
@@ -177,12 +196,16 @@ tryCatch({
 	startList <<- fitNoise$par
 	message("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
-	fitOutput = fitfunfun(fitNoise$par[1], -Inf, Inf, fitNoise$par[4], fitNoise$par[5], fitNoise$par[6], fitNoise$par[7]);
+	fitOutput = fitfunfun(fitNoise$par[1], -Inf, Inf, fitNoise$par[4], fitNoise$par[5], fitNoise$par[6]);
 	noiseProfileFun = approxfun(timeDecayHead, fitOutput$noise, method="linear", 0, 0)
 
 	noiseProfile = noiseProfileFun(timeDecay)
 	voltageMinusNoise = voltageDecay - noiseProfile
 
+	#just for plotting
+	fitOutput2 = fitfunfun(fitNoise$par[1], fitNoise$par[2], fitNoise$par[3], fitNoise$par[4], fitNoise$par[5], fitNoise$par[6]);
+	noiseProfileFun2 = approxfun(timeDecayHead, fitOutput2$noise, method="linear", 0, 0)
+	noiseProfile2 = noiseProfileFun2(timeDecay)
 	#plot(timeDecay, noiseProfile, xlim=c(timeStart,noiseEndTime), log="x",col="red", type="l")
 	#lines(timeDecay,voltageDecay, pch="+")
 	#Sys.sleep(1)
@@ -204,7 +227,7 @@ tryCatch({
 	op <- par(mar = c(5,7,4,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
 	
 	xlim=c(1e-9,tail(mydata[[x]]$time,1))
-	plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", col="red")
+	plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x")
 	title(ylab="Voltage (V)", cex.lab=2, line=4)
 	title(xlab="Time (s)", cex.lab=2, line=3.5)
 	mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=2, side=4,line=7,col="red")
@@ -213,7 +236,7 @@ tryCatch({
 	
 	lines(mydata[[x]]$time, baseline, col="blue")
 	lines(timeDecay, voltageMinusNoise, col="green")
-	lines(timeDecay, noiseProfile, col="red")
+	lines(timeDecay, noiseProfile2, col="red")
 	lines(darkCEtimeDecay, darkCEvoltageDecay, col="orange")
 
 	ylim_charge=c(min(chargeNoBaseline, charge)/0.09, max(chargeMinusNoise, charge)/0.09)
