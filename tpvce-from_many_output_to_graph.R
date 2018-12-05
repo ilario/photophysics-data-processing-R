@@ -92,9 +92,9 @@ lapply(dirs, function(x) {print(x);
  tryCatch({
 	  expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
  }, error=function(e) {cat("FAILED second non-robust FIT ", e$message, "\n")});
- tryCatch({
-	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
- }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
+ #tryCatch({
+	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(expfit)["B"],C=coef(expfit)["C"],D=coef(expfit)["D"]), data=a)
+ #}, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
 
 fulloutput <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)
@@ -183,9 +183,9 @@ lapply(dirs, function(x) {print(x);
  tryCatch({
 	  expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
  }, error=function(e) {cat("FAILED second non-robust FIT ", e$message, "\n")});
- tryCatch({
-	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(exp)["B"],C=coef(exp)["C"],D=coef(exp)["D"]), data=a)
- }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
+ #tryCatch({
+	  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(expfit)["B"],C=coef(expfit)["C"],D=coef(expfit)["D"]), data=a)
+ #}, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
 
 fulloutput <- read.table(paste(subdirs.tpv,"/output-robustmonoexp.txt",sep=""), header=TRUE);
 n<-tail(grep("file",fulloutput[,1]),n=1)

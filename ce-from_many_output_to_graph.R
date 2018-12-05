@@ -68,9 +68,9 @@ data <- lapply(dirs, function(x) {print(x);
  tryCatch({
  expfit <- nlsLM(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=log(coef(lin)[[1]]),C=log(1e-10),D=2), data=a)
  }, error=function(e) cat("Failed fit ", e$message, "\n"))
- tryCatch({
+ #tryCatch({
  expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(expfit)[[1]],C=coef(expfit)[[2]],D=coef(expfit)[[3]]), data=a)
- }, error=function(e) cat("Failed robust fit ", e$message, "\n"))
+ #}, error=function(e) cat("Failed robust fit ", e$message, "\n"))
 
 if(exists("expfit")){ 
  print(expfit)
