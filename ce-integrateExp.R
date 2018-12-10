@@ -57,6 +57,7 @@ voltageForSearchingZero = voltage[timeStartMinimumIndex : (timeStartMinimumIndex
 voltageChangeOfSign = sign(head(voltageForSearchingZero, -1)) + sign(tail(voltageForSearchingZero, -1))
 voltageChangeOfSignIndexes = which(voltageChangeOfSign == 0)
 voltageChangeOfSignIndexesLast = tail(voltageChangeOfSignIndexes,1)
+if(!length(voltageChangeOfSignIndexesLast)){voltageChangeOfSignIndexesLast = 0}
 timeStartIndex = timeStartMinimumIndex + voltageChangeOfSignIndexesLast
 timeStart = time[timeStartIndex]
 
@@ -64,24 +65,30 @@ timeStart = time[timeStartIndex]
 	voltageDecay = tail(voltage2, -timeStartIndex)
 
 	startCvalue = log(quantile(voltageDecay,0.999, names=FALSE))
-	expfitCE1 <- nlsLM(voltageDecay ~ exp(C)*exp(-timeDecay/D), start=list(C=startCvalue,D=3e-7))
+	nlsLMsuccess = FALSE
+	tryCatch({
+		expfitCE1 <- nlsLM(voltageDecay ~ exp(C)*exp(-timeDecay/D), start=list(C=startCvalue,D=3e-7))
+		nlsLMsuccess = TRUE
+	}, error=function(e) cat("Failed first exponential fit, it is likely just noise, returning a point at (0,0)", e$message, "\n"))
+	if(nlsLMsuccess){
 
-	#tryCatch({
-		previousC = coef(expfitCE1)["C"]
-		previousD = coef(expfitCE1)["D"]
-		expfitCE2 <- nlrob(voltageDecay ~ exp(C) * exp(-timeDecay / D), start=list(C=previousC,D=previousD), data=data.frame(voltageDecay =voltageDecay, timeDecay=timeDecay))#, method="MM")#, control=nlrob.control("MM"))
-	#}, error=function(e) cat("Failed monoexponential robust fit", e$message, "\n"))
-	coefC = coef(expfitCE2)["C"]
-	coefD = coef(expfitCE2)["D"]
+	coefC = coef(expfitCE1)["C"]
+	coefD = coef(expfitCE1)["D"]
+	tryCatch({
+		expfitCE2 <- nlrob(voltageDecay ~ exp(C) * exp(-timeDecay / D), start=list(C=coefC,D=coefD), data=data.frame(voltageDecay =voltageDecay, timeDecay=timeDecay))
+		coefC = coef(expfitCE2)["C"]
+		coefD = coef(expfitCE2)["D"]
+	}, error=function(e) cat("Failed monoexponential robust fit", e$message, "\n"))
+
 	voltageIntegralExp = function(x){
 		exp(coefC) * coefD * (exp(-timeStart/coefD) - exp(-x/coefD))
 	}
 
-	if(expfitCE2$status != "converged"){
+	if(!exists("expfitCE2") || expfitCE2$status != "converged"){
 		if(!exists("startListIntegrateExp")){
 			newC = coefC/5
-			newD1 = asin(sqrt((coefD*3 - 5e-8)*1e5))
-			newD2 = asin(sqrt((coefD/3 - 5e-8)*1e5))
+			newD1 = asin(sqrt(abs(coefD*3 - 5e-8)*1e5))
+			newD2 = asin(sqrt(abs(coefD/3 - 5e-8)*1e5))
 			startListIntegrateExp=list(C1=newC, C2=newC, D1=newD1, D2=newD2)
 		}
 		tryCatch({
@@ -103,11 +110,13 @@ timeStart = time[timeStartIndex]
 	if(interactive()){
 		plot(timeDecay, voltageDecay, log="x")
 		lines(timeDecay,predict(expfitCE1),col="red")
-		lines(timeDecay,predict(expfitCE2),col="orange")
-		if(exists("expfitCE3")){
-			lines(timeDecay,predict(expfitCE3),col="green")
+		if(exists("expfitCE2")){
+			lines(timeDecay,predict(expfitCE2),col="green")
 		}
-		Sys.sleep(3)
+		if(exists("expfitCE3")){
+			lines(timeDecay,predict(expfitCE3),col="orange")
+		}
+		Sys.sleep(1)
 	}
 
 	chargeIntegratedExp <- voltageIntegralExp(timeDecay)/50
@@ -119,13 +128,11 @@ timeStart = time[timeStartIndex]
 	c<-unlist(b)
 	c2 <- c[grepl("mV",c)]
 	d<-as.numeric(sub("mV.*", "", c2))
-        outputChargeDensityCE <- t(c(d, totalchargedensityIntegratedExp));
-	write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
 	png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
 	op <- par(mar = c(5,7,4,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
 	
-	xlim=c(timeStart, tail(mydata[[x]]$time,1))
+	xlim=c(max(timeStartMinimum, timeStart), tail(mydata[[x]]$time,1))
 	plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.5, log="x")#, yaxt="n"
 	title(ylab="Voltage (V)", cex.lab=2, line=4)
 	title(xlab="Time (s)", cex.lab=2, line=3.5)
@@ -136,8 +143,10 @@ timeStart = time[timeStartIndex]
 	lines(mydata[[x]]$time, baseline, col="blue")
 	if(exists("expfitCE3")){# && expfitCE3$status == "converged"){
 		lines(timeDecay, predict(expfitCE3, newdata=data.frame(timeDecay=timeDecay)), col="orange")
-	}else{
+	}else if (exists("expfitCE2")){
 		lines(timeDecay, predict(expfitCE2, newdata=data.frame(timeDecay=timeDecay)), col="green")
+	} else {
+		lines(timeDecay, predict(expfitCE1, newdata=data.frame(timeDecay=timeDecay)), col="red")
 	}
 		
 	ylim_charge=c(min(chargeNoBaseline, charge)/0.09, max(charge, chargeIntegratedExp)/0.09)
@@ -156,6 +165,10 @@ timeStart = time[timeStartIndex]
 #reset the plotting margins
 par(op)
 
+	outputChargeDensityCE <- t(c(d, totalchargedensityIntegratedExp));
+}else{
+	outputChargeDensityCE <- t(c(0, 0));
+}
 
 write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 })
