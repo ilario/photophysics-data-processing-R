@@ -22,6 +22,12 @@ Can be installed in RStudio via Tools/Install packages...
 Running it
 ----------
 
-Open the 'run-all-photophysics.R' file in RStudio, run it with Code/Run Region/Run All (Ctrl+Alt+R), select the directory of the photophysics of one device.
+Open the 'limits_for_graphics.R' file in RStudio, run it with Code/Run Region/Run All (Ctrl+Alt+R).
+
+Open the 'run-all-photophysics.R' file in RStudio, run it, select the directory of the photophysics of one device.
 
 Once all the devices has been processed, open the 'run-all-photophysics-comparisons.R' file and run it selecting the directory containing all the devices to compare.
+
+This last script could fail if the x and y limits for the plots does not match your data, edit the 'limits_for_graphics.R' file in RStudio, run it again and run again the 'run-all-photophysics-comparisons.R' file.
+
+The graphics have been created in the selected folders and subfolders. Additionally, some .csv file was create for enabling the usage of the resulting data in other softwares.
