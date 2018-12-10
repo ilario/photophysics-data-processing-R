@@ -1,15 +1,34 @@
 library(tcltk)
 
-datadir="~/exp"#"C:\\TPV_Controls_ORGANICS"
-print("Select CHARGE EXTRACTION Directory")
-cedir="ce"#tk_choose.dir(datadir,"== Select CHARGE EXTRACTION Dir ==\n")
-print("Select TRANSIENT PHOTO VOLTAGE Directory")
-tpvdir="tpv"#tk_choose.dir(dirname(cedir),"== Select T.P.Voltage Dir ==\n")
-print("Select TRANSIENT PHOTO CURRENT Directory")
-tpcdir="tpc"#tk_choose.dir(dirname(cedir),"== Select T.P.Current Dir ==\n")
-#setwd(dirname(cedir))
+homedir=path.expand('~')#"C:\\TPV_Controls_ORGANICS"
 
-scriptsdir = "~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+#if(!exists("scriptsdir")){
+  print("Select R SCRIPTS Directory")
+  scriptsdir = tk_choose.dir(homedir,"Select R SCRIPTS Directory\n")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+#}
+
+print("Select a DIRECTORY CONTAINING ALL PHOTOPHYSICS DATA OF ONE DEVICE")
+datadir=tk_choose.dir(homedir,"Select a DIRECTORY CONTAINING ALL PHOTOPHYSICS DATA OF ONE DEVICE\n")
+setwd(datadir)
+
+cedir = file.path(datadir, "ce")
+if(!dir.exists(cedir)){
+  print("Select CHARGE EXTRACTION Directory")
+  cedir=tk_choose.dir(homedir,"Select CHARGE EXTRACTION Directory\n")
+}
+
+tpcdir = file.path(datadir, "tpc")
+if(!dir.exists(tpcdir)){
+  print("Select TRANSIENT PHOTO CURRENT Directory")
+  tpcdir=tk_choose.dir(dirname(cedir),"Select TRANSIENT PHOTO CURRENT Directory\n")
+}
+
+tpvdir = file.path(datadir, "tpv")
+if(!dir.exists(tpvdir)){
+  print("Select TRANSIENT PHOTO VOLTAGE Directory")
+  tpvdir=tk_choose.dir(dirname(cedir),"Select TRANSIENT PHOTO VOLTAGE Directory\n")
+}
+
 source(file.path(scriptsdir,"from_ce_to_table.R"))
 source(file.path(scriptsdir,"ce-integrateExp.R"))
 source(file.path(scriptsdir,"ce-from_output_to_graph.R"))
@@ -42,5 +61,3 @@ tpcVsTpvVsCe(cedir=cedir, tpvdir=tpvdir, tpcdir=tpcdir)
 jrecCe(cedir=cedir, tpvdir=tpvdir)
 jrecDc(tpvdir=tpvdir)
 tpvFromOutputToGraphWithLimits(tpvdir=tpvdir, dcdir=getwd())
-
-Sys.sleep(1e5)
