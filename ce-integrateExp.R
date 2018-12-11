@@ -5,6 +5,10 @@ library(robustbase)
 library(minpack.lm)
 
 timeStartMinimum = 3e-8
+maximumDecayTime = 1e-2
+minimumDecayTime = 5e-8
+maximumDeltaV = 2
+minimumDeltaV = 1e-4
 
 options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
 
@@ -24,7 +28,17 @@ print(files[1])
 
 len<-length(mydata[[files[1]]]$voltage)
 
+intoRangeT <- function(number){
+	number1 = min(number, maximumDecayTime)
+	number2 = max(number1, minimumDecayTime)
+	return(number2)
+}
 
+intoRangeDV <- function(number){
+	number1 = min(number, maximumDeltaV)
+	number2 = max(number1, minimumDeltaV)
+	return(number2)
+}
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);
@@ -64,10 +78,11 @@ timeStart = time[timeStartIndex]
 	timeDecay = tail(time, -timeStartIndex)
 	voltageDecay = tail(voltage2, -timeStartIndex)
 
-	startCvalue = log(quantile(voltageDecay,0.999, names=FALSE))
+	startCvalue = quantile(voltageDecay,0.999, names=FALSE)
+
 	nlsLMsuccess = FALSE
 	tryCatch({
-		expfitCE1 <- nlsLM(voltageDecay ~ exp(C)*exp(-timeDecay/D), start=list(C=startCvalue,D=3e-7))
+		expfitCE1 <- nlsLM(voltageDecay ~ C*exp(-timeDecay/D), start=list(C=intoRangeDV(startCvalue),D=3e-7))
 		nlsLMsuccess = TRUE
 	}, error=function(e) cat("Failed first exponential fit, it is likely just noise, returning a point at (0,0)", e$message, "\n"))
 	if(nlsLMsuccess){
@@ -75,34 +90,32 @@ timeStart = time[timeStartIndex]
 	coefC = coef(expfitCE1)["C"]
 	coefD = coef(expfitCE1)["D"]
 	tryCatch({
-		expfitCE2 <- nlrob(voltageDecay ~ exp(C) * exp(-timeDecay / D), start=list(C=coefC,D=coefD), data=data.frame(voltageDecay =voltageDecay, timeDecay=timeDecay))
+		expfitCE2 <- nlrob(voltageDecay ~ C * exp(-timeDecay / D), start=list(C=intoRangeDV(coefC),D=intoRangeT(coefD)), data=data.frame(voltageDecay =voltageDecay, timeDecay=timeDecay), lower=c(C=minimumDeltaV, D=minimumDecayTime), upper=c(C=maximumDeltaV, D=maximumDecayTime), algorithm = "port")
 		coefC = coef(expfitCE2)["C"]
 		coefD = coef(expfitCE2)["D"]
 	}, error=function(e) cat("Failed monoexponential robust fit", e$message, "\n"))
 
 	voltageIntegralExp = function(x){
-		exp(coefC) * coefD * (exp(-timeStart/coefD) - exp(-x/coefD))
+		coefC * coefD * (exp(-timeStart/coefD) - exp(-x/coefD))
 	}
 
 	if(!exists("expfitCE2") || expfitCE2$status != "converged"){
 		if(!exists("startListIntegrateExp")){
 			newC = coefC/5
-			newD1 = asin(sqrt(abs(coefD*3 - 5e-8)*1e5))
-			newD2 = asin(sqrt(abs(coefD/3 - 5e-8)*1e5))
-			startListIntegrateExp=list(C1=newC, C2=newC, D1=newD1, D2=newD2)
+			newD1 = coefD*3
+			newD2 = coefD/3
+			startListIntegrateExp=list(C1=intoRangeDV(newC), C2=intoRangeDV(newC), D1=intoRangeT(newD1), D2=intoRangeT(newD2))
 		}
 		tryCatch({
-			expfitCE3 <- nlrob(voltageDecay ~ exp(C1) * exp(-timeDecay / (5e-8+1e-5*sin(D1)^2)) + exp(C2) * exp(-timeDecay / (5e-8+1e-5*sin(D2)^2)), start=startListIntegrateExp, data=data.frame(voltageDecay =voltageDecay, timeDecay=timeDecay))
+			expfitCE3 <- nlrob(voltageDecay ~ C1 * exp(-timeDecay / D1) + C2 * exp(-timeDecay / D2), start=startListIntegrateExp, data=data.frame(voltageDecay =voltageDecay, timeDecay=timeDecay), lower=c(C1=minimumDeltaV, C2=minimumDeltaV, D1=minimumDecayTime, D2=minimumDecayTime), upper=c(C1=maximumDeltaV, C2=maximumDeltaV, D1=maximumDecayTime, D2=maximumDecayTime), algorithm = "port")
 			coefC1 = coef(expfitCE3)["C1"]
 			coefC2 = coef(expfitCE3)["C2"]
 			coefD1 = coef(expfitCE3)["D1"]
 			coefD2 = coef(expfitCE3)["D2"]
-			coefD1complete = 5e-8+1e-5*sin(coefD1)^2
-			coefD2complete = 5e-8+1e-5*sin(coefD2)^2
 			startListIntegrateExp <<- expfitCE3$coefficients
 			#if(expfitCE3$status == "converged"){
 			voltageIntegralExp = function(x){
-				exp(coefC1) * coefD1complete * (exp(-timeStart/coefD1complete) - exp(-x/coefD1complete)) + exp(coefC2) * coefD2complete * (exp(-timeStart/coefD2complete) - exp(-x/coefD2complete))
+				coefC1 * coefD1 * (exp(-timeStart/coefD1) - exp(-x/coefD1)) + coefC2 * coefD2 * (exp(-timeStart/coefD2) - exp(-x/coefD2))
 			#}
 			}
 		}, error=function(e) cat("Failed biexponential robust fit", e$message, "\n"))
