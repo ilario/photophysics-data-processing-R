@@ -28,7 +28,7 @@ tpv <- read.table(file.path(tpvdir,"output-biexp.txt"), header=TRUE, skip=ifelse
 
 DCcapacitance <- read.table(file.path(dcdir,"outputDCcapacitance.txt"), header=TRUE);
 DCcapacitance <- DCcapacitance[with(DCcapacitance, order(Voc)), ]
-RCtime <- impedance*DCcapacitance$capacitance*0.09
+RCtime <- impedance*DCcapacitance$capacitance*cellArea
 
 png(file.path(tpvdir, paste(name, "-tpv-biexp-limits.png",sep="")), width=600, height=600);
 plot(1, ylim=c(min(tpv$T1,tpv$T2), max(tpv$T2, tpv$T1, RCtime)), xlim=c(min(tpv$Voc),max(tpv$Voc)), log="y", xlab=bquote("V"["OC"]*"(V)"), ylab="Life-time (s)", main=paste(name, "TPV biexp"), cex.axis=1.5, cex.lab=1.5);

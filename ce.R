@@ -26,7 +26,7 @@ trashfornullmessages <- lapply(files, function(x) {
 
 	charge=charge-charge[match(0,mydata[[x]]$time)]
 	totalcharge=mean(charge[round(length(charge)*0.9):round(length(charge)*0.95)])
-	totalchargedensity=totalcharge/0.09
+	totalchargedensity=totalcharge/cellArea
 
 	voltagezero <- mydata[[x]]$voltage
 	currentzero <- voltagezero/50
@@ -55,15 +55,15 @@ trashfornullmessages <- lapply(files, function(x) {
 	lines(mydata[[x]]$time, baseline, col="green")
 	lines(mydata[[x]]$time, voltagezero - darkCEvoltage, col="blue")
 
-	ylim_charge=c(min(chargezero, charge)/0.09, max(chargezero, charge)/0.09)
+	ylim_charge=c(min(chargezero, charge)/cellArea, max(chargezero, charge)/cellArea)
 	par(new=TRUE)
-	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
+	plot(mydata[[x]]$time,charge/cellArea, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
 	abline(h=0,col="red")
 	eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
 	text(xlim[2]*0.75,totalchargedensity*0.9,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="red")
 	
 	par(new=TRUE)
-	plot(mydata[[x]]$time,chargezero/0.09, type="l", col="orange", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
+	plot(mydata[[x]]$time,chargezero/cellArea, type="l", col="orange", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
 	
 	graphics.off()
 #reset the plotting margins

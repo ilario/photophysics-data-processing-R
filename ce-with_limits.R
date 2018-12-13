@@ -43,7 +43,7 @@ tryCatch({
 
 	#importante che la variabile in new abbia lo stesso nome di quella fittata
 	new <- data.frame(Voc = 0)
-	geometrical_capacitance <- 0.09*predict(expfitDC, new)
+	geometrical_capacitance <- cellArea*predict(expfitDC, new)
 
 #RC time is R[ohm]*C[F/cm2]*area[cm2]
 discharge_func = function(t, C) exp(-t/(impedance*C))
@@ -64,7 +64,7 @@ lapply(files, function(x) {
 	#importante che la variabile in new abbia lo stesso nome di quella fittata
 	new <- data.frame(Voc = Voc_fromfilename)
 
-	local_capacitance <- 0.09*predict(expfitDC, new)
+	local_capacitance <- cellArea*predict(expfitDC, new)
 	t_max = mydata[[x]]$time[which.max(loess_voltage)]
 
 	discharge_profile = maxV * discharge_func(mydata[[x]]$time, local_capacitance)

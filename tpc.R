@@ -37,7 +37,7 @@ trashfornullmessages <- lapply(files, function(x) {
 
 	charge=charge-charge[match(0,mydata[[x]]$time)]
 	totalcharge=quantile(charge,0.30)
-	totalchargedensity=totalcharge/0.09
+	totalchargedensity=totalcharge/cellArea
         outputChargeDensityTPC <- t(c(x, abs(totalchargedensity)));
 	write.table(outputChargeDensityTPC, file=file.path(tpcdir,"outputChargeDensityTPC.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
@@ -47,7 +47,7 @@ trashfornullmessages <- lapply(files, function(x) {
 	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x, "TPC"))
 	lines(mydata[[x]]$time, baseline, col="green")
 	par(new=TRUE)
-	plot(mydata[[x]]$time,charge/0.09, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="")
+	plot(mydata[[x]]$time,charge/cellArea, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="")
 	abline(h=0,col="red")
 	abline(h=totalchargedensity,col="red")
 	axis(4,col.ticks="red",col.axis="red", col="red")

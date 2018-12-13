@@ -55,7 +55,7 @@ trashfornullmessages <- lapply(files, function(x) {
 
 	charge=charge-charge[match(0,time)]
 	totalcharge=mean(charge[round(length(charge)*0.9):round(length(charge)*0.95)])
-	totalchargedensity=totalcharge/0.09
+	totalchargedensity=totalcharge/cellArea
 
 	voltageNoBaseline <- mydata[[x]]$voltage
 	currentNoBaseline <- voltageNoBaseline/50
@@ -63,7 +63,7 @@ trashfornullmessages <- lapply(files, function(x) {
 
 	chargeNoBaseline=chargeNoBaseline-chargeNoBaseline[mydata[[x]]$time == 0]
 	totalchargeNoBaseline=mean(chargeNoBaseline[round(length(chargeNoBaseline)*0.9):round(length(chargeNoBaseline)*0.95)])
-	totalchargedensityNoBaseline=totalchargeNoBaseline/0.09
+	totalchargedensityNoBaseline=totalchargeNoBaseline/cellArea
 
 timeStartMinimumIndex = which.min(abs(time - timeStartMinimum))
 maxVoltageAfterStartMinimumIndex = which.max(tail(voltage, -timeStartMinimumIndex))
@@ -134,7 +134,7 @@ timeStart = time[timeStartIndex]
 
 	chargeIntegratedExp <- voltageIntegralExp(timeDecay)/50
 	totalchargeIntegratedExp = voltageIntegralExp(Inf)/50
-	totalchargedensityIntegratedExp=totalchargeIntegratedExp/0.09
+	totalchargedensityIntegratedExp=totalchargeIntegratedExp/cellArea
 
 
 	b<-strsplit(x, "_")
@@ -162,17 +162,17 @@ timeStart = time[timeStartIndex]
 		lines(timeDecay, predict(expfitCE1, newdata=data.frame(timeDecay=timeDecay)), col="red")
 	}
 		
-	ylim_charge=c(min(chargeNoBaseline, charge)/0.09, max(charge, chargeIntegratedExp)/0.09)
+	ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(charge, chargeIntegratedExp)/cellArea)
 	par(new=TRUE)
-	plot(timeDecay,chargeIntegratedExp/0.09, type="l", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, col="red", log="x")
+	plot(timeDecay,chargeIntegratedExp/cellArea, type="l", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, col="red", log="x")
 	#abline(h=0,col="red")
 	eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
 	text(xlim[2]*0.5,ylim_charge[2]*0.9,labels=bquote(.(signif(totalchargedensityIntegratedExp,3))~"C/cm"^"2"),cex=2,col="red")
 	#text(xlim[2]*0.75,ylim_charge[2]*0.8,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="orange")
 	#text(xlim[2]*0.75,ylim_charge[2]*0.7,labels=bquote(.(signif(totalchargedensityNoBaseline,3))~"C/cm"^"2"),cex=2,col="red")
 
-	#lines(mydata[[x]]$time,chargeNoBaseline/0.09, type="l", col="orange")
-	#lines(mydata[[x]]$time, charge/0.09, type="l")
+	#lines(mydata[[x]]$time,chargeNoBaseline/cellArea, type="l", col="orange")
+	#lines(mydata[[x]]$time, charge/cellArea, type="l")
 
 	graphics.off()
 #reset the plotting margins
