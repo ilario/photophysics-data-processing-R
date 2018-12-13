@@ -4,8 +4,10 @@ library(sfsmisc)
 library(robustbase)
 library(minpack.lm)
 
+rm("maximumDecayTime")
+
 timeStartMinimum = 3e-8
-maximumDecayTime = 1e-2
+#maximumDecayTime = 1e-4 # leave commented for setting the last time point as maximumDecayTime
 minimumDecayTime = 5e-8
 maximumDeltaV = 2
 minimumDeltaV = 1e-4
@@ -28,11 +30,6 @@ print(files[1])
 
 len<-length(mydata[[files[1]]]$voltage)
 
-intoRangeT <- function(number){
-	number1 = min(number, maximumDecayTime)
-	number2 = max(number1, minimumDecayTime)
-	return(number2)
-}
 
 intoRangeDV <- function(number){
 	number1 = min(number, maximumDeltaV)
@@ -44,7 +41,17 @@ trashfornullmessages <- lapply(files, function(x) {
 	message(x);
 	time = mydata[[x]]$time
 	voltage = mydata[[x]]$voltage
+	if(!exists("maximumDecayTime")){
+		maximumDecayTime = tail(time,1)
+	}
 	deltaT = time[2] - time[1]
+
+	intoRangeT <- function(number){
+		number1 = min(number, maximumDecayTime)
+		number2 = max(number1, minimumDecayTime)
+		return(number2)
+	}
+
 	startVoltage <- mean(head(voltage, 600))
 	endVoltage <- mean(tail(voltage, 600))
 	baseline <- seq(startVoltage, endVoltage, length.out=len)
@@ -99,7 +106,7 @@ timeStart = time[timeStartIndex]
 		coefC * coefD * (exp(-timeStart/coefD) - exp(-x/coefD))
 	}
 
-	if(!exists("expfitCE2") || expfitCE2$status != "converged"){
+	#if(!exists("expfitCE2") || expfitCE2$status != "converged"){
 		if(!exists("startListIntegrateExp")){
 			newC = coefC/5
 			newD1 = coefD*3
@@ -112,14 +119,18 @@ timeStart = time[timeStartIndex]
 			coefC2 = coef(expfitCE3)["C2"]
 			coefD1 = coef(expfitCE3)["D1"]
 			coefD2 = coef(expfitCE3)["D2"]
-			startListIntegrateExp <<- expfitCE3$coefficients
 			#if(expfitCE3$status == "converged"){
-			voltageIntegralExp = function(x){
-				coefC1 * coefD1 * (exp(-timeStart/coefD1) - exp(-x/coefD1)) + coefC2 * coefD2 * (exp(-timeStart/coefD2) - exp(-x/coefD2))
-			#}
+			if(signif(coefC1,1) == minimumDeltaV || signif(coefC1,1) == maximumDeltaV || signif(coefC2,1) == minimumDeltaV || signif(coefC2,1) == maximumDeltaV || signif(coefD1,1) == minimumDecayTime || signif(coefD1,1) == maximumDecayTime || signif(coefD2,1) == minimumDecayTime || signif(coefD2,1) == maximumDecayTime){
+				rm("expfitCE3")
+				print("Biexponential robust fit coefficients are at the bounds, likely it failed, removing")
+			} else {
+				startListIntegrateExp <<- expfitCE3$coefficients
+				voltageIntegralExp = function(x){
+					coefC1 * coefD1 * (exp(-timeStart/coefD1) - exp(-x/coefD1)) + coefC2 * coefD2 * (exp(-timeStart/coefD2) - exp(-x/coefD2))
+				}
 			}
 		}, error=function(e) cat("Failed biexponential robust fit", e$message, "\n"))
-	}
+	#}
 	if(interactive()){
 		plot(timeDecay, voltageDecay, log="x")
 		lines(timeDecay,predict(expfitCE1),col="red")
@@ -152,22 +163,30 @@ timeStart = time[timeStartIndex]
 	mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=2, side=4,line=7,col="red")
 	eaxis(side=1, cex.axis=1.5)
 	#eaxis(side=2, cex.axis=1.5)
-	
+
+	ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(charge, chargeIntegratedExp)/cellArea)
+
 	lines(mydata[[x]]$time, baseline, col="blue")
 	if(exists("expfitCE3")){# && expfitCE3$status == "converged"){
 		lines(timeDecay, predict(expfitCE3, newdata=data.frame(timeDecay=timeDecay)), col="orange")
+		mtext(paste("Tau1 =", signif(coefD1,3),"s"), side=3, line=-6, cex=1.5, adj=0.8)
+		mtext(paste("Tau2 =", signif(coefD2,3),"s"), side=3, line=-8, cex=1.5, adj=0.8)
 	}else if (exists("expfitCE2")){
 		lines(timeDecay, predict(expfitCE2, newdata=data.frame(timeDecay=timeDecay)), col="green")
+		mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-6, cex=1.5, adj=0.8)
 	} else {
 		lines(timeDecay, predict(expfitCE1, newdata=data.frame(timeDecay=timeDecay)), col="red")
-	}
-		
-	ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(charge, chargeIntegratedExp)/cellArea)
+		mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-6, cex=1.5, adj=0.8)
+	}	
+
 	par(new=TRUE)
 	plot(timeDecay,chargeIntegratedExp/cellArea, type="l", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, col="red", log="x")
 	#abline(h=0,col="red")
 	eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
-	text(xlim[2]*0.5,ylim_charge[2]*0.9,labels=bquote(.(signif(totalchargedensityIntegratedExp,3))~"C/cm"^"2"),cex=2,col="red")
+	#text(xlim[2]*0.5,ylim_charge[2]*0.9,labels=bquote(.(signif(totalchargedensityIntegratedExp,3))~"C/cm"^"2"),cex=2,col="red")
+	mtext(bquote(.(signif(totalchargedensityIntegratedExp,3))~"C/cm"^"2"), side=3, line=-4, cex=1.5, adj=0.8)
+
+
 	#text(xlim[2]*0.75,ylim_charge[2]*0.8,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="orange")
 	#text(xlim[2]*0.75,ylim_charge[2]*0.7,labels=bquote(.(signif(totalchargedensityNoBaseline,3))~"C/cm"^"2"),cex=2,col="red")
 
