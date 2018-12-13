@@ -1,5 +1,6 @@
 name="photophysics"
 title=NULL
+cellArea=0.09
 image_width=1600
 image_height=900
 image_smallpdf_width=3.5
