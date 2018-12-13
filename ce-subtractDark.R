@@ -117,13 +117,14 @@ tryCatch({
 		output = fitfunfun(params[1], params[2], params[3], params[4], params[5], params[6])
 		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
 		result = sum(differences)
-
-		#plot(timeDecayHead, voltageDecayHead, col="green", pch="+")
-		#lines(timeDecayHead, output$noise)
-		#if(first){
-		#	Sys.sleep(3)
-		#	first <<- FALSE
-		#}
+		if(interactive()){
+			plot(timeDecayHead, voltageDecayHead, pch="+")
+			lines(timeDecayHead, output$noise, col="green")
+			if(first){
+				Sys.sleep(0.5)
+				first <<- FALSE
+			}
+		}
 		return(result)
 	}
 	if(!exists("startList")){
@@ -143,9 +144,10 @@ tryCatch({
 		output = fitfunfun(params[1], params[2], params[3], fitNoise$par[4], fitNoise$par[5], fitNoise$par[6])
 		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
 		result = sum(differences)
-
-		#plot(timeDecayHead, voltageDecayHead, col="red", pch="+")
-		#lines(timeDecayHead, output$noise)
+		if(interactive()){
+			plot(timeDecayHead, voltageDecayHead, pch="+")
+			lines(timeDecayHead, output$noise, col="brown")
+		}
 		return(result)
 	}
 
@@ -158,9 +160,10 @@ tryCatch({
 		output = fitfunfun(fitNoise$par[1], fitNoise$par[2], fitNoise$par[3], params[1], params[2], fitNoise$par[6])
 		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
 		result = sum(differences)
-
-		#plot(timeDecayHead, voltageDecayHead, col="orange", pch="+")
-		#lines(timeDecayHead, output$noise)
+		if(interactive()){
+			plot(timeDecayHead, voltageDecayHead, pch="+")
+			lines(timeDecayHead, output$noise, col="red")
+		}
 		return(result)
 	}
 
@@ -172,9 +175,10 @@ tryCatch({
 		output = fitfunfun(params[1], params[2], params[3], fitNoise$par[4], fitNoise$par[5], params[4])
 		differences = (output$noise[output$nonZeros] - voltageDecayLOESShead[output$nonZeros])^2
 		result = sum(differences)
-
-		#plot(timeDecayHead, voltageDecayHead, col="orange", pch="+")
-		#lines(timeDecayHead, output$noise)
+		if(interactive()){
+			plot(timeDecayHead, voltageDecayHead, pch="+")
+			lines(timeDecayHead, output$noise, col="orange")
+		}
 		return(result)
 	}
 
