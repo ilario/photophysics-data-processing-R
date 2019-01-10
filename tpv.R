@@ -52,7 +52,7 @@ write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=f
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);	
-		header =  read.table(file.path(tpvdir,paste(x,".txt",sep="")), skip=3, header=FALSE, nrows=3)$V2
+		#header =  read.table(file.path(tpvdir,paste(x,".txt",sep="")), skip=3, header=FALSE, nrows=3)$V2
 
 		peaktime <- mydata[[x]]$time[which.max(mydata[[x]]$voltage)];
 		starttime <- head(mydata[[x]]$time, n=1)
@@ -137,9 +137,11 @@ tryCatch({
 			lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
 			lines(temp$time, predict(fit2), col="aquamarine4", lwd=2);
 			segments(starttime, A2, 0, A2, col="aquamarine4")
-			lines(temp$time+header[3]/10*header[1], A2 + slowampl*exp(-temp$time/slowdecay)+deltavoltage/10, col="green");
+			# TO BE FIXED: REMOVE HEADER VARIABLE
+			#lines(temp$time+header[3]/10*header[1], A2 + slowampl*exp(-temp$time/slowdecay)+deltavoltage/10, col="green");
 			mtext(paste("Tau1 =", signif(slowdecay,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
-			lines(temp$time+header[3]/10*header[1], A2 + fastampl*exp(-temp$time/fastdecay)+deltavoltage/10, col="blue");
+			# TO BE FIXED: REMOVE HEADER VARIABLE
+			# lines(temp$time+header[3]/10*header[1], A2 + fastampl*exp(-temp$time/fastdecay)+deltavoltage/10, col="blue");
 			mtext(paste("Tau2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
 			graphics.off();
 		}, error=function(e) print("Biexp/Plot/Linear: Error"));
@@ -380,9 +382,11 @@ if(robust){
 			points(temp, pch=".");
 			lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
 			lines(temp$time, predict(fit2R), col="aquamarine4", lwd=2);
-			lines(temp$time+header[3]/10*header[1], A2R + Rslowampl*exp(-temp$time/Rslowdecay)+deltavoltage/10, col="green");
+			# TO BE FIXED: REMOVE HEADER VARIABLE
+			#lines(temp$time+header[3]/10*header[1], A2R + Rslowampl*exp(-temp$time/Rslowdecay)+deltavoltage/10, col="green");
 			mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
-			lines(temp$time+header[3]/10*header[1], A2R + Rfastampl*exp(-temp$time/Rfastdecay)+deltavoltage/10, col="blue");
+			# TO BE FIXED: REMOVE HEADER VARIABLE
+			#lines(temp$time+header[3]/10*header[1], A2R + Rfastampl*exp(-temp$time/Rfastdecay)+deltavoltage/10, col="blue");
 			mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
 			graphics.off();
 		}, error=function(e) print("RobustBiexp/Plot/Linear: Error"));
