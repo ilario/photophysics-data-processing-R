@@ -21,34 +21,35 @@ library(sfsmisc)
 
 if(!exists("image_width")){stop("image_width and image_height variables must be set")}
 
+doBiexpFit=F
 robust=T
+doPlots=F
 logy=F
-logx=T
+logx=F
 residuals=F
 thresholdBiexp=10
 thresholdRobustBiexp=100
 forbidNegativeDecays=T
 noiseTime=5e-8
 #debugDeltaV info will appear in biexp logx graphics
-debugDeltaV=T
+debugDeltaV=F
 
 files <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
 mydata <- lapply(file.path(tpvdir,files), read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
 ## output for importing
-write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-biexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-monoexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaV.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVloess.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVfirstPoints.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
-write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-robustmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
-write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-robustbiexp.txt"), append=FALSE, col.names=F, row.names=F);
-
-
-
+if(doBiexpFit){
+  write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-biexp.txt"), append=FALSE, col.names=F, row.names=F);
+  write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-robustbiexp.txt"), append=FALSE, col.names=F, row.names=F);
+  write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=FALSE, col.names=F, row.names=F);
+}
 
 trashfornullmessages <- lapply(files, function(x) {
 	message(x);	
@@ -95,6 +96,9 @@ trashfornullmessages <- lapply(files, function(x) {
 		slowdecay <- C; fastdecay <- C; #in caso non venisse effettuato il biexp
 		}, error=function(e) {print("EvaluationMonoexp: Error")});
 		
+		
+		
+		if(doBiexpFit){
 		biexpsuccess = 0
 		print("Biexp/Fit: Performing")
 		step <- 0.5;
@@ -128,7 +132,7 @@ tryCatch({
 		print(paste("F starting: ", Frand, ", F fitted: ", FFromPreviousDecay))
 			capture.output(summary(fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 			
-
+if(doPlots){
 			print("Biexp/Plot/Linear: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-biexp.png", sep="")), width = image_width, height = image_height);
@@ -145,7 +149,8 @@ tryCatch({
 			mtext(paste("Tau2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
 			graphics.off();
 		}, error=function(e) print("Biexp/Plot/Linear: Error"));
-if(logy){			print("Biexp/Plot/Log: Performing");
+}
+if(logy & doPlots){			print("Biexp/Plot/Log: Performing");
 		tryCatch({
 			temp_logy_biexp = subset(temp, time <= slowdecay*5)
 			png(file.path(tpvdir,paste(x, "-biexp-log.png", sep="")), width = image_width, height = image_height);
@@ -158,7 +163,7 @@ if(logy){			print("Biexp/Plot/Log: Performing");
 			graphics.off();	
 		}, error=function(e) print("Biexp/Plot/Log: Error"));
 }
-if(logx){
+if(logx & doPlots){
 			print("Biexp/Plot/LogX: Performing");
 		tryCatch({
 
@@ -178,7 +183,7 @@ if(logx){
 			graphics.off();	
 		}, error=function(e) print("Biexp/Plot/LogX: Error"));
 }
-if(residuals){
+if(residuals & doPlots){
 		tryCatch({
 			print("Biexp/Plot/Residuals: Performing");
 			png(file.path(tpvdir,paste(x, "-biexp-residuals.png", sep="")), width = image_width, height = image_height);
@@ -210,62 +215,37 @@ if(residuals){
 		step <- min((step+0.5),5)
 		}
 		}
+		}
 		
-#		if(biexpsuccess) {
 		for(rand in seq(1, 10, by=0.5)){
 tryCatch({
 		print("Monoexp/Fit: Performing");
 
-		Crand=sign(slowdecay*fastdecay)*sqrt(abs(slowdecay*fastdecay))*(2^runif(1,-rand,rand))
+    if(doBiexpFit){
+  		Crand=sign(slowdecay*fastdecay)*sqrt(abs(slowdecay*fastdecay))*(2^runif(1,-rand,rand))
+    }else{
+      Crand=C*(2^runif(1,-rand,rand))
+    }
+  
 		fit <- nls(voltage ~ cbind(1, exp(-time/C)), start=list(C=Crand),trace=F,data=temp,alg="plinear");
 		capture.output(summary(fit), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 		A <- coef(fit)[".lin1"]; B <- coef(fit)[".lin2"]; C <- coef(fit)["C"];
 		C.err <- summary(fit)$coefficients["C",2];
 		quitelowerpointmonoexp <- max((predict(fit, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A)/5,min(subset(tempsubset, voltage > A, select=voltage)-A));
 		higherpointmonoexp <- max(predict(fit, newdata = data.frame(time=0))-A,head(tempsubset$voltage,n=1)-A);
-
+if(doPlots){
 		print("Monoexp/Plot/Linear: Performing");
 		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fit, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
-#		png(file.path(tpvdir,paste(x, "-monoexp.png", sep="")), width = image_width, height = image_height);
-#		par(mar=c(5.1, 4.1+1, 4.1, 2.1))
-#		op <- par(mar = c(5,7,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
-#		plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "", ylab = "", pch=".", col="yellow", cex.lab=2, cex.axis=2, xaxt="n", yaxt="n");
-#		eaxis(side=1, cex.axis=1.5)
-#		eaxis(side=2, cex.axis=1.5)
-#		#line is for introducing more space between label and axis
-#		title(ylab = "Voltage (V)", cex.lab = 2, line = 4.5)
-#		title(xlab = "Time (s)", cex.lab = 2, line = 3.5)
-#		points(temp, pch=".");
-#		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
-#		lines(temp$time, predict(fit), col="red", lwd=2);
-#		segments(starttime, A, 0, A, col="red", lwd=2)
-#		mtext(paste("T =", signif(C,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
-#		graphics.off();
-#		#reset the plotting margins
-#		par(op)
-if(logy){
+}
+if(logy & doPlots){
 		print("Monoexp/Plot/Log: Performing");
 		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fit, in.loess_fit=lo2, in.yshift=-A, in.suffix="monoexp-log", in.log="y", in.xlim=c(0, C*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
-
-#		png(file.path(tpvdir,paste(x, "-monoexp-log.png", sep="")), width = image_width, height = image_height);
-#		plot(temp_logy$time, temp_logy$voltage - A, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", signif(A,digits=4), "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy$voltage, 10))-A, deltavoltage/1e5), deltavoltage) );
-##		points(tempsubset$time, tempsubset$voltage - A, pch=".", col="yellow");
-#		lines(tempsubset2$time, predict(lo2) - A, col='black', lwd=2);
-#		lines(temp$time,predict(fit) - A, col="red", lwd=3);
-#		mtext(paste("T =", signif(C,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
-#		graphics.off();
 }
-if(logx){
+if(logx & doPlots){
 		print("Monoexp/Plot/LogX: Performing");
 		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fit, in.loess_fit=lo2, in.suffix="monoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
-#		png(file.path(tpvdir,paste(x, "-monoexp-logx.png", sep="")), width = image_width, height = image_height);
-#		plot(temp$time, temp$voltage, xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x");
-#		#lines(temp$time, predict(lo2), col='black', lwd=3);
-#		lines(temp$time,predict(fit), col="red", lwd=2);
-#		mtext(paste("T =", signif(C,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
-#		graphics.off();
 }
-if(residuals){
+if(residuals & doPlots){
 		print("Monoexp/Plot/Residuals: Performing");
 		png(file.path(tpvdir,paste(x, "-monoexp-residuals.png", sep="")), width = image_width, height = image_height);
 		yresidualfit <- temp$voltage-predict(fit,newdata=data.frame(time=temp$time))
@@ -281,9 +261,11 @@ if(residuals){
 		outputDeltaVmonoexp <- t(c(x, A, B));
 		write.table(outputDeltaVmonoexp, file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 
+if(doBiexpFit){
 tryCatch({
 			capture.output(anova(fit,fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 }, error=function(e) print("Anova comparison: Error"));
+}
 		break;
 }, error=function(e) cat("Monoexp: Error ", e$message, "\n"))#, str(e$call), "\n"));
 		}
@@ -301,40 +283,20 @@ if(robust){
 		CR.err <- summary(fitR)$coefficients["C",2];
 		quitelowerpointmonoexp <- max((predict(fitR, newdata = data.frame(time=tail(tempsubset$time, n=1)))-AR)/5,min(subset(tempsubset, voltage > AR, select=voltage)-AR));
 		higherpointmonoexp <- max(predict(fitR, newdata = data.frame(time=0))-AR,head(tempsubset$voltage,n=1)-AR);
-		print("RobustMonoexp/Plot/Linear: Performing");
-
-		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
-
-#		png(file.path(tpvdir,paste(x, "-robustmonoexp.png", sep="")), width = image_height, height = image_height);
-#		par(mar=c(5.1, 4.1+1, 4.1, 2.1))
-#		plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow", cex.lab=2.5, cex.axis=2.5);
-#		points(temp, pch=".");
-#		lines(tempsubset2$time, predict(lo2), col='black', lwd=3);
-#		lines(temp$time, predict(fitR), col="red", lwd=2);
-#		mtext(paste("T =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
-#		graphics.off();
-if(logy){
+		
+		if(doPlots){
+		  print("RobustMonoexp/Plot/Linear: Performing");
+		  plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
+    }
+if(logy & doPlots){
 		print("RobustMonoexp/Plot/Log: Performing");
 		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.yshift=-AR, in.suffix="robustmonoexp-log", in.log="y", in.xlim=c(0, CR*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
-#		png(file.path(tpvdir,paste(x, "-robustmonoexp-log.png", sep="")), width = image_width, height = image_height);
-#		plot(tempsubset$time, tempsubset$voltage - AR, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", AR, "V)"), pch=".", log="y", ylim=c(quitelowerpointmonoexp,higherpointmonoexp), col="yellow");
-#		points(temp$time, temp$voltage - AR, pch=".");
-#		lines(tempsubset2$time, predict(lo2) - AR, col='black', lwd=3);
-#		lines(temp$time,predict(fitR) - AR, col="red", lwd=2);
-#		mtext(paste("T =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
-#		graphics.off();
 }
-if(logx){
+if(logx & doPlots){
 		print("RobustMonoexp/Plot/LogX: Performing");
 		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
-#		png(file.path(tpvdir,paste(x, "-robustmonoexp-logx.png", sep="")), width = image_width, height = image_height);
-#		plot(temp$time, temp$voltage, xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x");
-#		#lines(temp$time, predict(lo2), col='black', lwd=3);
-#		lines(temp$time,predict(fitR), col="red", lwd=2);
-#		mtext(paste("Tau =", signif(CR,digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
-#		graphics.off();
 }
-if(residuals){
+if(residuals & doPlots){
 		print("RobustMonoexp/Plot/Residuals: Performing");
 		png(file.path(tpvdir,paste(x, "-robustmonoexp-residuals.png", sep="")), width = image_width, height = image_height);
 		yresidualfitR <- temp$voltage-predict(fitR,newdata=data.frame(time=temp$time))
@@ -354,7 +316,7 @@ if(residuals){
 		}
 }
 
-if(robust){
+if(robust & doBiexpFit){
 		print("RobustBiexp/Fit: Performing")
 		robustbiexpsuccess = 0
 		tries=0
@@ -374,7 +336,7 @@ if(robust){
 			Rfastdecay.err<-summary(fit2R)$coefficients["F2R",2]
 
 			capture.output(summary(fit2R), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
-
+if(doPlots){
 			print("RobustBiexp/Plot/Linear: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-robustbiexp.png", sep="")), width = image_width, height = image_height);
@@ -390,7 +352,8 @@ if(robust){
 			mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
 			graphics.off();
 		}, error=function(e) print("RobustBiexp/Plot/Linear: Error"));
-if(logy){			print("RobustBiexp/Plot/Log: Performing");
+}
+if(logy & doPlots){			print("RobustBiexp/Plot/Log: Performing");
 		tryCatch({
 			Rquitelowerpointbiexp <- max((predict(fit2R, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A2R)/5,min(subset(tempsubset, voltage > A2R, select=voltage)-A2R));
 			Rhigherpointbiexp <- max(predict(fit2R, newdata = data.frame(time=0))-A2R,head(tempsubset$voltage,n=1)-A2R);
@@ -404,7 +367,7 @@ if(logy){			print("RobustBiexp/Plot/Log: Performing");
 			graphics.off();	
 		}, error=function(e) print("RobustBiexp/Plot/Log: Error"));
 }
-if(logx){
+if(logx & doPlots){
 			print("RobustBiexp/Plot/LogX: Performing");
 		tryCatch({
 			png(file.path(tpvdir,paste(x, "-robustbiexp-logx.png", sep="")), width = image_width, height = image_height);
@@ -415,7 +378,7 @@ if(logx){
 			graphics.off();	
 		}, error=function(e) print("RobustBiexp/Plot/LogX: Error"));
 }
-if(residuals){
+if(residuals & doPlots){
 		tryCatch({
 			print("RobustBiexp/Plot/Residuals: Performing");
 			png(file.path(tpvdir,paste(x, "-robustbiexp-residuals.png", sep="")), width = image_width, height = image_height);
