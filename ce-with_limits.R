@@ -25,6 +25,7 @@ mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
 write.table(t(c("Voc","RCtime")), file=file.path(cedir,"outputRCtime.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("Voc","CEmonoexpTime")), file=file.path(cedir,"outputMonoexpCE.txt"), append=FALSE, col.names=F, row.names=F);
 
 impedance = 50
 
