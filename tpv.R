@@ -34,6 +34,8 @@ noiseTime=5e-8
 #debugDeltaV info will appear in biexp logx graphics
 debugDeltaV=F
 
+options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
+
 files <- list.files(path=tpvdir, pattern="^TPV.*\\.txt.table$");
 mydata <- lapply(file.path(tpvdir,files), read.table, header=FALSE, col.names=c("time","voltage"));
 files <- sub(".txt.table","",files);
@@ -217,6 +219,14 @@ if(residuals & doPlots){
 		}
 		}
 		
+		
+		
+		
+		
+		
+		
+		
+		
 		for(rand in seq(1, 10, by=0.5)){
 tryCatch({
 		print("Monoexp/Fit: Performing");
@@ -226,13 +236,12 @@ tryCatch({
     }else{
       Crand=C*(2^runif(1,-rand,rand))
     }
-  
+
 		fit <- nls(voltage ~ cbind(1, exp(-time/C)), start=list(C=Crand),trace=F,data=temp,alg="plinear");
 		capture.output(summary(fit), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
 		A <- coef(fit)[".lin1"]; B <- coef(fit)[".lin2"]; C <- coef(fit)["C"];
 		C.err <- summary(fit)$coefficients["C",2];
-		quitelowerpointmonoexp <- max((predict(fit, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A)/5,min(subset(tempsubset, voltage > A, select=voltage)-A));
-		higherpointmonoexp <- max(predict(fit, newdata = data.frame(time=0))-A,head(tempsubset$voltage,n=1)-A);
+		
 if(doPlots){
 		print("Monoexp/Plot/Linear: Performing");
 		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fit, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
@@ -281,9 +290,7 @@ if(robust){
 		AR <- coef(fitR)["A"]; BR <- coef(fitR)["B"]; 
 		CR <- coef(fitR)["C"];
 		CR.err <- summary(fitR)$coefficients["C",2];
-		quitelowerpointmonoexp <- max((predict(fitR, newdata = data.frame(time=tail(tempsubset$time, n=1)))-AR)/5,min(subset(tempsubset, voltage > AR, select=voltage)-AR));
-		higherpointmonoexp <- max(predict(fitR, newdata = data.frame(time=0))-AR,head(tempsubset$voltage,n=1)-AR);
-		
+
 		if(doPlots){
 		  print("RobustMonoexp/Plot/Linear: Performing");
 		  plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
