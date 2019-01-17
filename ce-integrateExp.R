@@ -25,6 +25,7 @@ mydata <- lapply(file.path(cedir,files), read.table, header=FALSE, col.names=c("
 files <- sub(".txt.table","",files);
 names(mydata) <- files;
 write.table(t(c("Voc","ChargeDensityCE")), file=file.path(cedir,"outputChargeDensityCE.txt"), append=FALSE, col.names=F, row.names=F);
+write.table(t(c("Voc","ChargeCE")), file=file.path(cedir,"outputChargeCE.txt"), append=FALSE, col.names=F, row.names=F);
 
 print(files[1])
 
@@ -198,10 +199,13 @@ timeStart = time[timeStartIndex]
 par(op)
 
 	outputChargeDensityCE <- t(c(d, totalchargedensityIntegratedExp));
+	outputChargeCE <- t(c(d, totalchargeIntegratedExp));
 }else{
 	outputChargeDensityCE <- t(c(0, 0));
+	outputChargeCE <- t(c(0, 0));
 }
 
 write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
+write.table(outputChargeCE, file=file.path(cedir,"outputChargeCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
 })
 }
