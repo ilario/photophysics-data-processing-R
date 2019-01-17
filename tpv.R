@@ -19,10 +19,9 @@ print("TPV: FITTING")
 library(robustbase)
 library(sfsmisc)
 
-if(!exists("image_width")){stop("image_width and image_height variables must be set")}
 
-doBiexpFit=F
-robust=T
+doBiexpFit=T
+robust=F
 doPlots=F
 logy=F
 logx=F
@@ -33,6 +32,8 @@ forbidNegativeDecays=T
 noiseTime=5e-8
 #debugDeltaV info will appear in biexp logx graphics
 debugDeltaV=F
+
+if(!exists("image_width") & doPlots){stop("image_width and image_height variables must be set")}
 
 options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
 
