@@ -22,11 +22,11 @@ library(Hmisc)
 filename=gsub(",","",gsub(":","",name))
 
 change.lightness <- function(col, lightness=1){
-	if(missing(col))
-		stop("Please provide a vector of colours.")
-	apply(sapply(col, col2rgb, alpha=TRUE)/255, 2,
-		function(x)
-			rgb(x[1]*lightness, x[2]*lightness, x[3]*lightness, alpha=x[4]))
+  if(missing(col))
+    stop("Please provide a vector of colours.")
+  apply(sapply(col, col2rgb, alpha=TRUE)/255, 2,
+        function(x)
+          rgb(x[1]*lightness, x[2]*lightness, x[3]*lightness, alpha=x[4]))
 }
 
 #fileslist=list.files(pattern="*-forward.*.txt|*-reverse.*.txt")
@@ -38,7 +38,7 @@ legendlist=sub("_.*","",sub("^0","",cellslist))
 mycolors=gsub(".*-col_","",cellslist[grepl("-col_", cellslist)])
 
 if(!length(mycolors)){
-mycolors<-brewer.pal(8,"Dark2")
+  mycolors<-brewer.pal(8,"Dark2")
 }
 
 #jpeg(quality=98, paste(filename,"-revIVs.jpg",sep=""), width=image_width, height=image_height);
@@ -53,13 +53,13 @@ abline(h=0, col="gray50");abline(v=0, col="gray50")
 
 i = 1
 lapply(reverselist, function(x){ 
-V=mydata[[x]]$Voltage_V
-J=mydata[[x]]$Current_mA/0.09
-lines(V, J, lwd=2, col=mycolors[i])
-Jmarkers=J[V*10 == floor(V*10)]
-Vmarkers=V[V*10 == floor(V*10)]
-points(Vmarkers, Jmarkers, col=change.lightness(mycolors[i],0.5), bg=mycolors[i], cex=1.5, pch=20+(i%%5))
-i <<- i+1
+  V=mydata[[x]]$Voltage_V
+  J=mydata[[x]]$Current_mA/0.09
+  lines(V, J, lwd=2, col=mycolors[i])
+  Jmarkers=J[V*10 == floor(V*10)]
+  Vmarkers=V[V*10 == floor(V*10)]
+  points(Vmarkers, Jmarkers, col=change.lightness(mycolors[i],0.5), bg=mycolors[i], cex=1.5, pch=20+(i%%5))
+  i <<- i+1
 })
 
 legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist))), lwd=2, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bty="n", pch=seq(21,25))

@@ -15,18 +15,18 @@
 
 fromTpvTpcToTable <- function(dir=".")
 {
-print("TPV or TPC: ADDING TIME COLUMN IN .table FILES")
-files <- list.files(path=dir, pattern="^TP.*\\.txt$");
-mydata <- lapply(file.path(dir, files), read.table, header=FALSE, skip=8, col.names=c("voltage"));
-names(mydata) <- files;
-
-trashfornullmessages <- lapply(files, function(x) {
-	if(!file.exists(paste(x, ".table", sep=""))){
-		message(x);
-		header =  read.table(file.path(dir,x), skip=3, header=FALSE, nrows=3)$V2 
-#		header = as.numeric(system(paste("head -6 '", file.path(dir, x), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
-		mydata[[x]]$time = seq(0,header[3]-1)*header[1]+header[2];
-		write.table(mydata[[x]][,c("time","voltage")], file.path(dir, paste(x,".table", sep="")), col.names=F, row.names=F, quote=F)
-	}
-})
+  print("TPV or TPC: ADDING TIME COLUMN IN .table FILES")
+  files <- list.files(path=dir, pattern="^TP.*\\.txt$");
+  mydata <- lapply(file.path(dir, files), read.table, header=FALSE, skip=8, col.names=c("voltage"));
+  names(mydata) <- files;
+  
+  trashfornullmessages <- lapply(files, function(x) {
+    if(!file.exists(paste(x, ".table", sep=""))){
+      message(x);
+      header =  read.table(file.path(dir,x), skip=3, header=FALSE, nrows=3)$V2 
+      #		header = as.numeric(system(paste("head -6 '", file.path(dir, x), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
+      mydata[[x]]$time = seq(0,header[3]-1)*header[1]+header[2];
+      write.table(mydata[[x]][,c("time","voltage")], file.path(dir, paste(x,".table", sep="")), col.names=F, row.names=F, quote=F)
+    }
+  })
 }

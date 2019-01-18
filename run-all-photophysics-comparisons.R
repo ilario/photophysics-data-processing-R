@@ -3,8 +3,8 @@ library(tcltk)
 homedir=path.expand('~')#"C:\\TPV_Controls_ORGANICS"
 
 #if(!exists("scriptsdir")){
-  print("Select R SCRIPTS Directory")
-  scriptsdir = tk_choose.dir(homedir,"Select R SCRIPTS Directory\n")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+print("Select R SCRIPTS Directory")
+scriptsdir = tk_choose.dir(homedir,"Select R SCRIPTS Directory\n")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
 #}
 
 print("Select a DIRECTORY CONTAINING ALL DEVICES' PHOTOPHYSICS DATA DIRECTORIES")

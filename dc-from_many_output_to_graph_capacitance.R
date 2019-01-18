@@ -43,7 +43,7 @@ if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 jpeg(quality=98, paste(filename,"-DCs-capacitance.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab="",# log="y", 
-yaxt="n",xaxt="n")#main=paste(name,"DCs capacitance"), )
+     yaxt="n",xaxt="n")#main=paste(name,"DCs capacitance"), )
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.2)
 eaxis(side=1, cex.axis=1.2)
@@ -51,20 +51,20 @@ minor.tick(nx=10, ny=10)
 title(ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
 
 lapply(dirs, function(x) {print(x);
-	subdirs <- list.dirs(path=x, recursive=F)
-	subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
-	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
-a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
-# in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
-charge <- quantile(a$ChargeDensityTPC, 0.75)
-b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
-
-output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
-capacitance <- charge/b$deltaV
-output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-
-points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
- i <<- i+1
+  subdirs <- list.dirs(path=x, recursive=F)
+  subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
+  subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+  a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
+  # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
+  charge <- quantile(a$ChargeDensityTPC, 0.75)
+  b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
+  
+  output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
+  capacitance <- charge/b$deltaV
+  output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
+  
+  points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
+  i <<- i+1
 })
 #abline(h=0)
 legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=mycolors, title=title, bg="gray90"# bty="n"
@@ -80,34 +80,34 @@ i <- 0
 jpeg(quality=98, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
-yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )
+     yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.2)
 eaxis(side=1, cex.axis=1.2)
 minor.tick(nx=10, ny=10)
 
 lapply(dirs, function(x) {print(x);
-	subdirs <- list.dirs(path=x, recursive=F)
-	subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
-	subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
-a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
-# in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
-charge <- quantile(a$ChargeDensityTPC, 0.75)
-b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
-output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
-capacitance <- charge/b$deltaV
-dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)
-
-geometrical <- quantile(dataframe$capacitance,0.05)
-capacitance <- capacitance - geometrical
-
-output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
- i <<- i+1
+  subdirs <- list.dirs(path=x, recursive=F)
+  subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
+  subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
+  a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
+  # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
+  charge <- quantile(a$ChargeDensityTPC, 0.75)
+  b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
+  output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
+  capacitance <- charge/b$deltaV
+  dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)
+  
+  geometrical <- quantile(dataframe$capacitance,0.05)
+  capacitance <- capacitance - geometrical
+  
+  output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
+  points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
+  i <<- i+1
 })
 #abline(h=0)
 legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=mycolors, title=#paste("DC capacitance\n","no geom. cap.\n",
-       title, bg="gray90"#bty="n"
+         title, bg="gray90"#bty="n"
 )
 graphics.off()
 

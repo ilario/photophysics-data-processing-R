@@ -9,8 +9,8 @@ filename = "************FILL ME HERE***********"
 uvvis_dir = "data-UVvis"
 pl_dir = "data-PL"
 colorIndex = ************FILL ME HERE***********
-
-uvvis_wavelength_lim=c(250, 800)
+  
+  uvvis_wavelength_lim=c(250, 800)
 pl_wavelength_lim=c(600, 850)
 
 mylegend = c(paste(filename, ", experimental absorbance", sep=""), paste(filename, ", simulated absorbance", sep=""))
@@ -130,9 +130,9 @@ maxSimTaucIndirect = max(fitSimIndirectData$taucIndirect)
 ############################# UVvis
 
 if(output_pdf){
-	pdf(paste(filename,"-UVvis.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+  pdf(paste(filename,"-UVvis.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
 }else{
-	png(paste(filename,"-UVvis.png",sep=""), width=image_width, height=image_height)
+  png(paste(filename,"-UVvis.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,7.5,1,4) + 0.1) ## default is c(5,4,4,2) + 0.1 
 plot(NULL,xlim=uvvis_wavelength_lim,ylim=c(0,1), xlab="", ylab="", cex.axis=1.4, yaxt="n");
@@ -155,9 +155,9 @@ par(op)
 ############################# UVvis epsilon
 
 if(output_pdf){
-	pdf(paste(filename,"-UVvis_epsilon.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+  pdf(paste(filename,"-UVvis_epsilon.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
 }else{
-	png(paste(filename,"-UVvis_epsilon.png",sep=""), width=image_width, height=image_height)
+  png(paste(filename,"-UVvis_epsilon.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,7.5,1,4) + 0.1) ## default is c(5,4,4,2) + 0.1 
 plot(NULL,xlim=uvvis_wavelength_lim,ylim=c(0,max(simulated$Epsilon, experimental$Epsilon)), xlab="", ylab="", cex.axis=1.4, yaxt="n");
@@ -182,9 +182,9 @@ par(op)
 ############################# Tauc direct
 
 if(output_pdf){
-	pdf(paste(filename,"-UVvis_tauc_direct.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+  pdf(paste(filename,"-UVvis_tauc_direct.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
 }else{
-	png(paste(filename,"-UVvis_tauc_direct.png",sep=""), width=image_width, height=image_height)
+  png(paste(filename,"-UVvis_tauc_direct.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 xlimDirect=c(max(eV_uvvis_lim[1],min(fitSimDirectData$eV, fitDirectData$eV)-1), max(fitDirectLim2, fitSimDirectLim2))
@@ -221,9 +221,9 @@ par(op)
 ############################# Tauc indirect
 
 if(output_pdf){
-	pdf(paste(filename,"-UVvis_tauc_indirect.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+  pdf(paste(filename,"-UVvis_tauc_indirect.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
 }else{
-	png(paste(filename,"-UVvis_tauc_indirect.png",sep=""), width=image_width, height=image_height)
+  png(paste(filename,"-UVvis_tauc_indirect.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 xlimIndirect=c(max(eV_uvvis_lim[1], min(fitSimIndirectData$eV, fitIndirectData$eV)-1), max(fitIndirectLim2, fitSimIndirectLim2))
@@ -259,9 +259,9 @@ par(op)
 ############################# Tauc direct with photoluminescence
 
 if(output_pdf){
-	pdf(paste(filename,"-UVvis_tauc_direct_with_PL.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+  pdf(paste(filename,"-UVvis_tauc_direct_with_PL.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
 }else{
-	png(paste(filename,"-UVvis_tauc_direct_with_PL.png",sep=""), width=image_width, height=image_height)
+  png(paste(filename,"-UVvis_tauc_direct_with_PL.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,3,1,7.5) + 0.1) ## default is c(5,4,4,2) + 0.1
 xlimDirectPL=c(eV_pl_lim[1], max(fitDirectLim2, fitSimDirectLim2))
@@ -297,9 +297,9 @@ par(op)
 ############################# Tauc indirect with photoluminescence
 
 if(output_pdf){
-	pdf(paste(filename,"-UVvis_tauc_indirect_with_PL.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+  pdf(paste(filename,"-UVvis_tauc_indirect_with_PL.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
 }else{
-	png(paste(filename,"-UVvis_tauc_indirect_with_PL.png",sep=""), width=image_width, height=image_height)
+  png(paste(filename,"-UVvis_tauc_indirect_with_PL.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,3,1,7.5) + 0.1) ## default is c(5,4,4,2) + 0.1
 xlimIndirectPL=c(eV_pl_lim[1], fitIndirectLim2)

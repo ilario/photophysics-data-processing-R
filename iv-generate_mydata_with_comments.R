@@ -17,17 +17,17 @@ source("~/software/photophysics-data-processing-R/extractdata-curves-vi-separate
 file.create("output.txt")
 mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="^ig.*.txt$", list.excl="output.txt")
 results <- lapply(names(mydata), function(x){
-z <- factor(strsplit(x,"-")[[1]][2], v1all); 
-levels(z) <- list1;
-if(exists("var2")){
-	y <- factor(strsplit(x,"-")[[1]][2], v2all);
-	levels(y) <- list2;
-	comment=paste(toString(y), toString(z))}
-else {comment=toString(z)}
-
-
-write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x)), comment=comment), file="output.txt", append=TRUE);
-extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, comment=comment)});
+  z <- factor(strsplit(x,"-")[[1]][2], v1all); 
+  levels(z) <- list1;
+  if(exists("var2")){
+    y <- factor(strsplit(x,"-")[[1]][2], v2all);
+    levels(y) <- list2;
+    comment=paste(toString(y), toString(z))}
+  else {comment=toString(z)}
+  
+  
+  write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x)), comment=comment), file="output.txt", append=TRUE);
+  extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, comment=comment)});
 names(results) <- names(mydata)
 
 

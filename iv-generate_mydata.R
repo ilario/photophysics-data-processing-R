@@ -19,7 +19,7 @@ mydata <- import.iv.separated(pattern.excl="\\.png$", list.excl="output.txt", pa
 #mydata <- import.iv.separated(pattern.excl="\\.pdf$")
 file.create("output.txt")
 results <- lapply(names(mydata), function(x){
-	names(mydata[[x]]) <- c("Voltage_V","Current_mA") # it should not be needed, if curves were acquired with PyPv
-	write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, cell.surface=0.09, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x))), file="output.txt", append=TRUE);
-	extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, comment="", cell.surface=0.09)})
+  names(mydata[[x]]) <- c("Voltage_V","Current_mA") # it should not be needed, if curves were acquired with PyPv
+  write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, cell.surface=0.09, formatted.output=TRUE, directory=getwd(), sample=x, reverse=as.integer(grepl("reverse", x))), file="output.txt", append=TRUE);
+  extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, comment="", cell.surface=0.09)})
 names(results) <- names(mydata)

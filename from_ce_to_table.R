@@ -15,18 +15,18 @@
 
 fromCeToTable <- function(cedir="ce")
 {
-print("CE: ADDING TIME COLUMN IN .table FILES")
-files <- list.files(path=cedir, pattern="^CE.*\\.txt$");
-mydata <- lapply(file.path(cedir, files), read.table, header=FALSE, skip=9, col.names=c("voltage"));
-names(mydata) <- files;
-
-trashfornullmessages <- lapply(files, function(x) {
-#	if(!file.exists(paste(x, ".table", sep=""))){
-		message(x);
-		header = read.table(file.path(cedir, x), skip=4, header=FALSE, nrows=3)$V2
-#		header = as.numeric(system(paste("head -7 '", file.path(cedir, x), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
-		mydata[[x]]$time = seq(0,header[3]-1)*header[1]+header[2];
-		write.table(mydata[[x]][,c("time","voltage")], file.path(cedir, paste(x,".table", sep="")), col.names=F, row.names=F, quote=F)
-#	}
-})
+  print("CE: ADDING TIME COLUMN IN .table FILES")
+  files <- list.files(path=cedir, pattern="^CE.*\\.txt$");
+  mydata <- lapply(file.path(cedir, files), read.table, header=FALSE, skip=9, col.names=c("voltage"));
+  names(mydata) <- files;
+  
+  trashfornullmessages <- lapply(files, function(x) {
+    #	if(!file.exists(paste(x, ".table", sep=""))){
+    message(x);
+    header = read.table(file.path(cedir, x), skip=4, header=FALSE, nrows=3)$V2
+    #		header = as.numeric(system(paste("head -7 '", file.path(cedir, x), "' | tail -3|sed 's/\r$//' | cut -f2 -d' '", sep=""), intern = TRUE))
+    mydata[[x]]$time = seq(0,header[3]-1)*header[1]+header[2];
+    write.table(mydata[[x]][,c("time","voltage")], file.path(cedir, paste(x,".table", sep="")), col.names=F, row.names=F, quote=F)
+    #	}
+  })
 }

@@ -15,35 +15,35 @@
 
 ceDc <- function(cedir="ce", tpvdir="tpv", tpcdir="tpc")
 {
-print("CE vs DC: PLOTTING")
-ce <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
-
-directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
-
-#a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
-#charge <- mean(a$ChargeDensityTPC)
-#b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
-#capacitance <- charge/b$deltaV
-
-c <- read.table(file.path(getwd(), "outputDCcapacitance.txt"), header=T)
-
-#c<- data.frame(b$Voc,capacitance)
-d <- c[with(c, order(Voc)), ]
-e <- d[1:(nrow(d)/2),]
-
-f <- data.frame(d$Voc, d$capacitance)
-names(f) <- c("Voc","capacitance")
-g <- f
-g$capacitance[g$capacitance < 0] <- 0
-
-z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
-
-ChargeDensityCE <- ce$ChargeDensityCE*1e9
-png(paste("DC-CE-", directory, ".png", sep=""), height=600, width=600)
-par(mar=c(5.1,5,4.1,2.1))
-plot(Vectorize(function(X)integrate(z,0,X)$value*1e9),xlim=c(min(ce$Voc,range(f$Voc)[1]),max(ce$Voc,range(f$Voc)[2])), ylim=c(min(ChargeDensityCE),max(ChargeDensityCE, integrate(z,0,range(g$Voc)[2])$value*1e9))
-     , ylab=bquote("Charge Density (nC/cm"^"2"*")"), xlab="Voltage (V)", main=paste(directory,"DC and CE"), cex.main=1.5, cex.lab=1.5, cex.axis=1.5)#, log="y")
-points(ce$Voc, ChargeDensityCE)
-legend(x="topleft",inset=0.1,c("Differential Charging", "Charge Extraction"), lty=c(1,NA), pch=c(NA,1), lwd=2, cex=1.5)
-graphics.off()
+  print("CE vs DC: PLOTTING")
+  ce <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
+  
+  directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
+  
+  #a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
+  #charge <- mean(a$ChargeDensityTPC)
+  #b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
+  #capacitance <- charge/b$deltaV
+  
+  c <- read.table(file.path(getwd(), "outputDCcapacitance.txt"), header=T)
+  
+  #c<- data.frame(b$Voc,capacitance)
+  d <- c[with(c, order(Voc)), ]
+  e <- d[1:(nrow(d)/2),]
+  
+  f <- data.frame(d$Voc, d$capacitance)
+  names(f) <- c("Voc","capacitance")
+  g <- f
+  g$capacitance[g$capacitance < 0] <- 0
+  
+  z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
+  
+  ChargeDensityCE <- ce$ChargeDensityCE*1e9
+  png(paste("DC-CE-", directory, ".png", sep=""), height=600, width=600)
+  par(mar=c(5.1,5,4.1,2.1))
+  plot(Vectorize(function(X)integrate(z,0,X)$value*1e9),xlim=c(min(ce$Voc,range(f$Voc)[1]),max(ce$Voc,range(f$Voc)[2])), ylim=c(min(ChargeDensityCE),max(ChargeDensityCE, integrate(z,0,range(g$Voc)[2])$value*1e9))
+       , ylab=bquote("Charge Density (nC/cm"^"2"*")"), xlab="Voltage (V)", main=paste(directory,"DC and CE"), cex.main=1.5, cex.lab=1.5, cex.axis=1.5)#, log="y")
+  points(ce$Voc, ChargeDensityCE)
+  legend(x="topleft",inset=0.1,c("Differential Charging", "Charge Extraction"), lty=c(1,NA), pch=c(NA,1), lwd=2, cex=1.5)
+  graphics.off()
 }

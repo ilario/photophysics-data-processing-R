@@ -13,8 +13,8 @@ png("Jsc-stability.png", height=600, width=600)
 par(mar=c(5,6,2,2))
 plot(NULL,xlim=c(0,80),ylim=c(-0.003,0), xlab="Illumination Time (s)", ylab=bquote("J"["SC"]*" (mA)"), cex.axis=1.5, cex.lab=1.5)
 lapply(ls(h2), function(x){
-	       	       lines(mydata[[x]]$TIME, mydata[[x]]$CURR, lwd=2, col=colors[h2[[x]]])
-		       	       i<<-i+1
-		       legend(x="bottomright",inset=0.05,c("spiro-OMeTAD", "TAE4"), col=colors, lwd=4, cex=1.4)
+  lines(mydata[[x]]$TIME, mydata[[x]]$CURR, lwd=2, col=colors[h2[[x]]])
+  i<<-i+1
+  legend(x="bottomright",inset=0.05,c("spiro-OMeTAD", "TAE4"), col=colors, lwd=4, cex=1.4)
 })
 graphics.off()

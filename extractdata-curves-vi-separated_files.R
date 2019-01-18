@@ -14,16 +14,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import.iv.separated <- function(dir = ".", pattern="", pattern.excl="\\.png$", list.excl="output.txt", header=TRUE, skip=22){
-	files.all <- list.files(path=dir, pattern=pattern)
-#	files.all <- grep(pattern=grep_pattern, files.all)
-	files.pattern.excl <- list.files(path=dir, pattern=pattern.excl)
-	files.excl <- append(files.pattern.excl, list.excl)
-	files <- files.all[!files.all %in% files.excl]
-	mydata <- lapply(files, function(x){
-		tryCatch({read.table(x, header=header, skip=skip)}, error=function(e) {write(paste("Import error with file", x), stderr())})})
-	names(mydata) <- files
-	mydata <- Filter(function(x) length(x) > 0, mydata)
-	return(mydata)
+  files.all <- list.files(path=dir, pattern=pattern)
+  #	files.all <- grep(pattern=grep_pattern, files.all)
+  files.pattern.excl <- list.files(path=dir, pattern=pattern.excl)
+  files.excl <- append(files.pattern.excl, list.excl)
+  files <- files.all[!files.all %in% files.excl]
+  mydata <- lapply(files, function(x){
+    tryCatch({read.table(x, header=header, skip=skip)}, error=function(e) {write(paste("Import error with file", x), stderr())})})
+  names(mydata) <- files
+  mydata <- Filter(function(x) length(x) > 0, mydata)
+  return(mydata)
 }
 
 #for importing all files in the current directory into a dataframe
@@ -57,46 +57,46 @@ import.iv.separated <- function(dir = ".", pattern="", pattern.excl="\\.png$", l
 #lapply(names(mydata), function(x){write(extract.iv(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, formatted.output=TRUE, directory=20101020, sample=x, reverse=as.integer(grepl("reverse", x))), file="output.txt", append=TRUE)})
 
 extract.iv <- function(voltage, current, current.positive=FALSE, cell.surface=0.09, irradiance=100, formatted.output=FALSE, directory, sample, reverse, comment=""){
-	efficiency <- extract.iv.power(voltage, current, current.positive, cell.surface, irradiance);
-	jsc <- extract.iv.jsc(voltage, current, current.positive, cell.surface);
-	voc <- extract.iv.voc(voltage, current);
-	ff <- efficiency / (jsc * voc);
-	if(formatted.output){
-		result.formatted <- paste(as.character(directory), as.character(sample), reverse, as.character(format(jsc,digits=4)), as.character(format(voc,digits=4)), as.character(format(ff,digits=2)), as.character(format(efficiency,digits=4)), gsub(" ", "-", comment), sep="\t");
-		return(result.formatted);
-	}else{
-		names <- c("Jsc", "Voc", "FF", "efficiency", "comment");
-		result <- c(format(jsc,digits=4), format(voc,digits=4), format(ff,digits=2), format(efficiency,digits=4), comment);
-		names(result) <- names;
-		return(result);
-	}
+  efficiency <- extract.iv.power(voltage, current, current.positive, cell.surface, irradiance);
+  jsc <- extract.iv.jsc(voltage, current, current.positive, cell.surface);
+  voc <- extract.iv.voc(voltage, current);
+  ff <- efficiency / (jsc * voc);
+  if(formatted.output){
+    result.formatted <- paste(as.character(directory), as.character(sample), reverse, as.character(format(jsc,digits=4)), as.character(format(voc,digits=4)), as.character(format(ff,digits=2)), as.character(format(efficiency,digits=4)), gsub(" ", "-", comment), sep="\t");
+    return(result.formatted);
+  }else{
+    names <- c("Jsc", "Voc", "FF", "efficiency", "comment");
+    result <- c(format(jsc,digits=4), format(voc,digits=4), format(ff,digits=2), format(efficiency,digits=4), comment);
+    names(result) <- names;
+    return(result);
+  }
 }
 
 
 extract.iv.power <- function(voltage, current, current.positive=FALSE, cell.surface=0.09, irradiance=100){
-	power <- voltage * current * (as.numeric(current.positive)*2-1);
-	efficiency <- 100 * (max(power) / cell.surface) / irradiance;
-	return(efficiency);
+  power <- voltage * current * (as.numeric(current.positive)*2-1);
+  efficiency <- 100 * (max(power) / cell.surface) / irradiance;
+  return(efficiency);
 }
 
 extract.iv.jsc <- function(voltage, current, current.positive=FALSE, cell.surface=0.09){
-	pos.jsc <- which.min(abs(voltage));
-	length <- length(voltage);
-	range.jsc <- max(pos.jsc-3,1):min(pos.jsc+3,length);
-	data.jsc <- data.frame(voltage[range.jsc], current[range.jsc]);
-	fit2 <- lm(data.jsc$current ~ data.jsc$voltage + I(data.jsc$voltage^2));
-	jsc <- coef(fit2)[1] / cell.surface * (as.numeric(current.positive)*2-1);
-	return(jsc);
+  pos.jsc <- which.min(abs(voltage));
+  length <- length(voltage);
+  range.jsc <- max(pos.jsc-3,1):min(pos.jsc+3,length);
+  data.jsc <- data.frame(voltage[range.jsc], current[range.jsc]);
+  fit2 <- lm(data.jsc$current ~ data.jsc$voltage + I(data.jsc$voltage^2));
+  jsc <- coef(fit2)[1] / cell.surface * (as.numeric(current.positive)*2-1);
+  return(jsc);
 }
 
 extract.iv.voc <- function(voltage, current){
-	pos.voc <- which.min(abs(current));
-	length <- length(voltage);
-	range.voc <- max((pos.voc-3),1):min(pos.voc+3,length);
-	data.voc <- data.frame(voltage[range.voc], current[range.voc]);
-	fit2inv <- lm(data.voc$voltage ~ data.voc$current + I(data.voc$current^2));
-	voc <- coef(fit2inv)[1];
-	return(voc);
+  pos.voc <- which.min(abs(current));
+  length <- length(voltage);
+  range.voc <- max((pos.voc-3),1):min(pos.voc+3,length);
+  data.voc <- data.frame(voltage[range.voc], current[range.voc]);
+  fit2inv <- lm(data.voc$voltage ~ data.voc$current + I(data.voc$current^2));
+  voc <- coef(fit2inv)[1];
+  return(voc);
 }
 
 

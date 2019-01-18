@@ -19,13 +19,13 @@ name=directory
 files <- list.files(path=".", pattern="^ig.*\\.txt$");
 
 illumination <- function(names){
-	values <- lapply(names, function(name){
-				 splittedname <- strsplit(name, "-")
-				 value="1 sun"
-				 if(grepl("dark",name)){value="dark"}
-				 if(grepl("sun",name)){value=paste(as.numeric(gsub("sun","",unlist(splittedname)[grepl("sun",unlist(splittedname))])), " sun")}
-				 return(value)})
-	return(unlist(values))
+  values <- lapply(names, function(name){
+    splittedname <- strsplit(name, "-")
+    value="1 sun"
+    if(grepl("dark",name)){value="dark"}
+    if(grepl("sun",name)){value=paste(as.numeric(gsub("sun","",unlist(splittedname)[grepl("sun",unlist(splittedname))])), " sun")}
+    return(value)})
+  return(unlist(values))
 }
 
 
@@ -44,13 +44,13 @@ plot(NULL,xlim=c(-0.2,1.1),ylim=c(-2.1,1.2),cex.main=1.5,xlab="Voltage (V)",ylab
 lines(mydata[[filesDark[1]]]$Voltage_V, mydata[[filesDark[1]]]$Current_mA, lwd=1, col="black")
 i<-1
 lapply(filesNoDark[grepl("reverse",files)], function(x){print(x); print(colors[i]); 
-lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=1, col=colors[i]);
-i<<-i+1
+  lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=1, col=colors[i]);
+  i<<-i+1
 })
 i<-1
 lapply(filesNoDark[grepl("forward",files)], function(x){print(x); print(colors[i]); 
-lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=1, lty=2, col=colors[i])
-i<<-i+1
+  lines(mydata[[x]]$Voltage_V, mydata[[x]]$Current_mA, lwd=1, lty=2, col=colors[i])
+  i<<-i+1
 })
 
 abline(h=0);abline(v=0)

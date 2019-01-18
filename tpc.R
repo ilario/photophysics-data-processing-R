@@ -17,43 +17,43 @@
 
 tpc <- function(tpcdir="tpc")
 {
-print("TPC: INTEGRATING")
-files <- list.files(path=tpcdir, pattern="^TPC.*\\.txt.table$");
-mydata <- lapply(file.path(tpcdir,files), read.table, header=FALSE, col.names=c("time","voltage"));
-files <- sub(".txt.table","",files);
-names(mydata) <- files;
-write.table(t(c("file","ChargeDensityTPC")), file=file.path(tpcdir,"outputChargeDensityTPC.txt"), append=FALSE, col.names=F, row.names=F);
-
-trashfornullmessages <- lapply(files, function(x) {
-	message(x);
-	len<-length(mydata[[x]]$voltage)
-	startVoltage <- mean(mydata[[x]]$voltage[1:1000])
-	endVoltage <- mean(mydata[[x]]$voltage[(len-1000):len])
-	baseline <- seq(startVoltage, endVoltage, length.out=len)
-
-	voltage2 <- mydata[[x]]$voltage - baseline
-	current <- voltage2/50
-	charge <- cumsum(current)*(mydata[[x]]$time[2]-mydata[[x]]$time[1])
-
-	charge=charge-charge[match(0,mydata[[x]]$time)]
-	totalcharge=quantile(charge,0.30)
-	totalchargedensity=totalcharge/cellArea
-        outputChargeDensityTPC <- t(c(x, abs(totalchargedensity)));
-	write.table(outputChargeDensityTPC, file=file.path(tpcdir,"outputChargeDensityTPC.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
-
-
-	png(file.path(tpcdir,paste(x, ".png", sep="")), width=1280, height=800)
-	par(mar=c(5,4,4,5)+.1)
-	plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x, "TPC"))
-	lines(mydata[[x]]$time, baseline, col="green")
-	par(new=TRUE)
-	plot(mydata[[x]]$time,charge/cellArea, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="")
-	abline(h=0,col="red")
-	abline(h=totalchargedensity,col="red")
-	axis(4,col.ticks="red",col.axis="red", col="red")
-	mtext("Collected Charge Density (C/cm2)",side=4,line=3,col="red")
-	text(tail(mydata[[x]]$time,1)*0.9,totalchargedensity*0.95,labels=paste(abs(signif(totalchargedensity,4)), "C/cm2"),cex=2,col="red")
-	graphics.off()
-#}
-})
+  print("TPC: INTEGRATING")
+  files <- list.files(path=tpcdir, pattern="^TPC.*\\.txt.table$");
+  mydata <- lapply(file.path(tpcdir,files), read.table, header=FALSE, col.names=c("time","voltage"));
+  files <- sub(".txt.table","",files);
+  names(mydata) <- files;
+  write.table(t(c("file","ChargeDensityTPC")), file=file.path(tpcdir,"outputChargeDensityTPC.txt"), append=FALSE, col.names=F, row.names=F);
+  
+  trashfornullmessages <- lapply(files, function(x) {
+    message(x);
+    len<-length(mydata[[x]]$voltage)
+    startVoltage <- mean(mydata[[x]]$voltage[1:1000])
+    endVoltage <- mean(mydata[[x]]$voltage[(len-1000):len])
+    baseline <- seq(startVoltage, endVoltage, length.out=len)
+    
+    voltage2 <- mydata[[x]]$voltage - baseline
+    current <- voltage2/50
+    charge <- cumsum(current)*(mydata[[x]]$time[2]-mydata[[x]]$time[1])
+    
+    charge=charge-charge[match(0,mydata[[x]]$time)]
+    totalcharge=quantile(charge,0.30)
+    totalchargedensity=totalcharge/cellArea
+    outputChargeDensityTPC <- t(c(x, abs(totalchargedensity)));
+    write.table(outputChargeDensityTPC, file=file.path(tpcdir,"outputChargeDensityTPC.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
+    
+    
+    png(file.path(tpcdir,paste(x, ".png", sep="")), width=1280, height=800)
+    par(mar=c(5,4,4,5)+.1)
+    plot(mydata[[x]],type="l", ylab="Voltage (V)", xlab="Time (s)", main=paste(x, "TPC"))
+    lines(mydata[[x]]$time, baseline, col="green")
+    par(new=TRUE)
+    plot(mydata[[x]]$time,charge/cellArea, type="l", col="red", xaxt="n",yaxt="n",xlab="",ylab="")
+    abline(h=0,col="red")
+    abline(h=totalchargedensity,col="red")
+    axis(4,col.ticks="red",col.axis="red", col="red")
+    mtext("Collected Charge Density (C/cm2)",side=4,line=3,col="red")
+    text(tail(mydata[[x]]$time,1)*0.9,totalchargedensity*0.95,labels=paste(abs(signif(totalchargedensity,4)), "C/cm2"),cex=2,col="red")
+    graphics.off()
+    #}
+  })
 }

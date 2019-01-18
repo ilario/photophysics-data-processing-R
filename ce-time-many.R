@@ -38,15 +38,15 @@ mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 data <- lapply(dirs, function(x) {print(x);
- subdirs <- list.dirs(path=x, recursive=F)
- subdirs.ce <- subdirs[grep("ce", subdirs, ignore.case=T)]
-ce.files <- list.files(path=subdirs.ce, pattern="^CE.*\\.txt.table$");
-ce.file <- tail(ce.files, n=1)
-print(ce.file)
-print(x)
-ce <- read.table(file.path(subdirs.ce, ce.file), header=F)
-ce.max <<- max(ce.max, max(ce$V2))
- ce})
+  subdirs <- list.dirs(path=x, recursive=F)
+  subdirs.ce <- subdirs[grep("ce", subdirs, ignore.case=T)]
+  ce.files <- list.files(path=subdirs.ce, pattern="^CE.*\\.txt.table$");
+  ce.file <- tail(ce.files, n=1)
+  print(ce.file)
+  print(x)
+  ce <- read.table(file.path(subdirs.ce, ce.file), header=F)
+  ce.max <<- max(ce.max, max(ce$V2))
+  ce})
 names(data) <- dirs
 
 ylim=c(-0.05*ce.max, ce.max)
@@ -56,8 +56,8 @@ png(paste(filename, "-CE_times.png", sep=""), width=image_width, height=image_he
 par(mar=c(5.1,5,2,2.1))
 plot(NULL, xlim=xlim, ylim=ylim, cex.main=1.5, xlab="Time (s)", ylab="Current (a.u.)", cex.lab=1.5, cex.axis=1.2, yaxt="n")
 lapply(dirs, function(x) {print(x);
- lines(data[[x]]$V1, data[[x]]$V2, col=mycolors[i+1], lwd=2)
- i <<- i+1
+  lines(data[[x]]$V1, data[[x]]$V2, col=mycolors[i+1], lwd=2)
+  i <<- i+1
 })
 legend(x="topright",inset=0.05, legend, col=mycolors, cex=1.5, lwd=4, title=title, bg="gray90"
 )

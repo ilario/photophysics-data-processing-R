@@ -15,24 +15,24 @@
 
 jrecCe <- function(cedir="ce", tpvdir="tpv")
 {
-print("Jrec-CE: CALCULATING")
-ce <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
-cefit <- read.table(file.path(cedir,"outputChargeDensityCE-fit.txt"), header=T,stringsAsFactors=F)
-tpv <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=T,stringsAsFactors=F)
-tpvfit <- read.table(file.path(tpvdir,"output-monoexp-fit.txt"), header=T,stringsAsFactors=F)
-
-directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
-
-write.table(t(c("Jrec")), file=paste("jrec-ce-",directory[1],".txt",sep=""), append=FALSE, col.names=F, row.names=F);
-ce1sun <- tail(ce$ChargeDensityCE[order(ce$Voc)], n=1)
-print(paste("CE 1sun",ce1sun))
-gamma <- cefit$gamma
-print(paste("gamma", gamma))
-tau1sun <- tail(tpv$T[order(tpv$Voc)], n=1)
-print(paste("Tau 1sun", tau1sun))
-beta <- -tpvfit$beta
-print(paste("beta", beta))
-output <- ce1sun/((1+beta/gamma)*tau1sun)
-print(paste("Jrec-CE", output))
-write.table(output, file=paste("jrec-ce-",directory[1],".txt",sep=""), append=TRUE, col.names=F, row.names=F)
+  print("Jrec-CE: CALCULATING")
+  ce <- read.table(file.path(cedir, "outputChargeDensityCE.txt"), header=T,stringsAsFactors=F)
+  cefit <- read.table(file.path(cedir,"outputChargeDensityCE-fit.txt"), header=T,stringsAsFactors=F)
+  tpv <- read.table(file.path(tpvdir,"output-monoexp.txt"), header=T,stringsAsFactors=F)
+  tpvfit <- read.table(file.path(tpvdir,"output-monoexp-fit.txt"), header=T,stringsAsFactors=F)
+  
+  directory <- tail(strsplit(getwd(), "/")[[1]], n=1)
+  
+  write.table(t(c("Jrec")), file=paste("jrec-ce-",directory[1],".txt",sep=""), append=FALSE, col.names=F, row.names=F);
+  ce1sun <- tail(ce$ChargeDensityCE[order(ce$Voc)], n=1)
+  print(paste("CE 1sun",ce1sun))
+  gamma <- cefit$gamma
+  print(paste("gamma", gamma))
+  tau1sun <- tail(tpv$T[order(tpv$Voc)], n=1)
+  print(paste("Tau 1sun", tau1sun))
+  beta <- -tpvfit$beta
+  print(paste("beta", beta))
+  output <- ce1sun/((1+beta/gamma)*tau1sun)
+  print(paste("Jrec-CE", output))
+  write.table(output, file=paste("jrec-ce-",directory[1],".txt",sep=""), append=TRUE, col.names=F, row.names=F)
 }

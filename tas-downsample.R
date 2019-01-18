@@ -13,7 +13,7 @@ logdownsampling <- function(data, s=0.001)
   }
   means=means[!is.na(means)]
   return ( 
-      values = means  
+    values = means  
   )
 }
 
@@ -34,17 +34,17 @@ deltaODmatrix=matrix(deltaOD)
 list <- list[-1]
 
 invisible(lapply(list, function(x){print(x);
-wavelength=as.numeric(read.table(x, nrows=1, header=F)$V2)
-wavelengths<<-c(wavelengths, wavelength)
-
-negative=read.table(x, skip=2, nrows=100, header=F)
-bias=mean(negative$V2)
-
-data=read.table(x, skip=244, header=F)
-deltaOD=logdownsampling(data$V2)
-deltaOD=(deltaOD-bias)/10000
-
-deltaODmatrix<<-cbind(deltaODmatrix, deltaOD)
+  wavelength=as.numeric(read.table(x, nrows=1, header=F)$V2)
+  wavelengths<<-c(wavelengths, wavelength)
+  
+  negative=read.table(x, skip=2, nrows=100, header=F)
+  bias=mean(negative$V2)
+  
+  data=read.table(x, skip=244, header=F)
+  deltaOD=logdownsampling(data$V2)
+  deltaOD=(deltaOD-bias)/10000
+  
+  deltaODmatrix<<-cbind(deltaODmatrix, deltaOD)
 }))
 
 write.table(time, "time.table", row.names=F, col.names=F)
