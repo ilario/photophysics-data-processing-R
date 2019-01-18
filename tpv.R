@@ -18,11 +18,11 @@ tpv <- function(tpvdir="tpv")
 print("TPV: FITTING")
 library(robustbase)
 library(sfsmisc)
+library(RColorBrewer)
 
-
-doBiexpFit=T
-robust=F
-doPlots=F
+doBiexpFit=F
+robust=T
+doPlots=T
 logy=F
 logx=F
 residuals=F
@@ -33,7 +33,10 @@ noiseTime=5e-8
 #debugDeltaV info will appear in biexp logx graphics
 debugDeltaV=F
 
-if(!exists("image_width") & doPlots){stop("image_width and image_height variables must be set")}
+if(doPlots){
+  mycolors=brewer.pal(8,"Set2")
+  if(!exists("output_pdf")){stop("images width and height variables must be set, via limits_for_graphics.R")}
+}
 
 options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
 
@@ -47,11 +50,15 @@ write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaV.txt
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVloess.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVfirstPoints.txt"), append=FALSE, col.names=F, row.names=F);
 write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
-write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-robustmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
+if(robust){
+	write.table(t(c("file","Voc","A","T","T.error")), file=file.path(tpvdir,"output-robustmonoexp.txt"), append=FALSE, col.names=F, row.names=F);
+}
 if(doBiexpFit){
   write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-biexp.txt"), append=FALSE, col.names=F, row.names=F);
-  write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-robustbiexp.txt"), append=FALSE, col.names=F, row.names=F);
   write.table(t(c("file","Voc","deltaV")), file=file.path(tpvdir,"outputDeltaVbiexp.txt"), append=FALSE, col.names=F, row.names=F);
+  if(robust){
+	  write.table(t(c("file","Voc","A1","T1","T1.error","A2","T2","T2.error")), file=file.path(tpvdir,"output-robustbiexp.txt"), append=FALSE, col.names=F, row.names=F);
+  }
 }
 
 trashfornullmessages <- lapply(files, function(x) {
@@ -245,15 +252,18 @@ tryCatch({
 		
 if(doPlots){
 		print("Monoexp/Plot/Linear: Performing");
-		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fit, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
+  dev.monoexp = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL)
+  plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
 }
 if(logy & doPlots){
 		print("Monoexp/Plot/Log: Performing");
-		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fit, in.loess_fit=lo2, in.yshift=-A, in.suffix="monoexp-log", in.log="y", in.xlim=c(0, C*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
+    dev.monoexp.logy = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.yshift=-A, in.suffix="monoexp-log", in.log="y", in.xlim=c(0, C*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
+		plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.yshift=-A, in.dev=dev.monoexp.logy)
 }
 if(logx & doPlots){
 		print("Monoexp/Plot/LogX: Performing");
-		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fit, in.loess_fit=lo2, in.suffix="monoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
+    dev.monoexp.logx = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL)
+		plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.dev=dev.monoexp.logx)
 }
 if(residuals & doPlots){
 		print("Monoexp/Plot/Residuals: Performing");
@@ -294,15 +304,19 @@ if(robust){
 
 		if(doPlots){
 		  print("RobustMonoexp/Plot/Linear: Performing");
-		  plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
+		  #plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL)
+		  plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.color=mycolors[2], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp)
     }
 if(logy & doPlots){
 		print("RobustMonoexp/Plot/Log: Performing");
-		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.yshift=-AR, in.suffix="robustmonoexp-log", in.log="y", in.xlim=c(0, CR*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
-}
+		#plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.yshift=-AR, in.suffix="robustmonoexp-log", in.log="y", in.xlim=c(0, CR*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
+  plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.yshift=-AR, in.dev=dev.monoexp.logy)
+  
+  }
 if(logx & doPlots){
 		print("RobustMonoexp/Plot/LogX: Performing");
-		plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.image_width=image_width, in.image_height=image_height)
+  #plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL)
+  plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.dev=dev.monoexp.logx)
 }
 if(residuals & doPlots){
 		print("RobustMonoexp/Plot/Residuals: Performing");
@@ -410,33 +424,45 @@ if(residuals & doPlots){
 		temp <- temp[-1,]
 		}
 		}
+	}
+		if(doPlots){
+graphics.off(); # close all the graphical devices
+#reset the plotting margins
+#par(op)
+}
+		})
 
-
-
-
-	}})
 }
 
-plot_monoexp <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.data.fit, in.data.loess, in.monoexp_fit, in.loess_fit, in.yshift=0, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.image_width=800, in.image_height=640){
-		png(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".png", sep="")), width = in.image_width, height = in.image_height);
-		op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
-		plot(in.data.fit$time, in.data.fit$voltage + in.yshift, xlab = "", ylab = "", pch=".", cex.lab=2, cex.axis=2, xaxt="n", yaxt="n", xlim=in.xlim, ylim=in.ylim, log=in.log);
-		eaxis(side=1, cex.axis=1.5)
-		eaxis(side=2, cex.axis=1.5)
-		#line is for introducing more space between label and axis
-		title(ylab = "Voltage (V)", cex.lab = 2, line = 5)
-		title(xlab = "Time (s)", cex.lab = 2, line = 3.5)
-		points(in.data.nonfit$time, in.data.nonfit$voltage + in.yshift, pch=".", col="yellow");
-		lines(in.data.loess$time, predict(in.loess_fit) + in.yshift, col='black', lwd=3);
-		lines(in.data.fit$time, predict(in.monoexp_fit) + in.yshift, col="red", lwd=2);
+
+		
+plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.data.fit, in.data.loess, in.loess_fit, in.yshift=0, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.output_pdf=F){
+  if(output_pdf){
+    pdf(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".pdf", sep="")), width = image_bigpdf_width, height = image_bigpdf_height, pointsize=7);
+  }else{
+    png(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".png", sep="")), width = image_width, height = image_height);
+  }
+  op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
+  plot(in.data.fit$time, in.data.fit$voltage + in.yshift, xlab = "", ylab = "", pch=".", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", xlim=in.xlim, ylim=in.ylim, log=in.log, col="gray30", panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")));
+  eaxis(side=1, cex.axis=1.4)
+  eaxis(side=2, cex.axis=1.4)
+  #line is for introducing more space between label and axis
+  title(ylab = "Voltage (V)", cex.lab = 1.7, line = 5)
+  title(xlab = "Time (s)", cex.lab = 1.7, line = 3.5)
+  points(in.data.nonfit$time, in.data.nonfit$voltage + in.yshift, pch=".", col="yellow");
+  lines(in.data.loess$time, predict(in.loess_fit) + in.yshift, col='black', lwd=2);
+  return(dev.cur())
+}
+
+plotMonoexpAddline <- function(in.data.nonfit, in.data.fit, in.monoexp_fit, in.yshift=0, in.color="red", in.mtext="", in.mtextline=-5, in.dev){
+  dev.set(in.dev)
+ # print(paste("Plotting on", dev.cur()))
+		lines(in.data.fit$time, predict(in.monoexp_fit) + in.yshift, col=in.color, lwd=2);
 		if(is.na(coef(in.monoexp_fit)["A"])){
 			intercept=coef(in.monoexp_fit)[".lin1"]
 		} else {
 			intercept=coef(in.monoexp_fit)["A"]
 		}
-		segments(head(in.data.nonfit$time, 1), intercept + in.yshift, 0, intercept + in.yshift, col="red", lwd=2)
-		mtext(paste("T =", signif(coef(in.monoexp_fit)["C"],digits=4), "s"), side=3, line=-5, adj=NA, col="red", cex=2);
-		graphics.off();
-		#reset the plotting margins
-		par(op)
+		segments(head(in.data.nonfit$time, 1), intercept + in.yshift, 0, intercept + in.yshift, col=in.color, lwd=2)
+		mtext(paste(in.mtext, "T =", signif(coef(in.monoexp_fit)["C"],digits=4), "s"), side=3, line=in.mtextline, adj=0.95, col=in.color, cex=1.7);
 }
