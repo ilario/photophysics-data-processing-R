@@ -19,10 +19,12 @@ tpv <- function(tpvdir="tpv")
   library(robustbase)
   library(sfsmisc)
   library(RColorBrewer)
-  
+  library(gplots)
+
   doBiexpFit=F
   robust=T
   doPlots=T
+  plotHist2d=T
   logy=F
   logx=F
   residuals=F
@@ -34,7 +36,14 @@ tpv <- function(tpvdir="tpv")
   debugDeltaV=F
   
   if(doPlots){
-    mycolors=brewer.pal(8,"Set2")
+    mycolors=brewer.pal(8,"Dark2")
+    mycolors2_temp=brewer.pal(8,"YlGnBu")
+    mycolors2 = mycolors2_temp
+    mycolors2[1] <- "#ffffff"
+    mycolors2[2:4] <- mycolors2_temp[3:5]
+    mycolors2[6:8] <- mycolors2_temp[6]
+    mycolors2[9:12] <- mycolors2_temp[7]
+    mycolors2[13:16] <- mycolors2_temp[8]
     if(!exists("output_pdf")){stop("images width and height variables must be set, via limits_for_graphics.R")}
   }
   
@@ -252,17 +261,19 @@ tpv <- function(tpvdir="tpv")
         
         if(doPlots){
           print("Monoexp/Plot/Linear: Performing");
-          dev.monoexp = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL)
+	  xlim_monoexp = c(head(temp_nonfit$time,1), tail(temp$time,1))
+	  ylim_monoexp = c(min(temp$voltage), max(temp$voltage))
+          dev.monoexp = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=xlim_monoexp, in.ylim=ylim_monoexp, in.color=mycolors2, in.plotHist2d=plotHist2d)
           plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
         }
         if(logy & doPlots){
           print("Monoexp/Plot/Log: Performing");
-          dev.monoexp.logy = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.yshift=-A, in.suffix="monoexp-log", in.log="y", in.xlim=c(0, C*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
+          dev.monoexp.logy = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.yshift=-A, in.suffix="monoexp-log", in.log="y", in.xlim=c(0, C*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height, in.plotHist2d=F)
           plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.yshift=-A, in.dev=dev.monoexp.logy)
         }
         if(logx & doPlots){
           print("Monoexp/Plot/LogX: Performing");
-          dev.monoexp.logx = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL)
+          dev.monoexp.logx = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.plotHist2d=F)
           plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.dev=dev.monoexp.logx)
         }
         if(residuals & doPlots){
@@ -436,21 +447,30 @@ tpv <- function(tpvdir="tpv")
 
 
 
-plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.data.fit, in.data.loess, in.loess_fit, in.yshift=0, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.output_pdf=F){
+plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.data.fit, in.data.loess, in.loess_fit, in.yshift=0, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.output_pdf=F, in.color="black", in.plotHist2d=F){
   if(output_pdf){
     pdf(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".pdf", sep="")), width = image_bigpdf_width, height = image_bigpdf_height, pointsize=7);
   }else{
     png(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".png", sep="")), width = image_width, height = image_height);
   }
   op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
-  plot(in.data.fit$time, in.data.fit$voltage + in.yshift, xlab = "", ylab = "", pch=".", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", xlim=in.xlim, ylim=in.ylim, log=in.log, col="gray30", panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")));
+  if(in.plotHist2d){
+    df = data.frame(c(in.data.nonfit$time, in.data.fit$time), c(in.data.nonfit$voltage, in.data.fit$voltage) + in.yshift)
+    names(df) = c("time", "voltage")
+    print(dim(df))
+    df = subset(df, voltage > in.ylim[1] & voltage < in.ylim[2])
+    print(dim(df))
+    h2 = hist2d(df, col=in.color, xlab="", ylab="", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")))#xlim=in.xlim, ylim=in.ylim,
+  }else{
+    plot(in.data.fit$time, in.data.fit$voltage + in.yshift, xlab = "", ylab = "", pch=".", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", xlim=in.xlim, ylim=in.ylim, log=in.log, col="gray30", panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")));
+    points(in.data.nonfit$time, in.data.nonfit$voltage + in.yshift, pch=".", col="yellow");
+    lines(in.data.loess$time, predict(in.loess_fit) + in.yshift, col='black', lwd=2);
+  }
   eaxis(side=1, cex.axis=1.4)
   eaxis(side=2, cex.axis=1.4)
   #line is for introducing more space between label and axis
   title(ylab = "Voltage (V)", cex.lab = 1.7, line = 5)
   title(xlab = "Time (s)", cex.lab = 1.7, line = 3.5)
-  points(in.data.nonfit$time, in.data.nonfit$voltage + in.yshift, pch=".", col="yellow");
-  lines(in.data.loess$time, predict(in.loess_fit) + in.yshift, col='black', lwd=2);
   return(dev.cur())
 }
 
