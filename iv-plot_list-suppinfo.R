@@ -17,7 +17,9 @@ library(RColorBrewer)
 library(sfsmisc)
 library(Hmisc)
 
-
+if(!exists("name")){
+  name=basename(getwd())
+}
 #name=""
 #title=""
 filename=gsub(",","",gsub(":","",name))
@@ -38,7 +40,7 @@ forwarddarklist=fileslist[grepl("forward", fileslist) & grepl("dark", fileslist,
 reversedarklist=fileslist[!grepl("forward", fileslist) & grepl("dark", fileslist, ignore.case=T)]
 cellslist=sub("-forward|-reverse","",sub(".txt","",fileslist))
 cellslist=cellslist[!duplicated(cellslist)]
-legendlist=sub("_.*","",sub("^0","",cellslist))
+legendlist=gsub("_"," ",sub("_((?!_).)+$","",cellslist, perl=TRUE))
 mycolors=gsub(".*-col_","",cellslist[grepl("-col_", cellslist)])
 
 if(!length(mycolors)){
