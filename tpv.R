@@ -36,15 +36,13 @@ tpv <- function(tpvdir="tpv")
   debugDeltaV=F
   
   if(doPlots){
-    mycolors=brewer.pal(8,"Dark2")
-    mycolors2_temp=brewer.pal(8,"YlGnBu")
-    mycolors2 = mycolors2_temp
-    mycolors2[1] <- "#ffffff"
-    mycolors2[2:4] <- mycolors2_temp[3:5]
-    mycolors2[6:8] <- mycolors2_temp[6]
-    mycolors2[9:12] <- mycolors2_temp[7]
-    mycolors2[13:16] <- mycolors2_temp[8]
     if(!exists("output_pdf")){stop("images width and height variables must be set, via limits_for_graphics.R")}
+    mycolors=brewer.pal(8,"Dark2")
+    mycolors=mycolors[c(2,4,6,7)] # remove green and blue cause they're not visible over YlGnBu
+    mycolors2_temp=brewer.pal(8,"YlGnBu")
+    mycolors2_get = colorRampPalette(mycolors2_temp[3:8])
+    #mycolors2 = c("#ffffff", mycolors2_get(15))# white background
+    mycolors2 = mycolors2_get(16)
   }
   
   options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
@@ -264,7 +262,7 @@ tpv <- function(tpvdir="tpv")
 	  xlim_monoexp = c(head(temp_nonfit$time,1), tail(temp$time,1))
 	  ylim_monoexp = c(min(temp$voltage), max(temp$voltage))
           dev.monoexp = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=xlim_monoexp, in.ylim=ylim_monoexp, in.color=mycolors2, in.plotHist2d=plotHist2d)
-          plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
+          #plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
         }
         if(logy & doPlots){
           print("Monoexp/Plot/Log: Performing");
@@ -455,12 +453,11 @@ plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.
   }
   op <- par(mar = c(5,8,4,2) + 0.1) ## default is c(5,4,4,2) + 0.1
   if(in.plotHist2d){
+    steplength = function(x){sign(length(x))*(length(x)+10)}
     df = data.frame(c(in.data.nonfit$time, in.data.fit$time), c(in.data.nonfit$voltage, in.data.fit$voltage) + in.yshift)
     names(df) = c("time", "voltage")
-    print(dim(df))
     df = subset(df, voltage > in.ylim[1] & voltage < in.ylim[2])
-    print(dim(df))
-    h2 = hist2d(df, col=in.color, xlab="", ylab="", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")))#xlim=in.xlim, ylim=in.ylim,
+    h2 = hist2d(df, col=in.color, xlab="", ylab="", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", FUN=steplength, panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")))#xlim=in.xlim, ylim=in.ylim,
   }else{
     plot(in.data.fit$time, in.data.fit$voltage + in.yshift, xlab = "", ylab = "", pch=".", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", xlim=in.xlim, ylim=in.ylim, log=in.log, col="gray30", panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")));
     points(in.data.nonfit$time, in.data.nonfit$voltage + in.yshift, pch=".", col="yellow");
@@ -477,7 +474,9 @@ plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.
 plotMonoexpAddline <- function(in.data.nonfit, in.data.fit, in.monoexp_fit, in.yshift=0, in.color="red", in.mtext="", in.mtextline=-5, in.dev){
   dev.set(in.dev)
   # print(paste("Plotting on", dev.cur()))
-  lines(in.data.fit$time, predict(in.monoexp_fit) + in.yshift, col=in.color, lwd=2);
+  xarray = seq(head(in.data.fit$time,1), tail(in.data.fit$time,1), length.out=100)
+  ydata = predict(in.monoexp_fit, newdata = data.frame(time = xarray))
+  lines(xarray, ydata + in.yshift, col=in.color, lwd=2);
   if(is.na(coef(in.monoexp_fit)["A"])){
     intercept=coef(in.monoexp_fit)[".lin1"]
   } else {
