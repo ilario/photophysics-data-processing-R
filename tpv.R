@@ -262,7 +262,7 @@ tpv <- function(tpvdir="tpv")
 	  xlim_monoexp = c(head(temp_nonfit$time,1), tail(temp$time,1))
 	  ylim_monoexp = c(min(temp$voltage), max(temp$voltage))
           dev.monoexp = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=xlim_monoexp, in.ylim=ylim_monoexp, in.color=mycolors2, in.plotHist2d=plotHist2d)
-          #plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
+          plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
         }
         if(logy & doPlots){
           print("Monoexp/Plot/Log: Performing");
