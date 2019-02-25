@@ -1,13 +1,13 @@
 logdownsampling <- function(data, s=0.001)
 {
   i <- 1
-  t <- 0
+  t <- 1
   means <- c()
   length <- length(data)
   while(i < length)
   {
-    by <- floor(10^(t*s))-1
-    means <- c(means, mean(data[i:i+by]))
+    by <- floor(10^(i*s))-1
+    means[t] <- mean(data[i:(i+by)])
     i <- i+by+1
     t <- t+1
   }
