@@ -3,6 +3,7 @@ ceIntegrateExp <- function(cedir="ce")
   library(sfsmisc)
   library(robustbase)
   library(minpack.lm)
+  library(RColorBrewer)
   
   rm("maximumDecayTime")
   
@@ -13,6 +14,26 @@ ceIntegrateExp <- function(cedir="ce")
   minimumDeltaV = 1e-4
   
   options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
+  mycolors=brewer.pal(8,"Dark2")
+  
+  logdownsampling <- function(data, s=0.0003)
+  {
+    i <- 1
+    t <- 1
+    means <- c()
+    length <- length(data)
+    while(i < length)
+    {
+      by <- floor(10^(i*s))-1
+      means[t] <- mean(data[i:(i+by)])
+      i <- i+by+1
+      t <- t+1
+    }
+    means=means[!is.na(means)]
+    return ( 
+      values = means  
+    )
+  }
   
   rm("expfitCE1")
   rm("expfitCE2")
@@ -148,44 +169,55 @@ ceIntegrateExp <- function(cedir="ce")
       totalchargeIntegratedExp = voltageIntegralExp(Inf)/50
       totalchargedensityIntegratedExp=totalchargeIntegratedExp/cellArea
       
-      
       b<-strsplit(x, "_")
       c<-unlist(b)
       c2 <- c[grepl("mV",c)]
       d<-as.numeric(sub("mV.*", "", c2))
       
-      png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
-      op <- par(mar = c(5,7,4,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
+      if(output_pdf){
+        pdf(file.path(cedir,paste(x, ".pdf", sep="")), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+      }else{
+        png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
+      }
+      op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
       
-      xlim=c(max(timeStartMinimum, timeStart), tail(mydata[[x]]$time,1))
-      plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.5, log="x")#, yaxt="n"
-      title(ylab="Voltage (V)", cex.lab=2, line=4)
-      title(xlab="Time (s)", cex.lab=2, line=3.5)
-      mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=2, side=4,line=7,col="red")
-      eaxis(side=1, cex.axis=1.5)
-      #eaxis(side=2, cex.axis=1.5)
+      xlim=c(1e-8, tail(mydata[[x]]$time,1))
       
-      ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(charge, chargeIntegratedExp)/cellArea)
+      timeDownsampled = logdownsampling(mydata[[x]]$time)
+      #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.4, log="x", yaxt="n", panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
+      plot(timeDownsampled,logdownsampling(mydata[[x]]$voltage),type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.4, log="x", yaxt="n", panel.first=c(lines(timeDownsampled, logdownsampling(baseline), col="gray70")))
       
-      lines(mydata[[x]]$time, baseline, col="blue")
+      title(ylab="Voltage (V)", cex.lab=1.7, line=6)
+      title(xlab="Time (s)", cex.lab=1.7, line=3.5)
+      mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])
+      eaxis(side=1, cex.axis=1.4)
+      eaxis(side=2, cex.axis=1.4)
+      
+      #ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(charge, chargeIntegratedExp)/cellArea)
+      legendtext = c("Signal")
+      
+      timeDecayDownsampled = logdownsampling(timeDecay)
       if(exists("expfitCE3")){# && expfitCE3$status == "converged"){
-        lines(timeDecay, predict(expfitCE3, newdata=data.frame(timeDecay=timeDecay)), col="orange")
-        mtext(paste("Tau1 =", signif(coefD1,3),"s"), side=3, line=-6, cex=1.5, adj=0.8)
-        mtext(paste("Tau2 =", signif(coefD2,3),"s"), side=3, line=-8, cex=1.5, adj=0.8)
+        lines(timeDecayDownsampled, predict(expfitCE3, newdata=data.frame(timeDecay=timeDecayDownsampled)), col=mycolors[1])
+        mtext(paste("Tau1 =", signif(coefD1,3),"s"), side=3, line=-10, cex=1.7, adj=0.8)
+        mtext(paste("Tau2 =", signif(coefD2,3),"s"), side=3, line=-12, cex=1.7, adj=0.8)
+        legendtext = c(legendtext, "Bi-Exp fitting")
       }else if (exists("expfitCE2")){
-        lines(timeDecay, predict(expfitCE2, newdata=data.frame(timeDecay=timeDecay)), col="green")
-        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-6, cex=1.5, adj=0.8)
+        lines(timeDecayDownsampled, predict(expfitCE2, newdata=data.frame(timeDecay=timeDecayDownsampled)), col=mycolors[1])
+        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-10, cex=1.7, adj=0.8)
+        legendtext = c(legendtext, "Exp fitting")
       } else {
-        lines(timeDecay, predict(expfitCE1, newdata=data.frame(timeDecay=timeDecay)), col="red")
-        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-6, cex=1.5, adj=0.8)
+        lines(timeDecayDownsampled, predict(expfitCE1, newdata=data.frame(timeDecay=timeDecayDownsampled)), col=mycolors[1])
+        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-10, cex=1.7, adj=0.8)
+        legendtext = c(legendtext, "Exp fitting")
       }	
       
       par(new=TRUE)
-      plot(timeDecay,chargeIntegratedExp/cellArea, type="l", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, col="red", log="x")
+      plot(timeDecayDownsampled,logdownsampling(chargeIntegratedExp)/cellArea, type="l", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim,  col=mycolors[3], log="x")#ylim=ylim_charge,
       #abline(h=0,col="red")
-      eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
+      eaxis(4,col.ticks=mycolors[3],col.axis=mycolors[3], col=mycolors[3], cex.axis=1.4)
       #text(xlim[2]*0.5,ylim_charge[2]*0.9,labels=bquote(.(signif(totalchargedensityIntegratedExp,3))~"C/cm"^"2"),cex=2,col="red")
-      mtext(bquote(.(signif(totalchargedensityIntegratedExp,3))~"C/cm"^"2"), side=3, line=-4, cex=1.5, adj=0.8)
+      mtext(bquote(.(signif(totalchargedensityIntegratedExp,3))~"C/cm"^"2"), side=3, line=-8, cex=1.7, adj=0.95)
       
       
       #text(xlim[2]*0.75,ylim_charge[2]*0.8,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="orange")
@@ -194,6 +226,9 @@ ceIntegrateExp <- function(cedir="ce")
       #lines(mydata[[x]]$time,chargeNoBaseline/cellArea, type="l", col="orange")
       #lines(mydata[[x]]$time, charge/cellArea, type="l")
       
+      legendtext = c(legendtext,"Integrated charge")
+      legend(x="topleft",inset=0,legendtext,col=c("black",mycolors[c(1,3)]), cex=1.5, lwd=4, bty="n")
+
       graphics.off()
       #reset the plotting margins
       par(op)

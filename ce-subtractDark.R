@@ -3,12 +3,33 @@ ceSubtractDark <- function(cedir="ce")
   library(sfsmisc)
   library(robustbase)
   library(minpack.lm)
+  library(RColorBrewer)
   
   timeStartMinimum = 3e-8
   noiseEndTime = 4e-7
   
   rm("startList")
   options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
+  mycolors=brewer.pal(8,"Dark2")
+  
+  logdownsampling <- function(data, s=0.0003)
+  {
+    i <- 1
+    t <- 1
+    means <- c()
+    length <- length(data)
+    while(i < length)
+    {
+      by <- floor(10^(i*s))-1
+      means[t] <- mean(data[i:(i+by)])
+      i <- i+by+1
+      t <- t+1
+    }
+    means=means[!is.na(means)]
+    return ( 
+      values = means  
+    )
+  }
   
   print("CE: INTEGRATING")
   files <- list.files(path=cedir, pattern="^CE.*\\.txt.table$");
@@ -220,33 +241,45 @@ ceSubtractDark <- function(cedir="ce")
     outputChargeDensityCE <- t(c(d, totalchargedensityMinusNoise));
     write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
     
-    png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
-    op <- par(mar = c(5,7,4,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
+    if(output_pdf){
+      pdf(file.path(cedir,paste(x, ".pdf", sep="")), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+    }else{
+      png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
+    }
+    op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
     
-    xlim=c(1e-9,tail(mydata[[x]]$time,1))
-    plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x")
-    title(ylab="Voltage (V)", cex.lab=2, line=4)
-    title(xlab="Time (s)", cex.lab=2, line=3.5)
-    mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=2, side=4,line=7,col="red")
-    eaxis(side=1, cex.axis=1.5)
-    eaxis(side=2, cex.axis=1.5)
+    xlim=c(1e-8,tail(mydata[[x]]$time,1))
     
-    lines(mydata[[x]]$time, baseline, col="blue")
-    lines(timeDecay, voltageMinusNoise, col="green")
-    lines(timeDecay, noiseProfile2, col="red")
-    lines(darkCEtimeDecay, darkCEvoltageDecay, col="orange")
+    #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
+    timeDownsampled = logdownsampling(mydata[[x]]$time)
+    plot(timeDownsampled,logdownsampling(mydata[[x]]$voltage),type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
+    title(ylab="Voltage (V)", cex.lab=1.7, line=6)
+    title(xlab="Time (s)", cex.lab=1.7, line=3.5)
+    mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])#"red")
+    eaxis(side=1, cex.axis=1.4)
+    eaxis(side=2, cex.axis=1.4)
     
-    ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(chargeMinusNoise, charge)/cellArea)
+    timeDecayDownsampled = logdownsampling(timeDecay)
+    lines(timeDecayDownsampled, logdownsampling(voltageMinusNoise), col=mycolors[4])#"green")
+    #lines(timeDecay, noiseProfile2, col=mycolors[4])#"red")
+    lines(timeDecayDownsampled, logdownsampling(noiseProfile), col=mycolors[2])#"red")
+    lines(logdownsampling(darkCEtimeDecay), logdownsampling(darkCEvoltageDecay), col=mycolors[1])#"orange")
+    
+    #ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(chargeMinusNoise, charge)/cellArea)
     par(new=TRUE)
-    plot(timeDecay,chargeMinusNoise/cellArea, type="l", col="green", xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
-    abline(h=0,col="red")
-    eaxis(4,col.ticks="red",col.axis="red", col="red", cex.axis=1.5)
-    text(xlim[2]*0.75,ylim_charge[2]*0.9,labels=bquote(.(signif(totalchargedensityMinusNoise,3))~"C/cm"^"2"),cex=2,col="green")
-    text(xlim[2]*0.75,ylim_charge[2]*0.8,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col="orange")
-    text(xlim[2]*0.75,ylim_charge[2]*0.7,labels=bquote(.(signif(totalchargedensityNoBaseline,3))~"C/cm"^"2"),cex=2,col="red")
+    plot(timeDecayDownsampled,logdownsampling(chargeMinusNoise)/cellArea, type="l", col=mycolors[3], xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, log="x")#ylim=ylim_charge, 
+    #abline(h=0,col=mycolors[3])
+    eaxis(4,col.ticks=mycolors[3],col.axis=mycolors[3], col=mycolors[3], cex.axis=1.4)
+    #text(xlim[2]*0.75,totalchargedensityMinusNoise*0.9,labels=bquote(.(signif(totalchargedensityMinusNoise,3))~"C/cm"^"2"),cex=1.7, adj=1)#"green")ylim_charge[2]*0.9
+    mtext(bquote(.(signif(totalchargedensityMinusNoise,3))~"C/cm"^"2"), side=3, line=-10, cex=1.7, adj=0.95)
+    #text(xlim[2]*0.75,ylim_charge[2]*0.8,labels=bquote(.(signif(totalchargedensity,3))~"C/cm"^"2"),cex=2,col=mycolors[5])#"orange")
+    #text(xlim[2]*0.75,ylim_charge[2]*0.7,labels=bquote(.(signif(totalchargedensityNoBaseline,3))~"C/cm"^"2"),cex=2,col=mycolors[4])#"red")
     
-    lines(mydata[[x]]$time,chargeNoBaseline/cellArea, type="l", col="orange")
-    lines(mydata[[x]]$time, charge/cellArea, type="l", col="red")
+    #lines(mydata[[x]]$time,chargeNoBaseline/cellArea, type="l", col=mycolors[5])#"orange")
+    #lines(mydata[[x]]$time, charge/cellArea, type="l", col=mycolors[3])#"red")
+    
+    legendtext = c("Signal","Dark noise profile","Transformed noise","Noise-subtracted signal","Integrated charge")
+    legend(x="topleft",inset=0,legendtext,col=c("black",mycolors[c(1,2,4,3)]), cex=1.5, lwd=4, bty="n")
     
     graphics.off()
     #reset the plotting margins
