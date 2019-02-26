@@ -248,7 +248,7 @@ ceSubtractDark <- function(cedir="ce")
     }
     op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
     
-    xlim=c(1e-8,tail(mydata[[x]]$time,1))
+    xlim=c(1e-7,tail(mydata[[x]]$time,1))
     
     #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
     timeDownsampled = logdownsampling(mydata[[x]]$time)
@@ -257,7 +257,8 @@ ceSubtractDark <- function(cedir="ce")
     title(xlab="Time (s)", cex.lab=1.7, line=3.5)
     mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])#"red")
     eaxis(side=1, cex.axis=1.4)
-    eaxis(side=2, cex.axis=1.4)
+    yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17
+    eaxis(side=2, cex.axis=1.4, labels = pretty10exp(yaxt))
     
     timeDecayDownsampled = logdownsampling(timeDecay)
     lines(timeDecayDownsampled, logdownsampling(voltageMinusNoise), col=mycolors[4])#"green")
@@ -278,8 +279,10 @@ ceSubtractDark <- function(cedir="ce")
     #lines(mydata[[x]]$time,chargeNoBaseline/cellArea, type="l", col=mycolors[5])#"orange")
     #lines(mydata[[x]]$time, charge/cellArea, type="l", col=mycolors[3])#"red")
     
-    legendtext = c("Signal","Dark noise profile","Transformed noise","Noise-subtracted signal","Integrated charge")
-    legend(x="topleft",inset=0,legendtext,col=c("black",mycolors[c(1,2,4,3)]), cex=1.5, lwd=4, bty="n")
+    #legendtext = c("Signal","Dark noise profile","Transformed noise","Noise-subtracted signal","Integrated charge")
+    #legend(x="bottomright",inset=0,legendtext,col=c("black",mycolors[c(1,2,4,3)]), cex=1.5, lwd=4, bty="n")
+    legendtext = c("Dark noise profile","Transformed noise","Noise-subtracted signal")
+    legend(x="bottomright",inset=0,legendtext,col=mycolors[c(1,2,4)], cex=1.5, lwd=4, bty="n")
     
     graphics.off()
     #reset the plotting margins

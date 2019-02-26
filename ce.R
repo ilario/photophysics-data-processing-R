@@ -71,7 +71,7 @@ ce <- function(cedir="ce")
     }
     op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
     
-    xlim=c(1e-8,tail(mydata[[x]]$time,1))
+    xlim=c(1e-7,tail(mydata[[x]]$time,1))
     #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
     timeDownsampled = logdownsampling(mydata[[x]]$time)
     plot(timeDownsampled,logdownsampling(mydata[[x]]$voltage),type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
@@ -80,7 +80,8 @@ ce <- function(cedir="ce")
     title(xlab="Time (s)", cex.lab=1.7, line=3.5)
     mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])#"red")
     eaxis(side=1, cex.axis=1.4)
-    eaxis(side=2, cex.axis=1.4)
+    yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17
+    eaxis(side=2, cex.axis=1.4, labels = pretty10exp(yaxt))
     
     #lines(mydata[[x]]$time, voltagezero - darkCEvoltage, col=mycolors[1])#"blue")
     
@@ -96,8 +97,8 @@ ce <- function(cedir="ce")
     #par(new=TRUE)
     #plot(mydata[[x]]$time,chargezero/cellArea, type="l", col=mycolors[4], xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim, ylim=ylim_charge, log="x")
     
-    legendtext = c("Signal","Integrated charge")
-    legend(x="topleft",inset=0,legendtext,col=c("black", mycolors[3]), cex=1.5, lwd=4, bty="n")
+    #legendtext = c("Signal","Integrated charge")
+    #legend(x="bottomright",inset=0,legendtext,col=c("black", mycolors[3]), cex=1.5, lwd=4, bty="n")
     
     graphics.off()
     #reset the plotting margins

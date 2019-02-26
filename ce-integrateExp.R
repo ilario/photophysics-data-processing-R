@@ -181,7 +181,7 @@ ceIntegrateExp <- function(cedir="ce")
       }
       op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
       
-      xlim=c(1e-8, tail(mydata[[x]]$time,1))
+      xlim=c(1e-7, tail(mydata[[x]]$time,1))
       
       timeDownsampled = logdownsampling(mydata[[x]]$time)
       #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.4, log="x", yaxt="n", panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
@@ -191,25 +191,25 @@ ceIntegrateExp <- function(cedir="ce")
       title(xlab="Time (s)", cex.lab=1.7, line=3.5)
       mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])
       eaxis(side=1, cex.axis=1.4)
-      eaxis(side=2, cex.axis=1.4)
+      yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17
+      eaxis(side=2, cex.axis=1.4, labels = pretty10exp(yaxt))
       
       #ylim_charge=c(min(chargeNoBaseline, charge)/cellArea, max(charge, chargeIntegratedExp)/cellArea)
-      legendtext = c("Signal")
       
       timeDecayDownsampled = logdownsampling(timeDecay)
       if(exists("expfitCE3")){# && expfitCE3$status == "converged"){
         lines(timeDecayDownsampled, predict(expfitCE3, newdata=data.frame(timeDecay=timeDecayDownsampled)), col=mycolors[1])
-        mtext(paste("Tau1 =", signif(coefD1,3),"s"), side=3, line=-10, cex=1.7, adj=0.8)
-        mtext(paste("Tau2 =", signif(coefD2,3),"s"), side=3, line=-12, cex=1.7, adj=0.8)
-        legendtext = c(legendtext, "Bi-Exp fitting")
+        mtext(paste("Tau1 =", signif(coefD1,3),"s"), side=3, line=-10, cex=1.7, adj=0.95)
+        mtext(paste("Tau2 =", signif(coefD2,3),"s"), side=3, line=-12, cex=1.7, adj=0.95)
+        legendtext_fit = "Bi-Exp fitting"
       }else if (exists("expfitCE2")){
         lines(timeDecayDownsampled, predict(expfitCE2, newdata=data.frame(timeDecay=timeDecayDownsampled)), col=mycolors[1])
-        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-10, cex=1.7, adj=0.8)
-        legendtext = c(legendtext, "Exp fitting")
+        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-10, cex=1.7, adj=0.95)
+        legendtext_fit = "Exp fitting"
       } else {
         lines(timeDecayDownsampled, predict(expfitCE1, newdata=data.frame(timeDecay=timeDecayDownsampled)), col=mycolors[1])
-        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-10, cex=1.7, adj=0.8)
-        legendtext = c(legendtext, "Exp fitting")
+        mtext(paste("Tau =", signif(coefD,3),"s"), side=3, line=-10, cex=1.7, adj=0.95)
+        legendtext_fit = "Exp fitting"
       }	
       
       par(new=TRUE)
@@ -226,8 +226,10 @@ ceIntegrateExp <- function(cedir="ce")
       #lines(mydata[[x]]$time,chargeNoBaseline/cellArea, type="l", col="orange")
       #lines(mydata[[x]]$time, charge/cellArea, type="l")
       
-      legendtext = c(legendtext,"Integrated charge")
-      legend(x="topleft",inset=0,legendtext,col=c("black",mycolors[c(1,3)]), cex=1.5, lwd=4, bty="n")
+      #legendtext = c("Signal", legendtext_fit,"Integrated charge")
+      #legend(x="bottomright",inset=0,legendtext,col=c("black",mycolors[c(1,3)]), cex=1.5, lwd=4, bty="n")
+      legendtext = legendtext_fit
+      legend(x="bottomright",inset=0,legendtext,col=mycolors[1], cex=1.5, lwd=4, bty="n")
 
       graphics.off()
       #reset the plotting margins
