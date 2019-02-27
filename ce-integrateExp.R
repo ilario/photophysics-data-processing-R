@@ -181,7 +181,7 @@ ceIntegrateExp <- function(cedir="ce")
       }
       op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
       
-      xlim=c(1e-7, tail(mydata[[x]]$time,1))
+      xlim=c(5e-8, tail(mydata[[x]]$time,1))
       
       timeDownsampled = logdownsampling(mydata[[x]]$time)
       #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.4, log="x", yaxt="n", panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))

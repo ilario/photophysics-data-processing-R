@@ -71,7 +71,7 @@ ce <- function(cedir="ce")
     }
     op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
     
-    xlim=c(1e-7,tail(mydata[[x]]$time,1))
+    xlim=c(5e-8,tail(mydata[[x]]$time,1))
     #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
     timeDownsampled = logdownsampling(mydata[[x]]$time)
     plot(timeDownsampled,logdownsampling(mydata[[x]]$voltage),type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
