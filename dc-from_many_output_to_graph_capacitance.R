@@ -27,6 +27,21 @@ xlim=lim.DCcapacitance.voltage
 ylimnogeom=lim.DCcapacitance.nogeom.capacitance
 xlimnogeom=lim.DCcapacitance.nogeom.voltage
 
+add.alpha <- function(col, alpha=1){
+  if(missing(col))
+    stop("Please provide a vector of colours.")
+  apply(sapply(col, col2rgb)/255, 2,
+        function(x)
+          rgb(x[1], x[2], x[3], alpha=alpha))
+}
+change.lightness <- function(col, lightness=1){
+  if(missing(col))
+    stop("Please provide a vector of colours.")
+  apply(sapply(col, col2rgb, alpha=TRUE)/255, 2,
+        function(x)
+          rgb(x[1]*lightness, x[2]*lightness, x[3]*lightness, alpha=x[4]))
+}
+
 output=list()
 output.nogeom=list()
 
@@ -40,35 +55,37 @@ mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 # if the color is not set, use the default one
 if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
-jpeg(quality=98, paste(filename,"-DCs-capacitance.jpg",sep=""), width=image_width, height=image_height)
+if(output_pdf){
+  pdf(paste(filename,"-DCs-capacitance.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
+}else{
+  png(paste(filename,"-DCs-capacitance.png",sep=""), width=image_width, height=image_height)
+}
 par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab="",# log="y", 
-     yaxt="n",xaxt="n")#main=paste(name,"DCs capacitance"), )
+plot(NULL,xlim=xlim,ylim=ylim,cex.axis=1.4,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
-eaxis(side=2, cex.axis=1.2)
-eaxis(side=1, cex.axis=1.2)
+eaxis(side=2, cex.axis=1.4)
+eaxis(side=1, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
-title(ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), mgp=c(5,1,0), cex.lab=1.5)
+title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(5.5,1,0), cex.lab=1.7)
 
 lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
   subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
   a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
-  # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
-  charge <- quantile(a$ChargeDensityTPC, 0.75)
+  # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the first quartile of all the TPC measurements
+  charge <- quantile(a$ChargeDensityTPC, 0.25)
   b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
   
   output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
   capacitance <- charge/b$deltaV
   output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-  
-  points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
+
+  points(b$Voc, capacitance, col=change.lightness(mycolors[i+1],0.5), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=mycolors, title=title, bg="gray90"# bty="n"
-)
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=mycolors, title=title, bty="n")
 graphics.off()
 
 maxlength = max(sapply(output,length))
@@ -77,22 +94,26 @@ output = as.data.frame(output,check.names=FALSE)
 write.table(output, file=paste(filename,"-DCs-capacitance.csv",sep=""), row.names=FALSE, na="", sep=",")
 
 i <- 0
-jpeg(quality=98, paste(filename,"-DCs-nogeom-capacitance.jpg",sep=""), width=image_width, height=image_height)
-par(mar=c(5.1,7,2,2.1))
-plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.axis=1.2,cex.lab=1.5,xlab="Voltage (V)",ylab=bquote("Specific Capacitance (F/cm"^"2"*")"), #log="y", 
-     yaxt="n",xaxis="n")#main=paste(name,"DCs capacitance"), )
+if(output_pdf){
+  pdf(paste(filename,"-DCs-nogeom-capacitance.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
+}else{
+  png(paste(filename,"-DCs-nogeom-capacitance.png",sep=""), width=image_width, height=image_height)
+}
+op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
+plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.axis=1.4,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
-eaxis(side=2, cex.axis=1.2)
-eaxis(side=1, cex.axis=1.2)
+eaxis(side=2, cex.axis=1.4)
+eaxis(side=1, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
+title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(5.5,1,0), cex.lab=1.7)
 
 lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
   subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
   a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
-  # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
-  charge <- quantile(a$ChargeDensityTPC, 0.75)
+  # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the first quartile of all the TPC measurements
+  charge <- quantile(a$ChargeDensityTPC, 0.25)
   b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
   output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
   capacitance <- charge/b$deltaV
@@ -102,15 +123,15 @@ lapply(dirs, function(x) {print(x);
   capacitance <- capacitance - geometrical
   
   output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-  points(b$Voc, capacitance, lwd=1, bg=mycolors[i+1], cex=2, pch=21+(i%%5))
+  points(b$Voc, capacitance, col=change.lightness(mycolors[i+1],0.5), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=2, lwd=4,col=mycolors, title=#paste("DC capacitance\n","no geom. cap.\n",
-         title, bg="gray90"#bty="n"
-)
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
 graphics.off()
 
 output.nogeom = lapply(output.nogeom, function(x){length(x)=maxlength; print(x)})
 output.nogeom = as.data.frame(output.nogeom,check.names=FALSE)
 write.table(output.nogeom, file=paste(filename,"-DCs-nogeom-capacitance.csv",sep=""), row.names=FALSE, na="", sep=",")
+#reset the plotting margins
+par(op)
