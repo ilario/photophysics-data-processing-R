@@ -119,7 +119,7 @@ lapply(dirs, function(x) {print(x);
   j=1
   while(!exists("powerlaw") && j < 1000){
     j <- j + 0.1
-    start <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
+    start <- list(y0=log(5e-10*runif(1,1/j,j)), A=log(1e-105*runif(1,1/j,j)), alpha=-13*runif(1,1/j,j))
     tryCatch({
       powerlaw <- nlsLM(shown_T~exp(y0)+exp(A)*shown_charge^alpha, start=start, weights=weights)
       #check convergence and sum the p-values

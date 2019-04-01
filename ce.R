@@ -65,7 +65,7 @@ ce <- function(cedir="ce")
     write.table(outputChargeDensityCE, file=file.path(cedir,"outputChargeDensityCE.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
     
     if(output_pdf){
-      pdf(file.path(cedir,paste(x, ".pdf", sep="")), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7)
+      pdf(file.path(cedir,paste(x, ".pdf", sep="")), width=image_midpdf_width, height=image_midpdf_height, pointsize=7)
     }else{
       png(file.path(cedir,paste(x, ".png", sep="")), width=image_width, height=image_height)
     }
@@ -79,8 +79,8 @@ ce <- function(cedir="ce")
     title(ylab="Voltage (V)", cex.lab=1.7, line=6)
     title(xlab="Time (s)", cex.lab=1.7, line=3.5)
     mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])#"red")
-    eaxis(side=1, cex.axis=1.4)
-    yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17
+    eaxis(side=1, cex.axis=1.4, n.axp=1)
+    yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17 this got fixed in https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17534
     eaxis(side=2, cex.axis=1.4, labels = pretty10exp(yaxt))
     
     #lines(mydata[[x]]$time, voltagezero - darkCEvoltage, col=mycolors[1])#"blue")

@@ -33,14 +33,14 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
   # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
   charge <- quantile(a$ChargeDensityTPC, 0.75)
   
-  if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
-    print("DC: using DeltaV from mixed monoexp and biexp")
-    b <- read.table(file.path(tpvdir, "outputDeltaVmixed.txt"), header=T)
-    names(b) <- c("file", "Voc", "deltaV")
-    b <- b[with(b, order(b$Voc)), ]
-  }else{
+#  if(file.exists(file.path(tpvdir, "outputDeltaVmixed.txt"))){
+#    print("DC: using DeltaV from mixed monoexp and biexp")
+#    b <- read.table(file.path(tpvdir, "outputDeltaVmixed.txt"), header=T)
+#    names(b) <- c("file", "Voc", "deltaV")
+#    b <- b[with(b, order(b$Voc)), ]
+#  }else{
     b <- read.table(file.path(tpvdir, "outputDeltaVfirstPoints.txt"), header=T)
-  }
+#  }
   
   write.table(b, file=file.path(tpvdir, "outputDeltaVprocessedForDC.txt"), append=FALSE, row.names=FALSE)
   
