@@ -21,7 +21,7 @@ tpv <- function(tpvdir="tpv")
   library(RColorBrewer)
   library(gplots)
 
-  doBiexpFit=F
+  doBiexpFit=T
   robust=T
   doPlots=T
   plotHist2d=T
@@ -111,7 +111,7 @@ tpv <- function(tpvdir="tpv")
       C <- coef(fit)["C"];
       C.err <- summary(fit)$coefficients["C",2];
       slowdecay <- C; fastdecay <- C; #in caso non venisse effettuato il biexp
-    }, error=function(e) {print("EvaluationMonoexp: Error")});
+    }, error=function(e) cat("EvaluationMonoexp: Error ", e$message, "\n"));
     
     
     
@@ -165,7 +165,7 @@ tpv <- function(tpvdir="tpv")
                 # lines(temp$time+header[3]/10*header[1], A2 + fastampl*exp(-temp$time/fastdecay)+deltavoltage/10, col="blue");
                 mtext(paste("Tau2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
                 graphics.off();
-              }, error=function(e) print("Biexp/Plot/Linear: Error"));
+              }, error=function(e) cat("Biexp/Plot/Linear: Error ", e$message, "\n"));
             }
             if(logy & doPlots){			print("Biexp/Plot/Log: Performing");
               tryCatch({
@@ -178,7 +178,7 @@ tpv <- function(tpvdir="tpv")
                 mtext(paste("T1 =", signif(slowdecay,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
                 mtext(paste("T2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
                 graphics.off();	
-              }, error=function(e) print("Biexp/Plot/Log: Error"));
+              }, error=function(e) cat("Biexp/Plot/Log: Error ", e$message, "\n"));
             }
             if(logx & doPlots){
               print("Biexp/Plot/LogX: Performing");
@@ -198,7 +198,7 @@ tpv <- function(tpvdir="tpv")
                 }
                 
                 graphics.off();	
-              }, error=function(e) print("Biexp/Plot/LogX: Error"));
+              }, error=function(e) cat("Biexp/Plot/LogX: Error ", e$message, "\n"));
             }
             if(residuals & doPlots){
               tryCatch({
@@ -210,7 +210,7 @@ tpv <- function(tpvdir="tpv")
                 mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
                 mtext(paste("Tau2 =", signif(fastdecay,digits=4), "\u00b1", signif(fastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
                 graphics.off();
-              }, error=function(e) print("Biexp/Plot/Residuals: Error"));
+              }, error=function(e) cat("Biexp/Plot/Residuals: Error ", e$message, "\n"));
             }
             ## output for importing
             output <- t(c(x, A2, slowampl, slowdecay, slowdecay.err, fastampl, fastdecay, fastdecay.err));
@@ -222,7 +222,7 @@ tpv <- function(tpvdir="tpv")
             
             biexpsuccess = 1;
             break
-          }, error=function(e) print("Biexp/Fit: Error"));
+          }, error=function(e) cat("Biexp/Fit: Error ", e$message, "\n"));
         };
         if(biexpsuccess) {break}
         else {
@@ -293,10 +293,10 @@ tpv <- function(tpvdir="tpv")
         if(doBiexpFit){
           tryCatch({
             capture.output(anova(fit,fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
-          }, error=function(e) print("Anova comparison: Error"));
+          }, error=function(e) cat("Anova comparison: Error ", e$message, "\n"));
         }
         break;
-      }, error=function(e) cat("Monoexp: Error ", e$message, "\n"))#, str(e$call), "\n"));
+      }, error=function(e) cat("Monoexp: Error ", e$message, "\n"));
     }
     
     if(robust){
@@ -341,9 +341,9 @@ tpv <- function(tpvdir="tpv")
           
           tryCatch({
             capture.output(anova(fit,fitR), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
-          }, error=function(e) print("Anova comparison: Error"));
+          }, error=function(e) cat("Anova comparison: Error ", e$message, "\n"));
           break;
-        }, error=function(e) print("RobustMonoexp: Error"));
+        }, error=function(e) cat("RobustMonoexp: Error ", e$message, "\n"));
       }
     }
     
@@ -382,7 +382,7 @@ tpv <- function(tpvdir="tpv")
               #lines(temp$time+header[3]/10*header[1], A2R + Rfastampl*exp(-temp$time/Rfastdecay)+deltavoltage/10, col="blue");
               mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
               graphics.off();
-            }, error=function(e) print("RobustBiexp/Plot/Linear: Error"));
+            }, error=function(e) cat("RobustBiexp/Plot/Linear: Error ", e$message, "\n"));
           }
           if(logy & doPlots){			print("RobustBiexp/Plot/Log: Performing");
             tryCatch({
@@ -396,7 +396,7 @@ tpv <- function(tpvdir="tpv")
               mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
               mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
               graphics.off();	
-            }, error=function(e) print("RobustBiexp/Plot/Log: Error"));
+            }, error=function(e) cat("RobustBiexp/Plot/Log: Error ", e$message, "\n"));
           }
           if(logx & doPlots){
             print("RobustBiexp/Plot/LogX: Performing");
@@ -407,7 +407,7 @@ tpv <- function(tpvdir="tpv")
               mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
               mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
               graphics.off();	
-            }, error=function(e) print("RobustBiexp/Plot/LogX: Error"));
+            }, error=function(e) cat("RobustBiexp/Plot/LogX: Error ", e$message, "\n"));
           }
           if(residuals & doPlots){
             tryCatch({
@@ -419,7 +419,7 @@ tpv <- function(tpvdir="tpv")
               mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
               mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
               graphics.off();
-            }, error=function(e) print("RobustBiexp/Plot/Residuals: Error"));
+            }, error=function(e) cat("RobustBiexp/Plot/Residuals: Error ", e$message, "\n"));
           }
           ## output for importing
           outputrobust <- t(c(x, A2R, Rslowampl, Rslowdecay, Rslowdecay.err, Rfastampl, Rfastdecay, Rfastdecay.err));
@@ -427,7 +427,7 @@ tpv <- function(tpvdir="tpv")
           
           robustbiexpsuccess = 1;
           break
-        }, error=function(e) print("RobustBiexp/Fit: Error"));
+        }, error=function(e) cat("RobustBiexp/Fit: Error ", e$message, "\n"));
         if(robustbiexpsuccess) {break}
         else {print("RobustBiexp/Fit: Removing a point for helping the fitting");
           temp <- temp[-1,]
