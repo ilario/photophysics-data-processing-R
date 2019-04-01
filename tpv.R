@@ -72,7 +72,21 @@ tpv <- function(tpvdir="tpv")
     message(x);	
     #header =  read.table(file.path(tpvdir,paste(x,".txt",sep="")), skip=3, header=FALSE, nrows=3)$V2
     
-    peaktime <- mydata[[x]]$time[which.max(mydata[[x]]$voltage)];
+    # taking the peak time as the maximum point can match an early noise point, while the maximum is actually reached later
+    # peaktime <- mydata[[x]]$time[which.max(mydata[[x]]$voltage)];
+    timePointsLength = length(mydata[[x]]$time)
+    pointsForSmoothingForPeakTime = ceiling(noiseTime / (mydata[[x]]$time[2] - mydata[[x]]$time[1])) 
+    # this is orribly handmade... sorry... for loop... sorry...
+    # pre-allocate
+    smoothedDataForPeakTime = numeric(timePointsLength - pointsForSmoothingForPeakTime + 1)
+    # sum the current time point with the next ones, for example, the first point of the new array will be the sum of the points from the first, e.g. at -1e-6 up to -1e-6+noiseTime
+    for (i in 1:pointsForSmoothingForPeakTime) {
+	    smoothedDataForPeakTime = smoothedDataForPeakTime + mydata[[x]]$voltage[i:(timePointsLength-pointsForSmoothingForPeakTime+i)]
+    }
+    # divide by the number of sums for having an average rather than a sum
+    smoothedDataForPeakTime = smoothedDataForPeakTime / pointsForSmoothingForPeakTime
+    peakIndex = which.max(smoothedDataForPeakTime)
+    peaktime <- mydata[[x]]$time[peakIndex];
     starttime <- head(mydata[[x]]$time, n=1)
     voltage2 <- subset(mydata[[x]], time >= peaktime, select=voltage); 
     time2 <- subset(mydata[[x]], time >= peaktime, select=time);
@@ -97,10 +111,11 @@ tpv <- function(tpvdir="tpv")
     outputDeltaVloess <- t(c(x, startingvoltage, deltaVloess));
     write.table(outputDeltaVloess, file=file.path(tpvdir,"outputDeltaVloess.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
     
-    afterPeakNoiseTimePoints = time2 < peaktime + noiseTime
-    afterPeakNoiseVoltagePoints = voltage2[afterPeakNoiseTimePoints]
-    print(paste("DeltaVfirstPoints averaging on", length(afterPeakNoiseVoltagePoints), "points"))
-    deltaVfirstPoints <- mean(afterPeakNoiseVoltagePoints) - startingvoltage
+    #afterPeakNoiseTimePoints = time2 < peaktime + noiseTime
+    #afterPeakNoiseVoltagePoints = voltage2[afterPeakNoiseTimePoints]
+    print(paste("DeltaVfirstPoints averaging on", pointsForSmoothingForPeakTime, "points"))
+    #deltaVfirstPoints <- mean(afterPeakNoiseVoltagePoints) - startingvoltage
+    deltaVfirstPoints <- smoothedDataForPeakTime[peakIndex] - startingvoltage
     outputDeltaVfirstPoints <- t(c(x, startingvoltage, deltaVfirstPoints));
     write.table(outputDeltaVfirstPoints, file=file.path(tpvdir,"outputDeltaVfirstPoints.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
     
@@ -263,6 +278,11 @@ tpv <- function(tpvdir="tpv")
 	  ylim_monoexp = c(min(temp$voltage), max(temp$voltage))
           dev.monoexp = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=xlim_monoexp, in.ylim=ylim_monoexp, in.color=mycolors2, in.plotHist2d=plotHist2d)
           plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
+#debug
+#  abline(v=peaktime, col="blue")
+#  abline(v=peaktime+noiseTime, col="red")
+#  points(mydata[[x]]$time[1:(timePointsLength-pointsForSmoothingForPeakTime+1)], smoothedDataForPeakTime, pch=".", col="orange")
+#  points(time2[afterPeakNoiseTimePoints],voltage2[afterPeakNoiseTimePoints], pch=".", col="red")
         }
         if(logy & doPlots){
           print("Monoexp/Plot/Log: Performing");
