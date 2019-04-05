@@ -60,7 +60,7 @@ if(output_pdf){
 }else{
   png(paste(filename,"-DCs-capacitance.png",sep=""), width=image_width, height=image_height)
 }
-par(mar=c(5.1,7,2,2.1))
+par(mar=c(5.1,7.5,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.axis=1.4,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.4)
@@ -81,11 +81,11 @@ lapply(dirs, function(x) {print(x);
   capacitance <- charge/b$deltaV
   output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
 
-  points(b$Voc, capacitance, col=change.lightness(mycolors[i+1],0.5), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
+  points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.6), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=mycolors, title=title, bty="n")
+legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
 graphics.off()
 
 maxlength = max(sapply(output,length))
@@ -123,7 +123,7 @@ lapply(dirs, function(x) {print(x);
   capacitance <- capacitance - geometrical
   
   output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-  points(b$Voc, capacitance, col=change.lightness(mycolors[i+1],0.5), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
+  points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.6), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
