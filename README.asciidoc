@@ -18,6 +18,7 @@ Can be installed in RStudio via Tools/Install packages...
 * minpack.lm
 * RColorBrewer
 * Hmisc
+* gplots
 
 Running it
 ----------
