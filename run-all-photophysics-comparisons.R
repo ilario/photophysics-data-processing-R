@@ -8,8 +8,8 @@ if(exists("scriptsdir")){
   suggestedScriptsDir = homedir
 }
 
-print("Select R SCRIPTS Directory")
-scriptsdir = tk_choose.dir(suggestedScriptsDir,"Select R SCRIPTS Directory")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+print("Select photophysics-data-processing.R Directory")
+scriptsdir = tk_choose.dir(suggestedScriptsDir,"Select photophysics-data-processing.R Directory")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
 
 if(exists("datadir")){
   suggestedDataDir = datadir
@@ -20,6 +20,8 @@ if(exists("datadir")){
 print("Select a DIRECTORY CONTAINING ALL DEVICES' PHOTOPHYSICS DATA DIRECTORIES")
 datadir=tk_choose.dir(suggestedDataDir,"Select a DIRECTORY CONTAINING ALL DEVICES' PHOTOPHYSICS DATA DIRECTORIES")
 setwd(datadir)
+
+source(file.path(scriptsdir,"limits_for_graphics.R"))
 
 source(file.path(scriptsdir,"ce-from_many_output_to_graph.R"))
 source(file.path(scriptsdir,"ce-time-many.R"))

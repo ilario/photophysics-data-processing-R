@@ -8,8 +8,8 @@ if(exists("scriptsdir")){
   suggestedScriptsDir = homedir
 }
 
-print("Select R SCRIPTS Directory")
-scriptsdir = tk_choose.dir(suggestedScriptsDir,"Select R SCRIPTS Directory")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+print("Select photophysics-data-processing.R Directory")
+scriptsdir = tk_choose.dir(suggestedScriptsDir,"Select photophysics-data-processing.R Directory")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
 
 if(exists("datadir")){
   suggestedDataDir = datadir
@@ -37,6 +37,8 @@ if(!dir.exists(tpvdir)){
   print("Select TRANSIENT PHOTO VOLTAGE Directory")
   tpvdir=tk_choose.dir(dirname(cedir),"Select TRANSIENT PHOTO VOLTAGE Directory")
 }
+
+source(file.path(scriptsdir,"limits_for_graphics.R"))
 
 source(file.path(scriptsdir,"from_ce_to_table.R"))
 source(file.path(scriptsdir,"ce-integrateExp.R"))
