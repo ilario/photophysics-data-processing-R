@@ -9,28 +9,33 @@ if(exists("scriptsdir")){
 }
 
 print("Select R SCRIPTS Directory")
-scriptsdir = tk_choose.dir(suggestedScriptsDir,"Select R SCRIPTS Directory\n")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
+scriptsdir = tk_choose.dir(suggestedScriptsDir,"Select R SCRIPTS Directory")#"~/software/photophysics-data-processing-R"#"C:\\Users\\iciq\\Desktop\\photophysics-data-processing-R"
 
+if(exists("datadir")){
+  suggestedDataDir = datadir
+} else {
+  suggestedDataDir = homedir
+}
 print("Select a DIRECTORY CONTAINING ALL PHOTOPHYSICS DATA OF ONE DEVICE")
-datadir=tk_choose.dir(homedir,"Select a DIRECTORY CONTAINING ALL PHOTOPHYSICS DATA OF ONE DEVICE\n")
+datadir=tk_choose.dir(suggestedDataDir,"Select a DIRECTORY CONTAINING ALL PHOTOPHYSICS DATA OF ONE DEVICE")
 setwd(datadir)
 
 cedir = file.path(datadir, "ce")
 if(!dir.exists(cedir)){
   print("Select CHARGE EXTRACTION Directory")
-  cedir=tk_choose.dir(homedir,"Select CHARGE EXTRACTION Directory\n")
+  cedir=tk_choose.dir(datadir,"Select CHARGE EXTRACTION Directory")
 }
 
 tpcdir = file.path(datadir, "tpc")
 if(!dir.exists(tpcdir)){
   print("Select TRANSIENT PHOTO CURRENT Directory")
-  tpcdir=tk_choose.dir(dirname(cedir),"Select TRANSIENT PHOTO CURRENT Directory\n")
+  tpcdir=tk_choose.dir(dirname(cedir),"Select TRANSIENT PHOTO CURRENT Directory")
 }
 
 tpvdir = file.path(datadir, "tpv")
 if(!dir.exists(tpvdir)){
   print("Select TRANSIENT PHOTO VOLTAGE Directory")
-  tpvdir=tk_choose.dir(dirname(cedir),"Select TRANSIENT PHOTO VOLTAGE Directory\n")
+  tpvdir=tk_choose.dir(dirname(cedir),"Select TRANSIENT PHOTO VOLTAGE Directory")
 }
 
 source(file.path(scriptsdir,"from_ce_to_table.R"))
