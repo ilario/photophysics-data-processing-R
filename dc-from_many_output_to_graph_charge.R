@@ -45,7 +45,7 @@ data <- lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
   subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
-  a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
+  a <- read.table(file.path(subdirs.tpc,"outputChargeDensityTPC.txt"),header=T)
   # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
   charge <- quantile(a$ChargeDensityTPC, 0.75)
   b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
@@ -59,7 +59,7 @@ data <- lapply(dirs, function(x) {print(x);
   f})
 names(data) <- dirs
 
-jpeg(quality=98, paste(filename,"-DCs-charge-linlog.jpg",sep=""), width=image_width, height=image_height)
+png(paste(filename,"-DCs-charge-linlog.png",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
 #magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
@@ -91,7 +91,7 @@ write.table(output, file=paste(filename,"-DCs-charge.csv",sep=""), row.names=FAL
 
 
 i<-0
-jpeg(quality=98, paste(filename,"-DCs-charge.jpg",sep=""), width=image_width, height=image_height)
+png(paste(filename,"-DCs-charge.png",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlim,ylim=ylim,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
 eaxis(side=2, cex.axis=1.2)
@@ -116,7 +116,7 @@ legend(x="topleft",inset=0.05,legend,pch=seq(21,25), lwd=4, pt.cex=2, pt.lwd=2, 
 graphics.off()
 
 i<-0
-jpeg(quality=98, paste(filename,"-DCs-nogeom-charge-linlog.jpg",sep=""), width=image_width, height=image_height)
+png(paste(filename,"-DCs-nogeom-charge-linlog.png",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab=bquote("Charge Density (C/cm"^"2"*")"),  log="y", las=1, yaxt="n")#main=paste(name,"DCs charge"),
 #magaxis(side=1:2, ratio=0.5, unlog=FALSE, labels=FALSE, tcl=-0.5)
@@ -152,7 +152,7 @@ write.table(output.nogeom, file=paste(filename,"-DCs-nogeom-charge.csv",sep=""),
 
 
 i<-0
-jpeg(quality=98, paste(filename,"-DCs-nogeom-charge.jpg",sep=""), width=image_width, height=image_height)
+png(paste(filename,"-DCs-nogeom-charge.png",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,cex.lab=1.5, cex.axis=1.2, xlab="Voltage (V)",ylab="", las=1, yaxt="n", xaxt="n")
 eaxis(side=2, cex.axis=1.2)

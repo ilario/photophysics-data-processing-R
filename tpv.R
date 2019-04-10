@@ -122,7 +122,7 @@ tpv <- function(tpvdir="tpv")
     tryCatch({
       print("EvaluationMonoexp/Fit: Performing");
       fit <- nls(voltage ~ cbind(1, exp(-time/C)), start=list(C=expectedresult*runif(1,0.5,2)),trace=F,data=temp,alg="plinear");
-      capture.output(summary(fit), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
+      capture.output(summary(fit), file=file.path(tpvdir,paste(x, "-fit.txt", sep="")),  append=TRUE);
       C <- coef(fit)["C"];
       C.err <- summary(fit)$coefficients["C",2];
       slowdecay <- C; fastdecay <- C; #in caso non venisse effettuato il biexp
@@ -162,7 +162,7 @@ tpv <- function(tpvdir="tpv")
             if(forbidNegativeDecays){if(coef(fit2)[".lin2"] < 0 | coef(fit2)[".lin3"] < 0){print("Biexp/Fit: Bad result"); next}};
             print(paste("C starting: ", Crand, ", C fitted: ", CFromPreviousDecay))
             print(paste("F starting: ", Frand, ", F fitted: ", FFromPreviousDecay))
-            capture.output(summary(fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
+            capture.output(summary(fit2), file=file.path(tpvdir,paste(x, "-fit.txt", sep="")),  append=TRUE);
             
             if(doPlots){
               print("Biexp/Plot/Linear: Performing");
@@ -268,7 +268,7 @@ tpv <- function(tpvdir="tpv")
         }
         
         fit <- nls(voltage ~ cbind(1, exp(-time/C)), start=list(C=Crand),trace=F,data=temp,alg="plinear");
-        capture.output(summary(fit), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
+        capture.output(summary(fit), file=file.path(tpvdir,paste(x, "-fit.txt", sep="")),  append=TRUE);
         A <- coef(fit)[".lin1"]; B <- coef(fit)[".lin2"]; C <- coef(fit)["C"];
         C.err <- summary(fit)$coefficients["C",2];
         
@@ -312,7 +312,7 @@ tpv <- function(tpvdir="tpv")
         
         if(doBiexpFit){
           tryCatch({
-            capture.output(anova(fit,fit2), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
+            capture.output(anova(fit,fit2), file=file.path(tpvdir,paste(x, "-fit.txt", sep="")),  append=TRUE);
           }, error=function(e) cat("Anova comparison: Error ", e$message, "\n"));
         }
         break;
@@ -326,7 +326,7 @@ tpv <- function(tpvdir="tpv")
           
           CRrand=C*(2^runif(1,-rand,rand))
           fitR <- nlrob(voltage ~ A + B*exp(-time/C), start=list(A=A,B=B,C=CRrand),trace=F,data=temp);
-          capture.output(summary(fitR), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
+          capture.output(summary(fitR), file=file.path(tpvdir,paste(x, "-fit.txt", sep="")),  append=TRUE);
           AR <- coef(fitR)["A"]; BR <- coef(fitR)["B"]; 
           CR <- coef(fitR)["C"];
           CR.err <- summary(fitR)$coefficients["C",2];
@@ -360,7 +360,7 @@ tpv <- function(tpvdir="tpv")
           write.table(outputmonoexp, file=file.path(tpvdir,"output-robustmonoexp.txt"), append=TRUE, col.names=F, row.names=F, quote=F);
           
           tryCatch({
-            capture.output(anova(fit,fitR), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
+            capture.output(anova(fit,fitR), file=file.path(tpvdir,paste(x, "-fit.txt", sep="")),  append=TRUE);
           }, error=function(e) cat("Anova comparison: Error ", e$message, "\n"));
           break;
         }, error=function(e) cat("RobustMonoexp: Error ", e$message, "\n"));
@@ -386,7 +386,7 @@ tpv <- function(tpvdir="tpv")
           Rfastdecay<-coef(fit2R)["F2R"]
           Rfastdecay.err<-summary(fit2R)$coefficients["F2R",2]
           
-          capture.output(summary(fit2R), file=file.path(tpvdir,paste(x, "-fit", sep="")),  append=TRUE);
+          capture.output(summary(fit2R), file=file.path(tpvdir,paste(x, "-fit.txt", sep="")),  append=TRUE);
           if(doPlots){
             print("RobustBiexp/Plot/Linear: Performing");
             tryCatch({

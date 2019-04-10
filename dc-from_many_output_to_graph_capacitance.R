@@ -72,7 +72,7 @@ lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
   subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
-  a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
+  a <- read.table(file.path(subdirs.tpc,"outputChargeDensityTPC.txt"),header=T)
   # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the first quartile of all the TPC measurements
   charge <- quantile(a$ChargeDensityTPC, 0.25)
   b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
@@ -111,7 +111,7 @@ lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
   subdirs.tpc <- subdirs[grep("tpc", subdirs, ignore.case=T)]
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
-  a <- read.table(paste(subdirs.tpc,"/outputChargeDensityTPC.txt",sep=""),header=T)
+  a <- read.table(file.path(subdirs.tpc,"outputChargeDensityTPC.txt"),header=T)
   # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the first quartile of all the TPC measurements
   charge <- quantile(a$ChargeDensityTPC, 0.25)
   b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)

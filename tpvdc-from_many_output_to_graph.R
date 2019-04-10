@@ -43,7 +43,7 @@ mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
 if(!length(mycolors)){mycolors=brewer.pal(8,"Dark2")}
 
 i <- 0
-jpeg(quality=98, paste(filename,"-TPVDCs.jpg",sep=""), width=image_width, height=image_height)
+png(paste(filename,"-TPVDCs.png",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(1,xlim=xlim,ylim=ylim,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -53,7 +53,7 @@ minor.tick(nx=10)
 lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
-  a <- read.table(paste(x,"/outputDCcharge.txt",sep=""),header=T,stringsAsFactors=F)
+  a <- read.table(file.path(x,"outputDCcharge.txt"),header=T,stringsAsFactors=F)
   lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
   #just for the slope, no intercept
   linearfit <- lm(ChargeDensityDC ~ 0 + Voc, data=a[1:round(length(a$Voc)/2),])
@@ -98,7 +98,7 @@ write.table(output, file=paste(filename,"-TPVDCs.csv",sep=""), row.names=FALSE, 
 
 
 i <- 0
-jpeg(quality=98, paste(filename,"-TPVDCs-nogeom.jpg",sep=""), width=image_width, height=image_height)
+png(paste(filename,"-TPVDCs-nogeom.png",sep=""), width=image_width, height=image_height)
 par(mar=c(5.1,7,2,2.1))
 plot(1,xlim=xlimnogeom,ylim=ylimnogeom,cex.main=1.5,xlab=bquote("Charge Density (C/cm"^"2"*")"), ylab="Life-time (s)",cex.lab=1.5,cex.axis=1.2,log="y", yaxt="n", xaxt="n");#, main=paste(name,"TPV decay vs Charge from DC")
 eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
@@ -108,7 +108,7 @@ minor.tick(nx=10)
 lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
-  a <- read.table(paste(x,"/outputDCcharge-nogeom.txt",sep=""),header=T,stringsAsFactors=F)
+  a <- read.table(file.path(x,"outputDCcharge-nogeom.txt"),header=T,stringsAsFactors=F)
   lo <- loess(a$ChargeDensityDC~a$Voc,span=0.9)
   startlist=list(C=1e-10,D=8)
   tryCatch({
