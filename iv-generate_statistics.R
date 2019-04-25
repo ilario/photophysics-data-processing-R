@@ -44,6 +44,13 @@ signif.mean <- function(values, digits){
 signif.stdev <- function(values, digits){
   signif(sd(values), digits=digits)
 }
+round.mean <- function(values, digits){
+  round(mean(values), digits=digits)
+}
+round.stdev <- function(values, digits){
+  round(sd(values), digits=digits)
+}
+
 
 single <- function(x,mar,mgp.y,mgp.x){
   print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=length))
@@ -57,9 +64,9 @@ single <- function(x,mar,mgp.y,mgp.x){
   #	title(ylab="PCE (%)", mgp=mgp.y, cex.lab=1.5)
   title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
   print("PCE")
-  print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+  print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=round.mean, digits=1))
   print("PCE-stdev")
-  print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
+  print(aggregate(d$PCE, by=list(interaction(d$rev, d[[x]])), FUN=round.stdev, digits=1))
   graphics.off()
   
   #png(paste(name, "-", x, "-Jsc.png", sep=""), width=1200, height=600);
@@ -71,9 +78,9 @@ single <- function(x,mar,mgp.y,mgp.x){
   #	title(ylab=bquote("J"["SC"]~"(mA/cm"^"2"*")"), mgp=mgp.y, cex.lab=1.5)
   title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
   print("Jsc")
-  print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+  print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=round.mean, digits=1))
   print("Jsc-stdev")
-  print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
+  print(aggregate(d$Jsc, by=list(interaction(d$rev, d[[x]])), FUN=round.stdev, digits=1))
   graphics.off()
   
   #png(paste(name, "-", x, "-Voc.png", sep=""), width=1200, height=600);
@@ -85,9 +92,9 @@ single <- function(x,mar,mgp.y,mgp.x){
   #	title(ylab=bquote("V"["OC"]~"(V)"), mgp=mgp.y, cex.lab=1.5)
   title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
   print("Voc")
-  print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+  print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=round.mean, digits=2))
   print("Voc-stdev")
-  print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
+  print(aggregate(d$Voc, by=list(interaction(d$rev, d[[x]])), FUN=round.stdev, digits=2))
   graphics.off()
   
   #png(paste(name, "-", x, "-FF.png", sep=""), width=1200, height=600);
@@ -99,9 +106,9 @@ single <- function(x,mar,mgp.y,mgp.x){
   #	title(ylab="FF", mgp=mgp.y, cex.lab=1.5)
   title(xlab=gsub("_", " ", x), mgp=mgp.x, cex.lab=1.7)
   print("FF")
-  print(aggregate(d$FF, by=list(interaction(d$rev, d[[x]])), FUN=signif.mean, digits=3))
+  print(aggregate(d$FF*100, by=list(interaction(d$rev, d[[x]])), FUN=round.mean, digits=0))
   print("FF-stdev")
-  print(aggregate(d$FF, by=list(interaction(d$rev, d[[x]])), FUN=signif.stdev, digits=2))
+  print(aggregate(d$FF*100, by=list(interaction(d$rev, d[[x]])), FUN=round.stdev, digits=0))
   graphics.off()
 }
 
