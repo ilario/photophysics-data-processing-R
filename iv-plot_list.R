@@ -34,15 +34,20 @@ fileslist=names(mydata)
 reverselist=fileslist[!grepl("forward", fileslist) & !grepl("dark", fileslist, ignore.case=T)]
 cellslist=sub("-reverse","",sub(".txt","",reverselist))
 cellslist=cellslist[!duplicated(cellslist)]
-legendlist=sub("_.*","",sub("^0","",cellslist))
+#remove everything after the last underscore, then convert the remaining underscores to spaces
+legendlist=gsub("_"," ",sub("_((?!_).)+$","",cellslist, perl=TRUE))
+#legendlist=sub("_.*","",sub("^0","",cellslist))
 mycolors=gsub(".*-col_","",cellslist[grepl("-col_", cellslist)])
 
 if(!length(mycolors)){
   mycolors<-brewer.pal(8,"Dark2")
 }
 
-#jpeg(quality=98, paste(filename,"-revIVs.jpg",sep=""), width=image_width, height=image_height);
-pdf(paste(filename,"-revIVs.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7);
+if(output_pdf){
+  pdf(paste(filename,"-revIVs.pdf",sep=""), width=image_midpdf_width, height=image_midpdf_height, pointsize=7)
+}else{
+  png(paste(filename,"-revIVs.png",sep=""), width=image_width, height=image_height);
+}
 par(mar=c(5.1,6,1,1))
 plot(NULL,xlim=lim.IV.voltage,ylim=lim.IV.current,xlab="Voltage (V)",ylab=bquote("Current Density (mA/cm"^"2"*")"), cex.lab=1.7, yaxt="n", xaxt="n");
 eaxis(side=2, cex.axis=1.4)
@@ -56,12 +61,14 @@ lapply(reverselist, function(x){
   V=mydata[[x]]$Voltage_V
   J=mydata[[x]]$Current_mA/0.09
   lines(V, J, lwd=2, col=mycolors[i])
-  Jmarkers=J[V*10 == floor(V*10)]
-  Vmarkers=V[V*10 == floor(V*10)]
+  Jmarkers=J[seq(i*5,300+i*5,20)]
+  Vmarkers=V[seq(i*5,300+i*5,20)]
+  #Jmarkers=J[V*10 == floor(V*10)]
+  #Vmarkers=V[V*10 == floor(V*10)]
   points(Vmarkers, Jmarkers, col=change.lightness(mycolors[i],0.5), bg=mycolors[i], cex=1.5, pch=20+(i%%5))
   i <<- i+1
 })
 
-legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist))), lwd=2, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bty="n", pch=seq(21,25))
+legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist))), lwd=2, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bg="white", box.col="grey90", pch=seq(21,25), title=title)
 graphics.off()
 

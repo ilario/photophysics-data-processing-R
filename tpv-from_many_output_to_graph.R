@@ -55,14 +55,14 @@ tryCatch({
   
   i <- 0
   if(output_pdf){
-    pdf(paste(filename, "-TPVs-biexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+    pdf(paste(filename, "-TPVs-biexp.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7);
   }else{
     png(paste(filename, "-TPVs-biexp.png",sep=""), width=image_width, height=image_height);
   }
   op <- par(mar = c(5,7,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
   plot(NULL, ylim=ylim, xlim=xlim, cex.axis=1.4, log="y", xlab="", ylab="", yaxt="n")
-  title(ylab = "Charge carrier lifetime (s)", cex.lab = 1.7, line = 4)
-  title(xlab = bquote("V"["OC"]~"(V)"), cex.lab = 1.7, line = 4)
+  title(ylab = "Small perturbation life-time (s)", cex.lab = 1.7, line = 4)
+  title(xlab = "Light bias (V)", cex.lab = 1.7, line = 3)
   
   eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
   minor.tick(nx=10)
@@ -95,14 +95,14 @@ tryCatch({
   print("monoexp")
   i <- 0
   if(output_pdf){
-    pdf(paste(filename, "-TPVs-monoexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+    pdf(paste(filename, "-TPVs-monoexp.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7);
   }else{
     png(paste(filename, "-TPVs-monoexp.png",sep=""), width=image_width, height=image_height);
   }
   op <- par(mar = c(5,7,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
   plot(NULL, ylim=ylim, xlim=xlim,cex.axis=1.4, log="y", xlab="", ylab="", yaxt="n")
-  title(ylab = "Charge carrier lifetime (s)", cex.lab = 1.7, line = 4)
-  title(xlab = bquote("V"["OC"]~"(V)"), cex.lab = 1.7, line = 4)
+  title(ylab = "Small perturbation life-time (s)", cex.lab = 1.7, line = 4)
+  title(xlab = "Light bias (V)", cex.lab = 1.7, line = 3)
   
   eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
   minor.tick(nx=10)
@@ -133,14 +133,14 @@ tryCatch({
   print("robust monoexp")
   i <- 0
   if(output_pdf){
-    pdf(paste(filename, "-TPVs-robustmonoexp.pdf",sep=""), width=image_bigpdf_width, height=image_bigpdf_height, pointsize=7);
+    pdf(paste(filename, "-TPVs-robustmonoexp.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7);
   }else{
     png(paste(filename, "-TPVs-robustmonoexp.png",sep=""), width=image_width, height=image_height);
   }
   op <- par(mar = c(5,7,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
   plot(NULL, ylim=ylim, xlim=xlim,cex.axis=1.4, log="y", xlab="", ylab="", yaxt="n")
-  title(ylab = "Charge carrier lifetime (s)", cex.lab = 1.7, line = 4)
-  title(xlab = bquote("V"["OC"]~"(V)"), cex.lab = 1.7, line = 4)
+  title(ylab = "Small perturbation life-time (s)", cex.lab = 1.7, line = 4)
+  title(xlab = "Light bias (V)", cex.lab = 1.7, line = 3)
   
   eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
   minor.tick(nx=10)

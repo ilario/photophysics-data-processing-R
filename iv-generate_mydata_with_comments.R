@@ -15,7 +15,7 @@ source("~/software/photophysics-data-processing-R/extractdata-curves-vi-separate
 #list2=list(`` = v2g1, `` = v2g2)
 
 file.create("output.txt")
-mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="^ig.*.txt$", list.excl="output.txt")
+mydata <- import.iv.separated(pattern.excl="\\.png$", pattern="(forward|reverse).txt$", list.excl="output.txt")
 results <- lapply(names(mydata), function(x){
   z <- factor(strsplit(x,"-")[[1]][2], v1all); 
   levels(z) <- list1;

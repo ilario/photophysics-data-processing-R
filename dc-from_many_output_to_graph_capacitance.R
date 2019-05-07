@@ -48,7 +48,8 @@ output.nogeom=list()
 i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("_.*","",sub("^0","",dirs))
+#remove everything after the last underscore, then convert the remaining underscores to spaces
+legendlist=sub("^0","",gsub("_"," ",sub("_((?!_).)+$","",dirs, perl=TRUE)))
 
 # try to obtain the color from the file name
 mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
@@ -60,13 +61,16 @@ if(output_pdf){
 }else{
   png(paste(filename,"-DCs-capacitance.png",sep=""), width=image_width, height=image_height)
 }
-par(mar=c(5.1,7.5,2,2.1))
-plot(NULL,xlim=xlim,ylim=ylim,cex.axis=1.4,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
+op <- par(mar = c(5,8,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
+plot(NULL,xlim=xlim,ylim=ylim,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.4)
 eaxis(side=1, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
-title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(5.5,1,0), cex.lab=1.7)
+title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(6,1,0), cex.lab=1.7)
+
+# preallocate geometric capacitance array
+geometric = numeric(length(dirs))
 
 lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
@@ -79,13 +83,15 @@ lapply(dirs, function(x) {print(x);
   
   output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
   capacitance <- charge/b$deltaV
+  geometric[i+1] <<- quantile(capacitance,0.05)
+  print(paste("Geometric capacitance for", x, "is", geometric[i+1], "F/cm2"))
   output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-
+  abline(h=geometric[i+1], col=add.alpha(change.lightness(mycolors[i+1],0.8),0.6), lwd=2)
   points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.6), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
+legend(x="topleft",inset=0.05,legendlist,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
 graphics.off()
 
 maxlength = max(sapply(output,length))
@@ -100,7 +106,7 @@ if(output_pdf){
   png(paste(filename,"-DCs-nogeom-capacitance.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
-plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.axis=1.4,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
+plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.4)
 eaxis(side=1, cex.axis=1.4)
@@ -117,17 +123,16 @@ lapply(dirs, function(x) {print(x);
   b <- read.table(file.path(subdirs.tpv, "outputDeltaVprocessedForDC.txt"), header=T)
   output.nogeom[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
   capacitance <- charge/b$deltaV
-  dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)
+#  dataframe <- data.frame(Voc=b$Voc,capacitance=capacitance)
   
-  geometrical <- quantile(dataframe$capacitance,0.05)
-  capacitance <- capacitance - geometrical
+  capacitance <- capacitance - geometric[i+1]
   
   output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
   points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.6), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legend,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
+legend(x="topleft",inset=0.05,legendlist,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
 graphics.off()
 
 output.nogeom = lapply(output.nogeom, function(x){length(x)=maxlength; print(x)})

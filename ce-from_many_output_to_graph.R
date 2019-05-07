@@ -47,10 +47,10 @@ change.lightness <- function(col, lightness=1){
 
 output=list()
 
-i <- 0
 dirs <- list.dirs(recursive=FALSE)
 dirs <- sub("./","",dirs)
-legend=sub("_.*","",sub("^0","",dirs))
+#remove everything after the last underscore, then convert the remaining underscores to spaces
+legendlist=sub("^0","",gsub("_"," ",sub("_((?!_).)+$","",dirs, perl=TRUE)))
 
 # try to obtain the color from the file name
 mycolors=gsub(".*-col_","",dirs[grepl("-col_", dirs)])
@@ -101,19 +101,20 @@ if(output_pdf){
   png(paste(filename,"-CEs.png",sep=""), width=image_width, height=image_height)
 }
 op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
-plot(NULL,xlim=xlim,ylim=ylim,xlab="", ylab="", cex.axis=1.4, yaxt="n");
+plot(NULL,xlim=xlim,ylim=ylim,xlab="", ylab="", cex.axis=1.4, yaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")));
 title(ylab = bquote("Charge per area (C/cm"^"2"*")"), cex.lab = 1.7, line = 5.5)
 title(xlab = "Light bias (V)", cex.lab = 1.7, line = 3)
 
 eaxis(side=2, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
 lapply(dirs, function(x) {print(x);
+  lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(mycolors[i+1],0.8),lwd=2)
   points(data[[x]]$Voc, data[[x]]$ChargeDensityCE, col=change.lightness(mycolors[i+1],0.5), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
-  lines(data[[x]]$Voc, data[[x]]$g, col=change.lightness(mycolors[i+1],0.5),lwd=2)
   lines(data[[x]]$Voc, data[[x]]$onlyexp, col=mycolors[i+1],lwd=2)
+  points(tail(data[[x]]$Voc,1), tail(data[[x]]$onlyexp,1), col=change.lightness(mycolors[i+1],0.5), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
-legend(x="topleft",inset=0.05,legend, pch=seq(21,25), pt.bg=mycolors, col=change.lightness(mycolors,0.5), pt.cex=2, cex=1.5, pt.lwd=1.5, lwd=3, title=title, bty="n")
+legend(x="topleft",inset=0.05,legendlist, pch=seq(21,25), pt.bg=mycolors, col=change.lightness(mycolors,0.5), pt.cex=2, cex=1.5, pt.lwd=1.5, lwd=3, title=title, bty="n")
 graphics.off()
 #reset the plotting margins
 par(op)

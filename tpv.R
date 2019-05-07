@@ -167,44 +167,42 @@ tpv <- function(tpvdir="tpv")
             if(doPlots){
               print("Biexp/Plot/Linear: Performing");
               tryCatch({
-                png(file.path(tpvdir,paste(x, "-biexp.png", sep="")), width = image_width, height = image_height);
-                plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
-                points(temp, pch=".");
-                lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
-                lines(temp$time, predict(fit2), col="aquamarine4", lwd=2);
-                segments(starttime, A2, 0, A2, col="aquamarine4")
-                # TO BE FIXED: REMOVE HEADER VARIABLE
-                #lines(temp$time+header[3]/10*header[1], A2 + slowampl*exp(-temp$time/slowdecay)+deltavoltage/10, col="green");
-                mtext(paste("Tau1 =", signif(slowdecay,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
-                # TO BE FIXED: REMOVE HEADER VARIABLE
-                # lines(temp$time+header[3]/10*header[1], A2 + fastampl*exp(-temp$time/fastdecay)+deltavoltage/10, col="blue");
-                mtext(paste("Tau2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
-                graphics.off();
+                xlim_biexp = c(temp_nonfit$time[1], tail(temp$time,1))
+                ylim_biexp = range(c(temp_nonfit$voltage,temp$voltage))
+                dev.biexp = plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="biexp", in.log="", in.xlim=xlim_biexp, in.ylim=ylim_biexp, in.color=mycolors2, in.plotHist2d=plotHist2d)
+                plotBiexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.biexp_fit=fit2, in.color=mycolors[1], in.mtext="BiExp", in.dev=dev.biexp)
+                
               }, error=function(e) cat("Biexp/Plot/Linear: Error ", e$message, "\n"));
             }
             if(logy & doPlots){			print("Biexp/Plot/Log: Performing");
               tryCatch({
                 temp_logy_biexp = subset(temp, time <= slowdecay*5)
-                png(file.path(tpvdir,paste(x, "-biexp-log.png", sep="")), width = image_width, height = image_height);
-                plot(temp_logy_biexp$time, temp_logy_biexp$voltage - A2, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy_biexp$voltage, 10))-A2, deltavoltage/1e5), deltavoltage));
+                
+                dev.biexp.logy = plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp_logy_biexp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.yshift=-A2, in.suffix="biexp-log", in.log="y", in.xlim=c(0, slowdecay*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.plotHist2d=F)
+                plotBiexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.biexp_fit=fit2, in.color=mycolors[1], in.yshift=-A2, in.dev=dev.biexp.logy)
+                
+                #png(file.path(tpvdir,paste(x, "-biexp-log.png", sep="")), width = image_width, height = image_height);
+                #plot(temp_logy_biexp$time, temp_logy_biexp$voltage - A2, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2, "V)"), pch=".", log="y", ylim=c(max(mean(tail(temp_logy_biexp$voltage, 10))-A2, deltavoltage/1e5), deltavoltage));
                 #			points(tempsubset$time, tempsubset$voltage - A2, pch=".", col="yellow");
-                lines(tempsubset2$time, predict(lo2) - A2, col='black', lwd=2);
-                lines(temp$time,predict(fit2) - A2, col="aquamarine4", lwd=3);
-                mtext(paste("T1 =", signif(slowdecay,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
-                mtext(paste("T2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
-                graphics.off();	
+                ##lines(tempsubset2$time, predict(lo2) - A2, col='black', lwd=2);
+                #lines(temp$time,predict(fit2) - A2, col="aquamarine4", lwd=3);
+                #mtext(paste("T1 =", signif(slowdecay,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
+                #mtext(paste("T2 =", signif(fastdecay,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
+                #graphics.off();	
               }, error=function(e) cat("Biexp/Plot/Log: Error ", e$message, "\n"));
             }
             if(logx & doPlots){
               print("Biexp/Plot/LogX: Performing");
               tryCatch({
+                dev.biexp.logx = plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="biexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.plotHist2d=F)
+                plotBiexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.biexp_fit=fit2, in.color=mycolors[1], in.dev=dev.biexp.logx)
                 
-                png(file.path(tpvdir,paste(x, "-biexp-logx.png", sep="")), width = image_width, height = image_height);
-                plot(temp$time, temp$voltage, xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x", xlim=c(max(temp$time[1],-temp$time[1]),endtime));
-                #lines(temp$time, predict(lo2), col='black', lwd=3);
-                lines(temp$time,predict(fit2), col="aquamarine4", lwd=2);
-                mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
-                mtext(paste("Tau2 =", signif(fastdecay,digits=4), "\u00b1", signif(fastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
+                #png(file.path(tpvdir,paste(x, "-biexp-logx.png", sep="")), width = image_width, height = image_height);
+                #plot(temp$time, temp$voltage, xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x", xlim=c(max(temp$time[1],-temp$time[1]),endtime));
+                ##lines(temp$time, predict(lo2), col='black', lwd=3);
+                #lines(temp$time,predict(fit2), col="aquamarine4", lwd=2);
+                #mtext(paste("Tau1 =", signif(slowdecay,digits=4), "\u00b1", signif(slowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
+                #mtext(paste("Tau2 =", signif(fastdecay,digits=4), "\u00b1", signif(fastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
                 
                 if(debugDeltaV){
                   abline(h=startingvoltage + deltaVfirstPoints, lwd=5)
@@ -212,7 +210,7 @@ tpv <- function(tpvdir="tpv")
                   abline(h=startingvoltage + deltavoltage, col="green")
                 }
                 
-                graphics.off();	
+                #graphics.off();	
               }, error=function(e) cat("Biexp/Plot/LogX: Error ", e$message, "\n"));
             }
             if(residuals & doPlots){
@@ -242,7 +240,8 @@ tpv <- function(tpvdir="tpv")
         if(biexpsuccess) {break}
         else {
           removedPoints=removedPoints+1
-          temp <- tail(temp,-removedPoints*2)
+          temp_nonfit <- rbind(temp_nonfit, temp[1:removedPoints*2,])
+          temp <- temp[-removedPoints*2,]
           print(paste("Biexp/Fit: Removed", removedPoints*2, "points, fitting", nrow(temp), "datapoints"));
           step <- min((step+0.5),5)
         }
@@ -274,9 +273,9 @@ tpv <- function(tpvdir="tpv")
         
         if(doPlots){
           print("Monoexp/Plot/Linear: Performing");
-	  xlim_monoexp = c(head(temp_nonfit$time,1), tail(temp$time,1))
-	  ylim_monoexp = c(min(temp$voltage), max(temp$voltage))
-          dev.monoexp = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=xlim_monoexp, in.ylim=ylim_monoexp, in.color=mycolors2, in.plotHist2d=plotHist2d)
+	  xlim_monoexp = c(temp_nonfit$time[1], tail(temp$time,1))
+	  ylim_monoexp = range(c(temp_nonfit$voltage,temp$voltage))
+          dev.monoexp = plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp", in.log="", in.xlim=xlim_monoexp, in.ylim=ylim_monoexp, in.color=mycolors2, in.plotHist2d=plotHist2d)
           plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.mtext="Exp", in.dev=dev.monoexp)
 #debug
 #  abline(v=peaktime, col="blue")
@@ -286,13 +285,13 @@ tpv <- function(tpvdir="tpv")
         }
         if(logy & doPlots){
           print("Monoexp/Plot/Log: Performing");
-          dev.monoexp.logy = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.yshift=-A, in.suffix="monoexp-log", in.log="y", in.xlim=c(0, C*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height, in.plotHist2d=F)
-          plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.yshift=-A, in.dev=dev.monoexp.logy)
+          dev.monoexp.logy = plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.yshift=-A, in.suffix="monoexp-log", in.log="y", in.xlim=c(0, C*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.plotHist2d=F)
+          plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.yshift=-A, in.color=mycolors[1], in.dev=dev.monoexp.logy)
         }
         if(logx & doPlots){
           print("Monoexp/Plot/LogX: Performing");
-          dev.monoexp.logx = plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.plotHist2d=F)
-          plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.dev=dev.monoexp.logx)
+          dev.monoexp.logx = plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="monoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL, in.plotHist2d=F)
+          plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fit, in.color=mycolors[1], in.dev=dev.monoexp.logx)
         }
         if(residuals & doPlots){
           print("Monoexp/Plot/Residuals: Performing");
@@ -333,19 +332,19 @@ tpv <- function(tpvdir="tpv")
           
           if(doPlots){
             print("RobustMonoexp/Plot/Linear: Performing");
-            #plotMonoexpStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL)
+            #plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL)
             plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.color=mycolors[2], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp)
           }
           if(logy & doPlots){
             print("RobustMonoexp/Plot/Log: Performing");
-            #plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.yshift=-AR, in.suffix="robustmonoexp-log", in.log="y", in.xlim=c(0, CR*5), in.ylim=c(deltavoltage/1e5, deltavoltage), in.image_width=image_width, in.image_height=image_height)
-            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.yshift=-AR, in.dev=dev.monoexp.logy)
+            #plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.yshift=-AR, in.suffix="robustmonoexp-log", in.log="y", in.xlim=c(0, CR*5), in.ylim=c(deltavoltage/1e5, deltavoltage))
+            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.yshift=-AR, in.color=mycolors[2], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp.logy)
             
           }
           if(logx & doPlots){
             print("RobustMonoexp/Plot/LogX: Performing");
             #plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL)
-            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.dev=dev.monoexp.logx)
+            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.color=mycolors[2], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp.logx)
           }
           if(residuals & doPlots){
             print("RobustMonoexp/Plot/Residuals: Performing");
@@ -390,43 +389,48 @@ tpv <- function(tpvdir="tpv")
           if(doPlots){
             print("RobustBiexp/Plot/Linear: Performing");
             tryCatch({
-              png(file.path(tpvdir,paste(x, "-robustbiexp.png", sep="")), width = image_width, height = image_height);
-              plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
-              points(temp, pch=".");
-              lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
-              lines(temp$time, predict(fit2R), col="aquamarine4", lwd=2);
+              plotBiexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.biexp_fit=fit2R, in.color=mycolors[2], in.mtext="Robust BiExp", in.mtextline=-9, in.dev=dev.biexp)
+              
+              #png(file.path(tpvdir,paste(x, "-robustbiexp.png", sep="")), width = image_width, height = image_height);
+              #plot(mydata[[x]]$time, mydata[[x]]$voltage, xlab = "Time (s)", ylab = "Voltage (V)", pch=".", col="yellow");
+              #points(temp, pch=".");
+              #lines(tempsubset2$time, predict(lo2), col="black", lwd=3);
+              #lines(temp$time, predict(fit2R), col="aquamarine4", lwd=2);
               # TO BE FIXED: REMOVE HEADER VARIABLE
               #lines(temp$time+header[3]/10*header[1], A2R + Rslowampl*exp(-temp$time/Rslowdecay)+deltavoltage/10, col="green");
-              mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
+              #mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
               # TO BE FIXED: REMOVE HEADER VARIABLE
               #lines(temp$time+header[3]/10*header[1], A2R + Rfastampl*exp(-temp$time/Rfastdecay)+deltavoltage/10, col="blue");
-              mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
-              graphics.off();
+              #mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
+              #graphics.off();
             }, error=function(e) cat("RobustBiexp/Plot/Linear: Error ", e$message, "\n"));
           }
           if(logy & doPlots){			print("RobustBiexp/Plot/Log: Performing");
             tryCatch({
-              Rquitelowerpointbiexp <- max((predict(fit2R, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A2R)/5,min(subset(tempsubset, voltage > A2R, select=voltage)-A2R));
-              Rhigherpointbiexp <- max(predict(fit2R, newdata = data.frame(time=0))-A2R,head(tempsubset$voltage,n=1)-A2R);
-              png(file.path(tpvdir,paste(x, "-robustbiexp-log.png", sep="")), width = image_width, height = image_height);
-              plot(tempsubset$time, tempsubset$voltage - A2R, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2R, "V)"), pch=".", log="y", ylim=c(Rquitelowerpointbiexp,Rhigherpointbiexp), col="yellow");
-              points(temp$time, temp$voltage - A2R, pch=".");
-              lines(tempsubset2$time, predict(lo2) - A2R, col='black', lwd=3);
-              lines(temp$time,predict(fit2R) - A2R, col="aquamarine4", lwd=2);
-              mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
-              mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
-              graphics.off();	
+              plotBiexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.biexp_fit=fit2R, in.yshift=-A2R, in.color=mycolors[2], in.mtext="Robust BiExp", in.mtextline=-9, in.dev=dev.biexp.logy)
+              
+              #Rquitelowerpointbiexp <- max((predict(fit2R, newdata = data.frame(time=tail(tempsubset$time, n=1)))-A2R)/5,min(subset(tempsubset, voltage > A2R, select=voltage)-A2R));
+              #Rhigherpointbiexp <- max(predict(fit2R, newdata = data.frame(time=0))-A2R,head(tempsubset$voltage,n=1)-A2R);
+              #png(file.path(tpvdir,paste(x, "-robustbiexp-log.png", sep="")), width = image_width, height = image_height);
+              #plot(tempsubset$time, tempsubset$voltage - A2R, xlab = "Time (s)", ylab = paste("Log(Voltage (V) -", A2R, "V)"), pch=".", log="y", ylim=c(Rquitelowerpointbiexp,Rhigherpointbiexp), col="yellow");
+              #points(temp$time, temp$voltage - A2R, pch=".");
+              #lines(tempsubset2$time, predict(lo2) - A2R, col='black', lwd=3);
+              #lines(temp$time,predict(fit2R) - A2R, col="aquamarine4", lwd=2);
+              #mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
+              #mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
+              #graphics.off();	
             }, error=function(e) cat("RobustBiexp/Plot/Log: Error ", e$message, "\n"));
           }
           if(logx & doPlots){
             print("RobustBiexp/Plot/LogX: Performing");
             tryCatch({
-              png(file.path(tpvdir,paste(x, "-robustbiexp-logx.png", sep="")), width = image_width, height = image_height);
-              plot(temp$time, temp$voltage,  xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x", xlim=c(max(temp$time[1],-temp$time[1]),endtime));
-              lines(temp$time,predict(fit2R), col="aquamarine4", lwd=2);
-              mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
-              mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
-              graphics.off();	
+              plotBiexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.biexp_fit=fit2R, in.color=mycolors[2], in.mtext="Robust BiExp", in.mtextline=-9, in.dev=dev.biexp.logx)
+              #png(file.path(tpvdir,paste(x, "-robustbiexp-logx.png", sep="")), width = image_width, height = image_height);
+              #plot(temp$time, temp$voltage,  xlab = "Log(Time (s))", ylab = "Voltage (V)", pch=".", log="x", xlim=c(max(temp$time[1],-temp$time[1]),endtime));
+              #lines(temp$time,predict(fit2R), col="aquamarine4", lwd=2);
+              #mtext(paste("Tau1 =", signif(Rslowdecay,digits=4), "\u00b1", signif(Rslowdecay.err,digits=4), "s"), side=3, line=-5, adj=NA, col="green", cex=2);
+              #mtext(paste("Tau2 =", signif(Rfastdecay,digits=4), "\u00b1", signif(Rfastdecay.err,digits=4), "s"), side=3, line=-7, adj=NA, col="blue", cex=2);
+              #graphics.off();	
             }, error=function(e) cat("RobustBiexp/Plot/LogX: Error ", e$message, "\n"));
           }
           if(residuals & doPlots){
@@ -450,6 +454,7 @@ tpv <- function(tpvdir="tpv")
         }, error=function(e) cat("RobustBiexp/Fit: Error ", e$message, "\n"));
         if(robustbiexpsuccess) {break}
         else {print("RobustBiexp/Fit: Removing a point for helping the fitting");
+          temp_nonfit <- rbind(temp_nonfit, temp[1,])
           temp <- temp[-1,]
         }
       }
@@ -465,9 +470,9 @@ tpv <- function(tpvdir="tpv")
 
 
 
-plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.data.fit, in.data.loess, in.loess_fit, in.yshift=0, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.output_pdf=F, in.color="black", in.plotHist2d=F){
+plotStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.data.fit, in.data.loess, in.loess_fit, in.yshift=0, in.suffix="monoexp", in.log="", in.xlim=NULL, in.ylim=NULL, in.output_pdf=F, in.color="black", in.plotHist2d=F){
   if(output_pdf){
-    pdf(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".pdf", sep="")), width = image_bigpdf_width, height = image_bigpdf_height, pointsize=7);
+    pdf(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".pdf", sep="")), width = image_midpdf_width, height = image_midpdf_height, pointsize=7);
   }else{
     png(file.path(in.tpvdir,paste(in.samplename, "-", in.suffix, ".png", sep="")), width = image_width, height = image_height);
   }
@@ -477,11 +482,11 @@ plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.
     df = data.frame(c(in.data.nonfit$time, in.data.fit$time), c(in.data.nonfit$voltage, in.data.fit$voltage) + in.yshift)
     names(df) = c("time", "voltage")
     df = subset(df, voltage > in.ylim[1] & voltage < in.ylim[2])
-    h2 = hist2d(df, col=in.color, xlab="", ylab="", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", FUN=steplength, panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")))#xlim=in.xlim, ylim=in.ylim,
+    h2 = hist2d(df, col=in.color, xlab="", ylab="", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", FUN=steplength, panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")), xlim=in.xlim, ylim=in.ylim)
   }else{
     plot(in.data.fit$time, in.data.fit$voltage + in.yshift, xlab = "", ylab = "", pch=".", cex.lab=1.7, cex.axis=1.4, xaxt="n", yaxt="n", xlim=in.xlim, ylim=in.ylim, log=in.log, col="gray30", panel.first=c(abline(h=0, col="gray80"),abline(v=0, col="gray80")));
     points(in.data.nonfit$time, in.data.nonfit$voltage + in.yshift, pch=".", col="yellow");
-    lines(in.data.loess$time, predict(in.loess_fit) + in.yshift, col='black', lwd=2);
+    lines(in.data.loess$time, predict(in.loess_fit) + in.yshift, col='black', lwd=1.5);
   }
   eaxis(side=1, cex.axis=1.4)
   eaxis(side=2, cex.axis=1.4)
@@ -494,14 +499,35 @@ plotMonoexpStart <- function(in.tpvdir="tpv", in.samplename, in.data.nonfit, in.
 plotMonoexpAddline <- function(in.data.nonfit, in.data.fit, in.monoexp_fit, in.yshift=0, in.color="red", in.mtext="", in.mtextline=-5, in.dev){
   dev.set(in.dev)
   # print(paste("Plotting on", dev.cur()))
-  xarray = seq(head(in.data.fit$time,1), tail(in.data.fit$time,1), length.out=100)
+  xarray = seq(in.data.fit$time[1], tail(in.data.fit$time,1), length.out=200)
   ydata = predict(in.monoexp_fit, newdata = data.frame(time = xarray))
-  lines(xarray, ydata + in.yshift, col=in.color, lwd=2);
+  lines(xarray, ydata + in.yshift, col=in.color, lwd=1.5);
   if(is.na(coef(in.monoexp_fit)["A"])){
     intercept=coef(in.monoexp_fit)[".lin1"]
   } else {
     intercept=coef(in.monoexp_fit)["A"]
   }
-  segments(head(in.data.nonfit$time, 1), intercept + in.yshift, 0, intercept + in.yshift, col=in.color, lwd=2)
+  segments(head(in.data.nonfit$time, 1), intercept + in.yshift, 0, intercept + in.yshift, col=in.color, lwd=1.5)
   mtext(paste(in.mtext, "T =", signif(coef(in.monoexp_fit)["C"],digits=4), "s"), side=3, line=in.mtextline, adj=0.95, col=in.color, cex=1.7);
 }
+
+plotBiexpAddline <- function(in.data.nonfit, in.data.fit, in.biexp_fit, in.yshift=0, in.color="red", in.mtext="", in.mtextline=-5, in.dev){
+  dev.set(in.dev)
+  # print(paste("Plotting on", dev.cur()))
+  xarray = seq(in.data.fit$time[1], tail(in.data.fit$time,1), length.out=300)
+  ydata = predict(in.biexp_fit, newdata = data.frame(time = xarray))
+  lines(xarray, ydata + in.yshift, col=in.color, lwd=1.5);
+  if(is.na(coef(in.biexp_fit)["A2R"])){
+    intercept=coef(in.biexp_fit)[".lin1"]
+    t1decay=coef(in.biexp_fit)["C"]
+    t2decay=coef(in.biexp_fit)["F"]
+  } else {
+    intercept=coef(in.biexp_fit)["A2R"]
+    t1decay=coef(in.biexp_fit)["C2R"]
+    t2decay=coef(in.biexp_fit)["F2R"]
+  }
+  segments(head(in.data.nonfit$time, 1), intercept + in.yshift, 0, intercept + in.yshift, col=in.color, lwd=1.5)
+  mtext(paste(in.mtext, "T1 =", signif(t1decay,digits=4), "s"), side=3, line=in.mtextline, adj=0.95, col=in.color, cex=1.7);
+  mtext(paste(in.mtext, "T2 =", signif(t2decay,digits=4), "s"), side=3, line=in.mtextline+1.7, adj=0.95, col=in.color, cex=1.7);
+}
+
