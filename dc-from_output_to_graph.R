@@ -31,7 +31,7 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
   a <- read.table(file.path(tpcdir, "outputChargeDensityTPC.txt"), header=T)
   
   # in case TPC in dark and in sun are different, the choice of what to use is arbitrary, I would use the third quartile of all the TPC measurements
-  charge <- quantile(a$ChargeDensityTPC, 0.75)
+  charge <- quantile(a$ChargeDensityTPC, 0.25)
   
 #    b <- read.table(file.path(tpvdir, "outputDeltaVbiexp.txt"), header=T)
     b <- read.table(file.path(tpvdir, "outputDeltaVfirstPoints.txt"), header=T)
@@ -62,7 +62,6 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
       expfit <<- nlrob(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=coef(expfit)[[1]],C=coef(expfit)[[2]],D=coef(expfit)[[3]]), data=outputDCcapacitance)
     }, error=function(e) print("Failed restricted to positive gamma robust fit"))
   }
-  
   
   getExpFit()
   
@@ -101,6 +100,8 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
   
   names(f) <- c("Voc","capacitance")
   g <- f
+  
+  # this is harmless, it quite never goes negative
   g$capacitance[g$capacitance < 0] <- 0
   
   z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
@@ -124,10 +125,13 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
   title(ylab=bquote("Charge Density (C/cm"^"2"*")"), cex.lab=1.7, line=7)
   graphics.off()
   
-  dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
+#  dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
+#  geometric <- quantile(dataframe$capacitance, 0.05)
   
-  geometrical <- quantile(dataframe$capacitance, 0.05)
-  g$capacitance <- g$capacitance - geometrical
+  g$capacitance <- g$capacitance - eB
+  # this way the capacitance can go really too much negative, resulting in an absurd megative charge profile
+  # eliminating the negative values is surely exhaggerated but a better solution (better also than no solution) is difficult to find
+  g$capacitance[g$capacitance < 0] <- 0
   
   z <- approxfun(g$Voc, g$capacitance, method="linear", 0, 0)
   integral=Vectorize(function(X)integrate(z,0,X)$value)

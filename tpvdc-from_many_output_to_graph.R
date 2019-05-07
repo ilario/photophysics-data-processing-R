@@ -145,13 +145,22 @@ lapply(dirs, function(x) {print(x);
   subdirs.tpv <- subdirs[grep("tpv", subdirs, ignore.case=T)]
   a <- read.table(file.path(x,"outputDCcharge-nogeom.txt"),header=T,stringsAsFactors=F)
 
-  startlist=list(C=1e-10,D=8)
+  rm(expfit)
+  startlist=list(C=1e-12,D=9)
   tryCatch({
     expfit <- nlsLM(ChargeDensityDC~ C*(exp(D*Voc)-1), start=startlist, data=a)
     tryCatch({
       expfit <- nlrob(ChargeDensityDC~ C*(exp(D*Voc)-1), start=list(C=coef(expfit)[1],D=coef(expfit)[2]), data=a)
     }, error=function(e) {print("FAILED nogeom FIT ROBUST")});
   }, error=function(e) {print("FAILED nogeom FIT non-robust")});
+  
+  temp=dev.cur()
+  dev.set(temp+1)
+  png(paste("debug_tpvdc_", x, ".png",sep=""))
+plot(a$Voc,a$ChargeDensityDC)
+lines(a$Voc, predict(expfit))
+dev.off(temp+1)
+dev.set(temp)
   
   filex <- file.path(subdirs.tpv, "output-robustmonoexp.txt")
   fulloutput <- read.table(filex, header=TRUE);

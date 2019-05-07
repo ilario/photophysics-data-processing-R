@@ -21,6 +21,8 @@ filename=gsub(",","",gsub(":","",name))
 library(RColorBrewer)
 library(sfsmisc)
 library(Hmisc)
+library(robustbase)
+library(minpack.lm)
 
 ylim=lim.DCcapacitance.capacitance
 xlim=lim.DCcapacitance.voltage
@@ -69,6 +71,21 @@ eaxis(side=1, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
 title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(6,1,0), cex.lab=1.7)
 
+getExpFit <- function(Voc, capacitance){
+  outputDCcapacitance <- data.frame(Voc, capacitance);
+  names(outputDCcapacitance) <- c("Voc","capacitance")
+  tryCatch({
+    expfit <- nls(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
+  }, error=function(e) print("Failed restricted to positive gamma fit - first"))
+  tryCatch({
+    expfit <- nlsLM(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=log(max(1e-8,min(outputDCcapacitance$capacitance))),C=log(1e-10),D=2), data=outputDCcapacitance)
+  }, error=function(e) print("Failed restricted to positive gamma fit - second"))
+  tryCatch({
+    expfit <- nlrob(capacitance ~ exp(B) + exp(C)*exp(D)*exp(exp(D)*Voc), start=list(B=coef(expfit)[[1]],C=coef(expfit)[[2]],D=coef(expfit)[[3]]), data=outputDCcapacitance)
+  }, error=function(e) print("Failed restricted to positive gamma robust fit"))
+  return(expfit)
+}
+
 # preallocate geometric capacitance array
 geometric = numeric(length(dirs))
 
@@ -83,11 +100,19 @@ lapply(dirs, function(x) {print(x);
   
   output[[paste("Voc",sub("nm","",sub("_.*","",sub("^0","",x))),sep="")]] <<- signif(b$Voc,5)
   capacitance <- charge/b$deltaV
-  geometric[i+1] <<- quantile(capacitance,0.05)
+  
+  expfit = getExpFit(Voc=b$Voc, capacitance=capacitance)
+  
+#  geometric_quantile <- quantile(capacitance,0.05)
+  geometric[i+1] <<- exp(coef(expfit)[[1]])
+  
   print(paste("Geometric capacitance for", x, "is", geometric[i+1], "F/cm2"))
   output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-  abline(h=geometric[i+1], col=add.alpha(change.lightness(mycolors[i+1],0.8),0.6), lwd=2)
-  points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.6), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
+#  abline(h=geometric_quantile, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.6), lwd=2)
+
+  lines(seq(0,max(b$Voc),0.01), predict(expfit, newdata=data.frame(Voc=seq(0,max(b$Voc),0.01))), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
+  
+  points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.9), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
