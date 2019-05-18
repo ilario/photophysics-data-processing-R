@@ -64,14 +64,17 @@ ceFromOutputToGraph <- function(cedir="ce")
   graphics.off()
   
   if(exists("expfit")){
-    write.table(t(c("B","Ch0","gamma","GeomCh","ChemCh")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
-    eB=if(expSuccess){exp(coef(expfit)[[1]])} else {coef(expfit)[[1]]}
-    eCh0=if(expSuccess){exp(coef(expfit)[[2]])} else {0}
-    egamma=if(expSuccess){exp(coef(expfit)[[3]])} else {0}
-    Voc=max(a$Voc)
-    GeomCh=eB*Voc
-    ChemCh=eCh0*(exp(egamma*Voc)-1)
-    output <- t(c(eB, eCh0, egamma, GeomCh, ChemCh))
+    #write.table(t(c("B","Ch0","gamma","GeomCh","ChemCh")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
+    write.table(t(c("Cg","neq","m","gamma")), file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=FALSE, col.names=F, row.names=F);
+    Cg=if(expSuccess){exp(coef(expfit)[[1]])} else {coef(expfit)[[1]]}
+    neq=if(expSuccess){exp(coef(expfit)[[2]])} else {0}
+    gamma=if(expSuccess){exp(coef(expfit)[[3]])} else {Inf}
+    # m = q/(gamma kB T)
+    m=1.6021766208E-19/(gamma*1.38064852E-23*300)
+    # Voc=max(a$Voc)
+    # GeomCh=eB*Voc
+    # ChemCh=eCh0*(exp(egamma*Voc)-1)
+    output <- t(c(Cg, neq, m, gamma))
     write.table(output, file=file.path(cedir,"outputChargeDensityCE-fit.txt"), append=TRUE, col.names=F, row.names=F)
   }
 }
