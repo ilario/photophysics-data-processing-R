@@ -11,7 +11,9 @@ ceIntegrateExp <- function(cedir="ce")
   #maximumDecayTime = 1e-4 # leave commented for setting the last time point as maximumDecayTime
   minimumDecayTime = 5e-8
   maximumDeltaV = 2
-  minimumDeltaV = 1e-4
+  # in case of CE with applied voltage, CE peak can be negative
+  #minimumDeltaV = 1e-4
+  minimumDeltaV = -maximumDeltaV
   
   options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
   mycolors=brewer.pal(8,"Dark2")
@@ -74,7 +76,9 @@ ceIntegrateExp <- function(cedir="ce")
       return(number2)
     }
     
-    startVoltage <- mean(head(voltage, 600))
+    # in case of CE with applied voltage (rather than with illumination), the first points are not a good baseline at all
+   # startVoltage <- mean(head(voltage, 600))
+    startVoltage = 0
     endVoltage <- mean(tail(voltage, 600))
     baseline <- seq(startVoltage, endVoltage, length.out=len)
     voltage2 <- voltage - baseline
@@ -107,7 +111,11 @@ ceIntegrateExp <- function(cedir="ce")
     timeDecay = tail(time, -timeStartIndex)
     voltageDecay = tail(voltage2, -timeStartIndex)
     
-    startCvalue = quantile(voltageDecay,0.999, names=FALSE)
+    # for CE with applied voltage and negative peaks, this does not work
+    #startCvalue = quantile(voltageDecay,0.999, names=FALSE)
+    startCvalueRangeTimeIndexes = time >= timeStart & time <= (timeStart + 1e-7)
+    startCvalue = mean(voltage[startCvalueRangeTimeIndexes])
+    print(startCvalue)
     
     nlsLMsuccess = FALSE
     tryCatch({
