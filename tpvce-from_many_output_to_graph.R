@@ -101,6 +101,16 @@ lapply(dirs, function(x) {print(x);
     expfit <- nlrob(ChargeDensityCE~ exp(B)*Voc+exp(C)*(exp(exp(D)*Voc)-1), start=list(B=coef(expfit)["B"],C=coef(expfit)["C"],D=coef(expfit)["D"]), data=a)
   }, error=function(e) {cat("FAILED robust FIT ", e$message, "\n")});
   
+  
+  temp=dev.cur()
+  dev.set(temp+1)
+  png(paste("debug_tpvce_", x, ".png",sep=""))
+  plot(a$Voc,a$ChargeDensityCE)
+  lines(a$Voc, predict(expfit))
+  dev.off(temp+1)
+  dev.set(temp)
+  
+  
   fulloutput <- read.table(file.path(subdirs.tpv,"output-robustmonoexp.txt"), header=TRUE);
   n<-tail(grep("file",fulloutput[,1]),n=1)
   tpv <- read.table(file.path(subdirs.tpv,"output-robustmonoexp.txt"), header=TRUE, skip=ifelse(length(n),n,0));
@@ -117,13 +127,15 @@ lapply(dirs, function(x) {print(x);
   shown_T = tpv$T[index_shown_charge]
   
   weights = (min(shown_T)/shown_T)^2
+  
+  if(length(shown_T) < 11 || length(shown_charge) < 11){stop("TPVCE: you need wider plot limits!")}
   # set to zero all but last 10 points' weight
-  weights = c(integer(length(weights)-10), weights[length(weights)-(9:0)])
+  weights[1:(length(weights)-10)] = 0
   
   #just in case...
   rm(powerlaw)
   
-  if(length(shown_T) < 4 || length(shown_charge) < 4){stop("TPVCE: you need wider plot limits!")}
+
   
   j=1
   while(!exists("powerlaw") && j < 1000){
@@ -219,14 +231,14 @@ lapply(dirs, function(x) {print(x);
   shown_T_nogeom = tpv$T[index_shown_charge_nogeom]
   
   weights_nogeom = (min(shown_T_nogeom)/shown_T_nogeom)^2
-  # set to zero all but last 10 points' weight
-  weights_nogeom = c(integer(length(weights_nogeom)-10), weights_nogeom[length(weights_nogeom)-(9:0)])
   
+  if(length(shown_T_nogeom) < 11 || length(shown_charge_nogeom) < 11){graphics.off(); stop("TPVCE_nogeom: you need wider plot limits!")}
+  # set to zero all but last 10 points' weight
+  weights_nogeom[1:(length(weights_nogeom)-10)] = 0
   
   #just in case...
   rm(powerlaw_nogeom)
-  
-  if(length(shown_T_nogeom) < 4 || length(shown_charge_nogeom) < 4){graphics.off(); stop("TPVCE_nogeom: you need wider plot limits!")}
+
   j=1
   while(!exists("powerlaw_nogeom") && j < 1000){
     j <- j + 0.1
@@ -250,7 +262,7 @@ lapply(dirs, function(x) {print(x);
     }
   }
   if(exists("powerlaw_nogeom")){
-    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.9))
+    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
     capture.output(summary(powerlaw_nogeom), file=paste(x, "-tpvce-nogeom-fit.txt", sep=""),  append=TRUE);
   }
   recombination_orders_nogeom[i+1] <<- 1-coef(powerlaw_nogeom)["alpha"]
@@ -326,14 +338,15 @@ lapply(dirs, function(x) {print(x);
   shown_T_nogeom = tpv$Ttotal[index_shown_charge_nogeom]
 
   weights_nogeom = (min(shown_T_nogeom)/shown_T_nogeom)^2
-  # set to zero all but last 10 points' weight
-  weights_nogeom = c(integer(length(weights_nogeom)-10), weights_nogeom[length(weights_nogeom)-(9:0)])
   
+  if(length(shown_T_nogeom) < 11 || length(shown_charge_nogeom) < 11){graphics.off(); stop("TPVCE_nogeom_total: you need wider plot limits!")}
+  # set to zero all but last 10 points' weight
+  weights_nogeom[1:(length(weights_nogeom)-10)] = 0
   
   #just in case...
   rm(powerlaw_nogeom)
   
-  if(length(shown_T_nogeom) < 4 || length(shown_charge_nogeom) < 4){graphics.off(); stop("TPVCE_nogeom_total: you need wider plot limits!")}
+
   j=1
   while(!exists("powerlaw_nogeom") && j < 1000){
     j <- j + 0.1
@@ -356,7 +369,7 @@ lapply(dirs, function(x) {print(x);
     }
   }
   if(exists("powerlaw_nogeom")){
-    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.9))
+    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
     capture.output(summary(powerlaw_nogeom), file=paste(x, "-tpvce-nogeom-total-fit.txt", sep=""),  append=TRUE);
   }
   
