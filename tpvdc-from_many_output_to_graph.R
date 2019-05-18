@@ -157,10 +157,10 @@ lapply(dirs, function(x) {print(x);
   temp=dev.cur()
   dev.set(temp+1)
   png(paste("debug_tpvdc_", x, ".png",sep=""))
-plot(a$Voc,a$ChargeDensityDC)
-lines(a$Voc, predict(expfit))
-dev.off(temp+1)
-dev.set(temp)
+  plot(a$Voc,a$ChargeDensityDC)
+  lines(a$Voc, predict(expfit))
+  dev.off(temp+1)
+  dev.set(temp)
   
   filex <- file.path(subdirs.tpv, "output-robustmonoexp.txt")
   fulloutput <- read.table(filex, header=TRUE);
@@ -210,7 +210,7 @@ dev.set(temp)
     }
   }
   if(exists("powerlaw_nogeom")){
-    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.9))
+    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
     capture.output(summary(powerlaw_nogeom), file=paste(x, "-tpvdc-nogeom-fit.txt", sep=""),  append=TRUE);
     recombination_orders_nogeom[i+1] <<- 1-coef(powerlaw_nogeom)["alpha"]
   }else{
@@ -311,7 +311,7 @@ lapply(dirs, function(x) {print(x);
     }
   }
   if(exists("powerlaw_nogeom")){
-    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.9))
+    lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
     capture.output(summary(powerlaw_nogeom), file=paste(x, "-tpvdc-nogeom-total-fit.txt", sep=""),  append=TRUE);
   }
 
@@ -319,7 +319,7 @@ lapply(dirs, function(x) {print(x);
   
   i <<- i+1
 })
-legend(x="bottomleft",inset=0.05,legendlist,pch=seq(21,25), pt.bg=mycolors, lwd=2, pt.lwd=1.5, pt.cex=2, col=change.lightness(mycolors,0.5),cex=1.5, title=title,bg="gray90", bty="n")
+legend(x="bottomleft",inset=0,legendlist,pch=seq(21,25), pt.bg=mycolors, lwd=2, pt.lwd=1.5, pt.cex=2, col=change.lightness(mycolors,0.5),cex=1.5, title=title,bg="gray90", bty="n")
 graphics.off()
 #reset the plotting margins
 par(op)

@@ -116,7 +116,7 @@ lapply(dirs, function(x) {print(x);
   i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legendlist,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
+legend(x="topleft",inset=0.05,legendlist,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), lwd=3, title=title, bty="n")
 graphics.off()
 
 maxlength = max(sapply(output,length))
@@ -130,13 +130,13 @@ if(output_pdf){
 }else{
   png(paste(filename,"-DCs-nogeom-capacitance.png",sep=""), width=image_width, height=image_height)
 }
-op <- par(mar = c(5,7.5,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
+op <- par(mar = c(5,8,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1 
 plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n",xaxt="n", panel.first=c(abline(h=0, col="gray80"), abline(v=0, col="gray80")))
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.4)
 eaxis(side=1, cex.axis=1.4)
 minor.tick(nx=10, ny=10)
-title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(5.5,1,0), cex.lab=1.7)
+title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(6,1,0), cex.lab=1.7)
 
 lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
