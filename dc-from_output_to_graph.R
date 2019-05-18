@@ -82,14 +82,17 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
   lines(outputDCcapacitance$Voc, predict(expfit), lwd=2, col=mycolors[1])
   graphics.off()
   
-  write.table(t(c("B","Ch0","gamma","GeomCh","ChemCh")), file="outputDC-fit.txt", append=FALSE, col.names=F, row.names=F);
-  eB=exp(coef(expfit)[[1]])
-  eCh0=exp(coef(expfit)[[2]])
-  egamma=exp(coef(expfit)[[3]])
-  Voc=max(outputDCcapacitance$Voc)
-  GeomCh=eB*Voc
-  ChemCh=eCh0*(exp(egamma*Voc)-1)
-  output <- t(c(eB, eCh0, egamma, GeomCh, ChemCh))
+  #write.table(t(c("B","Ch0","gamma","GeomCh","ChemCh")), file="outputDC-fit.txt", append=FALSE, col.names=F, row.names=F);
+  write.table(t(c("Cg","neq","m","gamma")), file="outputDC-fit.txt", append=FALSE, col.names=F, row.names=F);
+  Cg=exp(coef(expfit)[[1]])
+  neq=exp(coef(expfit)[[2]])
+  gamma=exp(coef(expfit)[[3]])
+  # m = q/(gamma kB T)
+  m=1.6021766208E-19/(gamma*1.38064852E-23*300)
+#  Voc=max(outputDCcapacitance$Voc)
+#  GeomCh=eB*Voc
+#  ChemCh=eCh0*(exp(egamma*Voc)-1)
+  output <- t(c(Cg, neq, m, gamma))
   write.table(output, file="outputDC-fit.txt", append=TRUE, col.names=F, row.names=F)
   
   c<- data.frame(b$Voc,capacitance)
@@ -128,7 +131,7 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
 #  dataframe <- data.frame(Voc=g$Voc,capacitance=g$capacitance)
 #  geometric <- quantile(dataframe$capacitance, 0.05)
   
-  g$capacitance <- g$capacitance - eB
+  g$capacitance <- g$capacitance - Cg
   # this way the capacitance can go really too much negative, resulting in an absurd megative charge profile
   # eliminating the negative values is surely exhaggerated but a better solution (better also than no solution) is difficult to find
   g$capacitance[g$capacitance < 0] <- 0
