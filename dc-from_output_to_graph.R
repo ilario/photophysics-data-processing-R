@@ -37,7 +37,7 @@ dcFromOutputToGraph <- function(tpvdir="tpv", tpcdir="tpc")
     b <- read.table(file.path(tpvdir, "outputDeltaVfirstPoints.txt"), header=T)
 #    b <- read.table(file.path(tpvdir, "outputDeltaVloess.txt"), header=T)
 #    b <- read.table(file.path(tpvdir, "outputDeltaVmonoexp.txt"), header=T)
-#    b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
+ #    b <- read.table(file.path(tpvdir, "outputDeltaV.txt"), header=T)
  
   write.table(b, file=file.path(tpvdir, "outputDeltaVprocessedForDC.txt"), append=FALSE, row.names=FALSE)
   

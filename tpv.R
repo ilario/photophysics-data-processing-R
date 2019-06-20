@@ -38,7 +38,7 @@ tpv <- function(tpvdir="tpv")
   if(doPlots){
     if(!exists("output_pdf")){stop("images width and height variables must be set, via limits_for_graphics.R")}
     mycolors=brewer.pal(8,"Dark2")
-    mycolors=mycolors[c(2,4,6,7)] # remove green and blue cause they're not visible over YlGnBu
+    mycolors=mycolors[c(2,4,6,7,8)] # remove green and blue cause they're not visible over YlGnBu
     mycolors2_temp=brewer.pal(8,"YlGnBu")
     mycolors2_get = colorRampPalette(mycolors2_temp[3:8])
     #mycolors2 = c("#ffffff", mycolors2_get(15))# white background
@@ -333,18 +333,18 @@ tpv <- function(tpvdir="tpv")
           if(doPlots){
             print("RobustMonoexp/Plot/Linear: Performing");
             #plotStart(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.loess_fit=lo2, in.suffix="robustmonoexp", in.log="", in.xlim=NULL, in.ylim=NULL)
-            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.color=mycolors[2], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp)
+            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.color=mycolors[5], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp)
           }
           if(logy & doPlots){
             print("RobustMonoexp/Plot/Log: Performing");
             #plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.yshift=-AR, in.suffix="robustmonoexp-log", in.log="y", in.xlim=c(0, CR*5), in.ylim=c(deltavoltage/1e5, deltavoltage))
-            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.yshift=-AR, in.color=mycolors[2], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp.logy)
+            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.yshift=-AR, in.color=mycolors[5], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp.logy)
             
           }
           if(logx & doPlots){
             print("RobustMonoexp/Plot/LogX: Performing");
             #plot_monoexp(in.tpvdir=tpvdir, in.samplename=x, in.data.nonfit=temp_nonfit, in.data.fit=temp, in.data.loess=tempsubset2, in.monoexp_fit=fitR, in.loess_fit=lo2, in.suffix="robustmonoexp-logx", in.log="x", in.xlim=NULL, in.ylim=NULL)
-            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.color=mycolors[2], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp.logx)
+            plotMonoexpAddline(in.data.nonfit=temp_nonfit, in.data.fit=temp, in.monoexp_fit=fitR, in.color=mycolors[5], in.mtext="Robust Exp", in.mtextline=-7, in.dev=dev.monoexp.logx)
           }
           if(residuals & doPlots){
             print("RobustMonoexp/Plot/Residuals: Performing");

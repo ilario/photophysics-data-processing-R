@@ -12,6 +12,7 @@ ceSubtractDark <- function(cedir="ce")
   options(error=function() { traceback(2); if(!interactive()) quit("no", status = 1, runLast = FALSE) })
   mycolors=brewer.pal(8,"Dark2")
   
+
   logdownsampling <- function(data, s=0.0003)
   {
     i <- 1
@@ -85,6 +86,9 @@ ceSubtractDark <- function(cedir="ce")
   
   trashfornullmessages <- lapply(files, function(x) {
     message(x);
+    if(interactive()){
+      dev.new(width=25, height=15)
+    }
     deltaT = mydata[[x]]$time[2] - mydata[[x]]$time[1]
     startVoltage <- mean(mydata[[x]]$voltage[1:600])
     endVoltage <- mean(tail(mydata[[x]]$voltage,600))
@@ -248,13 +252,13 @@ ceSubtractDark <- function(cedir="ce")
     }
     op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
     
-    xlim=c(5e-8,tail(mydata[[x]]$time,1))
+    xlim=c(1e-7,tail(mydata[[x]]$time,1))
     
     #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
     timeDownsampled = logdownsampling(mydata[[x]]$time)
     plot(timeDownsampled,logdownsampling(mydata[[x]]$voltage),type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
     title(ylab="Voltage (V)", cex.lab=1.7, line=6)
-    title(xlab="Time (s)", cex.lab=1.7, line=3.5)
+    title(xlab="Time (s)", cex.lab=1.7, line=3)
     mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])#"red")
     eaxis(side=1, cex.axis=1.4, n.axp=1)
     yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17 this got fixed in https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17534
@@ -282,7 +286,7 @@ ceSubtractDark <- function(cedir="ce")
     #legendtext = c("Signal","Dark noise profile","Transformed noise","Noise-subtracted signal","Integrated charge")
     #legend(x="bottomright",inset=0,legendtext,col=c("black",mycolors[c(1,2,4,3)]), cex=1.5, lwd=4, bty="n")
     legendtext = c("Dark noise profile","Transformed noise","Corrected signal")
-    legend(x="bottomright",inset=0,legendtext,col=mycolors[c(1,2,4)], cex=1.5, lwd=4, bty="n")
+    legend(x="bottomright",inset=0,legendtext,col=mycolors[c(1,2,4)], cex=1.5, lwd=5, bty="n")
     
     graphics.off()
     #reset the plotting margins

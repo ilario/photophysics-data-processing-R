@@ -189,14 +189,14 @@ ceIntegrateExp <- function(cedir="ce")
       }
       op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
       
-      xlim=c(5e-8, tail(mydata[[x]]$time,1))
+      xlim=c(1e-7, tail(mydata[[x]]$time,1))
       
       timeDownsampled = logdownsampling(mydata[[x]]$time)
       #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.4, log="x", yaxt="n", panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
       plot(timeDownsampled,logdownsampling(mydata[[x]]$voltage),type="l", ylab="", xlab="", xaxt="n", xlim=xlim, cex.axis=1.4, log="x", yaxt="n", panel.first=c(lines(timeDownsampled, logdownsampling(baseline), col="gray70")))
       
       title(ylab="Voltage (V)", cex.lab=1.7, line=6)
-      title(xlab="Time (s)", cex.lab=1.7, line=3.5)
+      title(xlab="Time (s)", cex.lab=1.7, line=3)
       mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])
       eaxis(side=1, cex.axis=1.4, n.axp=1)
       yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17
@@ -237,7 +237,7 @@ ceIntegrateExp <- function(cedir="ce")
       #legendtext = c("Signal", legendtext_fit,"Integrated charge")
       #legend(x="bottomright",inset=0,legendtext,col=c("black",mycolors[c(1,3)]), cex=1.5, lwd=4, bty="n")
       legendtext = legendtext_fit
-      legend(x="bottomright",inset=0,legendtext,col=mycolors[1], cex=1.5, lwd=4, bty="n")
+      legend(x="bottomright",inset=0,legendtext,col=mycolors[1], cex=1.5, lwd=5, bty="n")
 
       graphics.off()
       #reset the plotting margins

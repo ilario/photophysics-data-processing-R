@@ -71,13 +71,13 @@ ce <- function(cedir="ce")
     }
     op <- par(mar = c(5,8.5,2,8.5) + 0.1) ## default is c(5,4,4,2) + 0.1
     
-    xlim=c(5e-8,tail(mydata[[x]]$time,1))
+    xlim=c(1e-7,tail(mydata[[x]]$time,1))
     #plot(mydata[[x]],type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
     timeDownsampled = logdownsampling(mydata[[x]]$time)
     plot(timeDownsampled,logdownsampling(mydata[[x]]$voltage),type="l", ylab="", xlab="", xaxt="n", yaxt="n", xlim=xlim, log="x", cex.axis=1.4, panel.first=c(lines(mydata[[x]]$time, baseline, col="gray70")))
     
     title(ylab="Voltage (V)", cex.lab=1.7, line=6)
-    title(xlab="Time (s)", cex.lab=1.7, line=3.5)
+    title(xlab="Time (s)", cex.lab=1.7, line=3)
     mtext(bquote("Collected Charge Density (C/cm"^"2"*")"), cex=1.7, side=4,line=7,col=mycolors[3])#"red")
     eaxis(side=1, cex.axis=1.4, n.axp=1)
     yaxt <- round(axTicks(2), digits=10) # without round, the zero can get printed as 2E-17 this got fixed in https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17534

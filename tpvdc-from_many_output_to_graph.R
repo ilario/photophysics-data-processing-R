@@ -34,6 +34,8 @@ library(minpack.lm)
 library(sfsmisc)
 library(Hmisc)
 
+q=1.60217662e-19
+
 ## Add an alpha value to a colour https://gist.github.com/mages/5339689
 add.alpha <- function(col, alpha=1){
   if(missing(col))
@@ -194,10 +196,10 @@ lapply(dirs, function(x) {print(x);
   j=1
   while(!exists("powerlaw_nogeom") && j < 1000){
     j <- j + 0.1
-    start_nogeom <- list(A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
+    start_nogeom <- list(A=log(1e19*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
     
     tryCatch({
-      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*shown_charge_nogeom^alpha, start=start_nogeom, weights=weights_nogeom)
+      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*(shown_charge_nogeom/q)^alpha, start=start_nogeom, weights=weights_nogeom)
     }, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n");
     })
     #summary fails if the fit was done on no data, with some chol2inv error
@@ -295,10 +297,10 @@ lapply(dirs, function(x) {print(x);
   j=1
   while(!exists("powerlaw_nogeom") && j < 1000){
     j <- j + 0.1
-    start_nogeom <- list(A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
+    start_nogeom <- list(A=log(1e19*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
     
     tryCatch({
-      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*shown_charge_nogeom^alpha, start=start_nogeom, weights=weights_nogeom)
+      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*(shown_charge_nogeom/q)^alpha, start=start_nogeom, weights=weights_nogeom)
     }, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n");
     })
     #summary fails if the fit was done on no data, with some chol2inv error

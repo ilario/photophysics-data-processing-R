@@ -93,7 +93,7 @@ title(ylab = "Voltage (V)", cex.lab = 1.7, line = 5)
 
   lines(tpc.dark$V1, tpc.dark$V2, lwd=2, col=mycolors[1])
   lines(tpc.sun$V1, tpc.sun$V2, lwd=2, col=mycolors[2])
-  legend(x="bottomright",inset=0.05, c("dark","1 sun"), lwd=3, col=mycolors[c(1,2)], cex=1.5, bty="n")
+  legend(x="bottomright",inset=0.05, c("dark bg","1 sun bg"), lwd=3, col=mycolors[c(1,2)], cex=1.5, bty="n")
 
       par(new=TRUE)
       plot(NULL, xaxt="n",yaxt="n",xlab="",ylab="", xlim=xlim_time, ylim=1000*ylim_tpc/50)

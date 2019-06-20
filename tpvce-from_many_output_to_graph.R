@@ -33,6 +33,8 @@ library(minpack.lm)
 library(sfsmisc)
 library(Hmisc)
 
+q=1.60217662e-19
+
 ## Add an alpha value to a colour https://gist.github.com/mages/5339689
 add.alpha <- function(col, alpha=1){
   if(missing(col))
@@ -141,10 +143,10 @@ lapply(dirs, function(x) {print(x);
   while(!exists("powerlaw") && j < 1000){
     j <- j + 0.1
     #start <- list(y0=log(5e-10*runif(1,1/j,j)), A=log(1e-105*runif(1,1/j,j)), alpha=-13*runif(1,1/j,j))
-    start <- list(A=log(1e-105*runif(1,1/j,j)), alpha=-13*runif(1,1/j,j))
+    start <- list(A=log(q^-11*1e-105*runif(1,1/j,j)), alpha=-11*runif(1,1/j,j))
     tryCatch({
       #powerlaw <- nlsLM(shown_T~exp(y0)+exp(A)*shown_charge^alpha, start=start, weights=weights)
-      powerlaw <- nlsLM(shown_T~exp(A)*shown_charge^alpha, start=start, weights=weights)
+      powerlaw <- nlsLM(shown_T~exp(A)*(shown_charge/q)^alpha, start=start, weights=weights)
       #check convergence and sum the p-values
     }, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n");
     })
@@ -243,11 +245,11 @@ lapply(dirs, function(x) {print(x);
   while(!exists("powerlaw_nogeom") && j < 1000){
     j <- j + 0.1
     #start_nogeom <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
-    start_nogeom <- list(A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
+    start_nogeom <- list(A=log(1e19*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
     
     tryCatch({
       #powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(y0)+exp(A)*shown_charge_nogeom^alpha, start=start_nogeom, weights=weights_nogeom)
-      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*shown_charge_nogeom^alpha, start=start_nogeom, weights=weights_nogeom)
+      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*(shown_charge_nogeom/q)^alpha, start=start_nogeom, weights=weights_nogeom)
       #powerlaw_nogeom_rob <- nlrob(shown_T_nogeom~exp(y0)+exp(A)*shown_charge_nogeom^alpha, start=list(y0=coef(powerlaw_nogeom)["y0"], A=coef(powerlaw_nogeom)["A"], alpha=coef(powerlaw_nogeom)["alpha"]), data=data.frame(shown_T_nogeom=shown_T_nogeom, shown_charge_nogeom=shown_charge_nogeom), weights=weights_nogeom)
 
     }, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n");
@@ -271,7 +273,7 @@ lapply(dirs, function(x) {print(x);
   
   i <<- i+1
 })
-legend(x="topright",inset=-0.01,legendlist,pch=seq(21,25), pt.bg=mycolors, lwd=2, pt.lwd=1.5, pt.cex=2, col=change.lightness(mycolors,0.5),cex=1.5, title=title,bg="gray90", bty="n")
+legend(x="bottomleft",inset=0.02,legendlist,pch=seq(21,25), pt.bg=mycolors, lwd=2, pt.lwd=1.5, pt.cex=2, col=change.lightness(mycolors,0.5),cex=1.5, title=title,bg="gray90", bty="n")
 graphics.off()
 
 #reset the plotting margins
@@ -351,11 +353,11 @@ lapply(dirs, function(x) {print(x);
   while(!exists("powerlaw_nogeom") && j < 1000){
     j <- j + 0.1
     #start_nogeom <- list(y0=log(5e-7*runif(1,1/j,j)), A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
-    start_nogeom <- list(A=log(1e-28*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
+    start_nogeom <- list(A=log(1e19*runif(1,1/j,j)), alpha=-3.2*runif(1,1/j,j))
     
     tryCatch({
       #powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(y0)+exp(A)*shown_charge_nogeom^alpha, start=start_nogeom, weights=weights_nogeom)
-      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*shown_charge_nogeom^alpha, start=start_nogeom, weights=weights_nogeom)
+      powerlaw_nogeom <- nlsLM(shown_T_nogeom~exp(A)*(shown_charge_nogeom/q)^alpha, start=start_nogeom, weights=weights_nogeom)
       #powerlaw_nogeom_rob <- nlrob(shown_T_nogeom~exp(y0)+exp(A)*shown_charge_nogeom^alpha, start=list(y0=coef(powerlaw_nogeom)["y0"], A=coef(powerlaw_nogeom)["A"], alpha=coef(powerlaw_nogeom)["alpha"]), data=data.frame(shown_T_nogeom=shown_T_nogeom, shown_charge_nogeom=shown_charge_nogeom), weights=weights_nogeom)
     }, error=function(e) {cat("FAILED POWERLAW FIT ", e$message, "\n");
     })
@@ -377,7 +379,7 @@ lapply(dirs, function(x) {print(x);
   
   i <<- i+1
 })
-legend(x="topright",inset=0.01,legendlist,pch=seq(21,25), pt.bg=mycolors, lwd=2, pt.lwd=1.5, pt.cex=2, col=change.lightness(mycolors,0.5),cex=1.5, title=title,bg="gray90", bty="n")
+legend(x="bottomleft",inset=0.02,legendlist,pch=seq(21,25), pt.bg=mycolors, lwd=2, pt.lwd=1.5, pt.cex=2, col=change.lightness(mycolors,0.5),cex=1.5, title=title,bg="gray90", bty="n")
 graphics.off()
 
 #reset the plotting margins
