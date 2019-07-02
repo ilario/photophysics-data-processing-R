@@ -35,6 +35,9 @@ library(Hmisc)
 
 q=1.60217662e-19
 
+write.table(t(c("file","RecConstant","RecOrder","CEexpprefactor","EquilibriumLifetime")), file="outputTPVCE-nogeom-fit.txt", append=FALSE, col.names=F, row.names=F);
+write.table(t(c("file","RecConstant","RecOrder","CEexpprefactor","EquilibriumLifetime")), file="outputTPVCE-nogeom-total-fit.txt", append=FALSE, col.names=F, row.names=F);
+
 ## Add an alpha value to a colour https://gist.github.com/mages/5339689
 add.alpha <- function(col, alpha=1){
   if(missing(col))
@@ -266,6 +269,17 @@ lapply(dirs, function(x) {print(x);
   if(exists("powerlaw_nogeom")){
     lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
     capture.output(summary(powerlaw_nogeom), file=paste(x, "-tpvce-nogeom-fit.txt", sep=""),  append=TRUE);
+    
+    # CEexpprefactor
+    n_eq = exp(coef(expfit)["C"])/q
+    # RecOrder
+    Phi = 1-coef(powerlaw_nogeom)["alpha"]
+    # RecConstant
+    k = 1/exp(coef(powerlaw_nogeom)["A"])
+    # EquilibriumLifetime
+    tau0 = (n_eq^(1-Phi))/k
+    outputTPVCE_nogeom_fit <- data.frame(x, k, Phi, n_eq, tau0);
+    write.table(outputTPVCE_nogeom_fit, file="outputTPVCE-nogeom-fit.txt", append=TRUE, col.names=F, row.names=F, quote=F);
   }
   recombination_orders_nogeom[i+1] <<- 1-coef(powerlaw_nogeom)["alpha"]
 
@@ -373,6 +387,17 @@ lapply(dirs, function(x) {print(x);
   if(exists("powerlaw_nogeom")){
     lines(shown_charge_nogeom, predict(powerlaw_nogeom, shown_charge_nogeom), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
     capture.output(summary(powerlaw_nogeom), file=paste(x, "-tpvce-nogeom-total-fit.txt", sep=""),  append=TRUE);
+    
+    # CEexpprefactor
+    n_eq = exp(coef(expfit)["C"])/q
+    # RecOrder
+    Phi = 1-coef(powerlaw_nogeom)["alpha"]
+    # RecConstant
+    k = 1/exp(coef(powerlaw_nogeom)["A"])
+    # EquilibriumLifetime
+    tau0 = (n_eq^(1-Phi))/k
+    outputTPVCE_nogeom_total_fit <- data.frame(x, k, Phi, n_eq, tau0);
+    write.table(outputTPVCE_nogeom_total_fit, file="outputTPVCE-nogeom-total-fit.txt", append=TRUE, col.names=F, row.names=F, quote=F);
   }
   
   points(charge_nogeom, tpv$Ttotal, bg=add.alpha(mycolors[i+1],0.5), col=change.lightness(mycolors[i+1],0.5), cex=1.5, pch=21+(i%%5));
