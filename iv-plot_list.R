@@ -44,7 +44,7 @@ if(!length(mycolors)){
 }
 
 if(output_pdf){
-  pdf(paste(filename,"-revIVs.pdf",sep=""), width=image_midpdf_width, height=image_midpdf_height, pointsize=7)
+  pdf(paste(filename,"-revIVs.pdf",sep=""), width=image_smallpdf_width, height=image_smallpdf_height, pointsize=7)
 }else{
   png(paste(filename,"-revIVs.png",sep=""), width=image_width, height=image_height);
 }
@@ -69,6 +69,7 @@ lapply(reverselist, function(x){
   i <<- i+1
 })
 
-legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist))), lwd=2, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bg="white", box.col="grey90", pch=seq(21,25), title=title)
+#legend(x="topleft",inset=c(0.15,0.2),legendlist, lty=c(rep(1,length(fileslist))), lwd=2, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bg="white", box.col="grey90", pch=seq(21,25), title=title)
+legend(x="topleft",inset=c(0.17,0.25),legendlist, lty=c(rep(1,length(fileslist))), lwd=2, pt.cex=2, pt.lwd=1.5, pt.bg=mycolors, cex=1.5, col=change.lightness(mycolors,0.5), bty="n", pch=seq(21,25), title=title)
 graphics.off()
 
