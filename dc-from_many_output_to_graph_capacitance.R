@@ -24,9 +24,9 @@ library(Hmisc)
 library(robustbase)
 library(minpack.lm)
 
-ylim=lim.DCcapacitance.capacitance
+ylim=1e9*lim.DCcapacitance.capacitance
 xlim=lim.DCcapacitance.voltage
-ylimnogeom=lim.DCcapacitance.nogeom.capacitance
+ylimnogeom=1e9*lim.DCcapacitance.nogeom.capacitance
 xlimnogeom=lim.DCcapacitance.nogeom.voltage
 
 add.alpha <- function(col, alpha=1){
@@ -68,8 +68,8 @@ plot(NULL,xlim=xlim,ylim=ylim,cex.lab=1.7,xlab="Light bias (V)",ylab="", yaxt="n
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.4)
 eaxis(side=1, cex.axis=1.4)
-minor.tick(nx=10, ny=10)
-title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(6,1,0), cex.lab=1.7)
+#minor.tick(nx=10, ny=10)
+title(ylab=bquote("Specific capacitance (nF/cm"^"2"*")"), mgp=c(6,1,0), cex.lab=1.7)
 
 getExpFit <- function(Voc, capacitance){
   outputDCcapacitance <- data.frame(Voc, capacitance);
@@ -102,6 +102,7 @@ lapply(dirs, function(x) {print(x);
   capacitance <- charge/b$deltaV
   
   expfit = getExpFit(Voc=b$Voc, capacitance=capacitance)
+#  print(expfit)
   
 #  geometric_quantile <- quantile(capacitance,0.05)
   geometric[i+1] <<- exp(coef(expfit)[[1]])
@@ -110,9 +111,9 @@ lapply(dirs, function(x) {print(x);
   output[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
 #  abline(h=geometric_quantile, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.6), lwd=2)
 
-  lines(seq(0,max(b$Voc),0.01), predict(expfit, newdata=data.frame(Voc=seq(0,max(b$Voc),0.01))), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
+  lines(seq(0,max(b$Voc),0.01), 1e9*predict(expfit, newdata=data.frame(Voc=seq(0,max(b$Voc),0.01))), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
   
-  points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.9), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
+  points(b$Voc, 1e9*capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.9), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
@@ -135,8 +136,8 @@ plot(NULL,xlim=xlimnogeom,ylim=ylimnogeom,cex.lab=1.7,xlab="Light bias (V)",ylab
 #eaxis(side=2,at=c(1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.2)
 eaxis(side=2, cex.axis=1.4)
 eaxis(side=1, cex.axis=1.4)
-minor.tick(nx=10, ny=10)
-title(ylab=bquote("Specific capacitance (F/cm"^"2"*")"), mgp=c(6,1,0), cex.lab=1.7)
+#minor.tick(nx=10, ny=10)
+title(ylab=bquote("Specific capacitance (nF/cm"^"2"*")"), mgp=c(6,1,0), cex.lab=1.7)
 
 lapply(dirs, function(x) {print(x);
   subdirs <- list.dirs(path=x, recursive=F)
@@ -153,11 +154,17 @@ lapply(dirs, function(x) {print(x);
   capacitance <- capacitance - geometric[i+1]
   
   output.nogeom[[sub("_.*","",sub("^0","",x))]] <<- signif(capacitance,5)
-  points(b$Voc, capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.6), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
+  
+  outputDCcapacitance <- data.frame(b$Voc, capacitance);
+  names(outputDCcapacitance) <- c("Voc","capacitance")
+  expfit_nogeom <- nlrob(capacitance ~ exp(C)*exp(D)*exp(exp(D)*Voc), start=list(C=-30,D=2.5), data=outputDCcapacitance)
+  lines(seq(0,max(b$Voc),0.01), 1e9*predict(expfit_nogeom, newdata=data.frame(Voc=seq(0,max(b$Voc),0.01))), lwd=2, col=add.alpha(change.lightness(mycolors[i+1],0.8),0.8))
+  
+  points(b$Voc, 1e9*capacitance, col=add.alpha(change.lightness(mycolors[i+1],0.5),0.6), bg=add.alpha(mycolors[i+1],0.5), pch=21+(i%%5), cex=1.5)
   i <<- i+1
 })
 #abline(h=0)
-legend(x="topleft",inset=0.05,legendlist,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), title=title, bty="n")
+legend(x="topleft",inset=0.05,legendlist,pch=seq(21,25), pt.bg=mycolors,pt.cex=2, cex=1.5, pt.lwd=1.5,col=change.lightness(mycolors,0.5), lwd=3,title=title, bty="n")
 graphics.off()
 
 output.nogeom = lapply(output.nogeom, function(x){length(x)=maxlength; print(x)})
