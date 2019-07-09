@@ -95,7 +95,7 @@ change.lightness <- function(col, lightness=1){
   }
   op <- par(mar = c(5,7,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
     plot(NULL, ylim=c(min(tpv$T1,tpv$T2[!is.na(tpv$T2)]),max(tpv$T2[!is.na(tpv$T2)],tpv$T1)), xlim=c(min(tpv$Voc),max(tpv$Voc)), log="y", xlab="Light bias (V)", ylab="", cex.axis=1.4, cex.lab=1.7, yaxt="n");#, main=paste(name, "TPV biexp and monoexp")
-  title(ylab = "Small perturbation life-time (s)", cex.lab = 1.7, line = 4)
+  title(ylab = "Small perturbation lifetime (s)", cex.lab = 1.7, line = 4)
   eaxis(side=2,at=c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
   minor.tick(nx=10)
     points(tpv$Voc, tpv$T1, pch=21, col=change.lightness(mycolors[1],0.5), bg=mycolors[1], cex=1.5)

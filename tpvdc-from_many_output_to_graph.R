@@ -74,7 +74,7 @@ if(output_pdf){
 op <- par(mar = c(4,6,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 plot(NULL,xlim=xlim,ylim=ylim,xlab="", ylab="",log="xy", yaxt="n", xaxt="n")
 #line is for introducing more space between label and axis
-title(ylab = "Small perturbation life-time (s)", cex.lab = 1.7, line = 4)
+title(ylab = "Small perturbation lifetime (s)", cex.lab = 1.7, line = 4)
 title(xlab = bquote("Charge per area (C/cm"^"2"*")"), cex.lab = 1.7, line = 3)
 eaxis(side=2,at=c(1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
 #xtick = 10^(floor(log10(xlim[2])))
@@ -139,7 +139,7 @@ op <- par(mar = c(4,6,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 plot(NULL,xlim=xlim_nogeom,ylim=ylim_nogeom,xlab="", ylab="",log="xy", yaxt="n", xaxt="n")
 
 #line is for introducing more space between label and axis
-title(ylab = "Small perturbation life-time (s)", cex.lab = 1.7, line = 4)
+title(ylab = "Small perturbation lifetime (s)", cex.lab = 1.7, line = 4)
 title(xlab = bquote("Charge per area (C/cm"^"2"*")"), cex.lab = 1.7, line = 3)
 eaxis(side=2,at=c(1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
 #xtick = 10^(floor(log10(xlim_nogeom[2])))
@@ -259,7 +259,7 @@ op <- par(mar = c(4,6,1,1) + 0.1) ## default is c(5,4,4,2) + 0.1
 plot(NULL,xlim=xlim_nogeom,ylim=ylim_nogeom,xlab="", ylab="",log="xy", yaxt="n", xaxt="n")
 
 #line is for introducing more space between label and axis
-title(ylab = "Total carrier life-time (s)", cex.lab = 1.7, line = 4)
+title(ylab = "Total carrier lifetime (s)", cex.lab = 1.7, line = 4)
 title(xlab = bquote("Charge per area (C/cm"^"2"*")"), cex.lab = 1.7, line = 3)
 eaxis(side=2,at=c(1e-16, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,0.1,1,10,100,1e3), cex.axis=1.4)
 #xtick = 10^(floor(log10(xlim_nogeom[2])))
