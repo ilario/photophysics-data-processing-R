@@ -21,19 +21,18 @@ tpv <- function(tpvdir="tpv")
   library(RColorBrewer)
   library(gplots)
 
-  doBiexpFit=T
-  robust=T
-  doPlots=T
-  plotHist2d=T
-  logy=F
-  logx=F
-  residuals=F
-  thresholdBiexp=10
-  thresholdRobustBiexp=100
-  forbidNegativeDecays=T
-  noiseTime=5e-8
-  #debugDeltaV info will appear in biexp logx graphics
-  debugDeltaV=F
+  doBiexpFit=T	# activate if you need also the BI-exponential fittings
+  robust=T	# activate if also the robust-fittings (fittings which tries to ignore the outlier points) should be performed, additionally to the normal fitting
+  doPlots=T	# activate if you want any graphics, otherwise just textual output is saved to disk
+  plotHist2d=T	# instead of plotting single data points, plot a heatmap of where the points are (avoid the overplotting problem)
+  logy=F	# additionally to linear-linear plots, also plot decays with logarithmic Y axis
+  logx=F	# additionally to linear-linear plots, also plot decays with logarithmic X axis
+  residuals=F	# additionally to other plots, plot the residuals (graph of the distance between the fit and the data points)
+  thresholdBiexp=10	# limit how many times some points should be removed from the data to be fitted before giving up
+  thresholdRobustBiexp=100	# limit the attempts to obtain a good robust fit, before giving up
+  forbidNegativeDecays=T	# consider invalid a biexponential fit where one of the two decays has a negative prefactor (e.g. a negative fast signal), set to false if negative components are interesting for you
+  noiseTime=5e-8	# [seconds] time window for smoothing the signal and then looking for the voltage peak maximum
+  debugDeltaV=F	# in biexp-LOGX graphics, prints horizontal lines which indicate the voltage maximum obtained with the various methods
   
   if(doPlots){
     if(!exists("output_pdf")){stop("images width and height variables must be set, via limits_for_graphics.R")}
